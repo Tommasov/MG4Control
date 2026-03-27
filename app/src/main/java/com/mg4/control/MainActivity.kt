@@ -13,6 +13,8 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.button.MaterialButton
 import com.mg4.control.service.MG4ControlService
+import com.mg4.control.update.UpdateChecker
+import com.mg4.control.update.UpdateDialogManager
 import com.mg4.control.util.FirmwareInfo
 import com.mg4.control.util.LocaleHelper
 
@@ -44,6 +46,21 @@ class MainActivity : AppCompatActivity() {
         setupLogo()
         setupFirmwareChips()
         setupNavButtons()
+        checkForUpdates()
+    }
+
+    // ── Vérification de mise à jour au démarrage ──────────────────────────────
+
+    private fun checkForUpdates() {
+        UpdateChecker.check(
+            context = this,
+            onUpdateAvailable = { updateInfo ->
+                if (!isFinishing && !isDestroyed) {
+                    UpdateDialogManager.show(this, updateInfo)
+                }
+            }
+            // onNoUpdate et onError ignorés au démarrage — silencieux si tout va bien
+        )
     }
 
     // ── Logo "MG4Control" avec "Control" en couleur accent ───────────────────

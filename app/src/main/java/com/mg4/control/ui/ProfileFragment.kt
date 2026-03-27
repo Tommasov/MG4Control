@@ -2,12 +2,15 @@ package com.mg4.control.ui
 
 import android.app.AlertDialog
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -73,6 +76,11 @@ class ProfileFragment : Fragment() {
         view.findViewById<RecyclerView>(R.id.recycler_profiles).apply {
             layoutManager = LinearLayoutManager(context)
             adapter = this@ProfileFragment.adapter
+        }
+
+        // ── Bouton Fermer ─────────────────────────────────────────────────────
+        view.findViewById<MaterialButton>(R.id.btn_close_profiles).setOnClickListener {
+            findNavController().popBackStack()
         }
 
         view.findViewById<View>(R.id.btn_add_profile).setOnClickListener {
@@ -285,18 +293,24 @@ class ProfileFragment : Fragment() {
         val etName = dialogView.findViewById<EditText>(R.id.et_profile_name)
         if (existing != null) etName.setText(existing.name)
 
-        // ── Création du dialog ───────────────────────────────────────────────
+        // ── Création du dialog sans chrome Android ───────────────────────────
         val dialog = AlertDialog.Builder(ctx)
-            .setTitle(if (existing != null) getString(R.string.profile_edit) else getString(R.string.profile_add))
             .setView(dialogView)
-            .setPositiveButton(R.string.profile_save, null)
-            .setNegativeButton(R.string.profile_cancel, null)
+            .setCancelable(true)
             .create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        dialog.show()
+        // Titre dynamique intégré dans le layout
+        dialogView.findViewById<TextView>(R.id.tv_dialog_title).text =
+            if (existing != null) getString(R.string.profile_edit) else getString(R.string.profile_add)
 
-        // Override Save : ne ferme PAS si le nom est vide
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+        // ── Bouton Annuler ───────────────────────────────────────────────────
+        dialogView.findViewById<MaterialButton>(R.id.btn_dialog_cancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // ── Bouton Enregistrer : ne ferme PAS si le nom est vide ────────────
+        dialogView.findViewById<MaterialButton>(R.id.btn_dialog_save).setOnClickListener {
             val name = etName.text.toString().trim()
             if (name.isEmpty()) {
                 etName.error = getString(R.string.profile_name_required)
@@ -327,5 +341,7 @@ class ProfileFragment : Fragment() {
             refreshList()
             dialog.dismiss()
         }
+
+        dialog.show()
     }
 }

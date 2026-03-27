@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">MG4 Control</string>
 
+    <!-- Fermer (bouton retour dashboard) -->
+    <string name="nav_close">Fermer</string>
+
     <!-- Bottom navigation -->
     <string name="nav_drive">Drive</string>
     <string name="nav_climate">Climat</string>
@@ -76,6 +79,9 @@
     <string name="adas_tja">TJA</string>
 
     <!-- Infos / À propos -->
+    <string name="btn_check_update">Vérifier les mises à jour</string>
+    <string name="update_up_to_date">✓  Application à jour</string>
+    <string name="update_network_error">✕  Erreur réseau</string>
     <string name="btn_infos">Infos</string>
     <string name="info_title">À propos</string>
     <string name="info_app_label">Application</string>
@@ -89,6 +95,31 @@
     <string name="card_drive">Paramètres de conduite</string>
     <string name="card_climate">Paramètres de climatisation</string>
     <string name="card_alerts">Paramètres d\'alertes</string>
+
+    <!-- Mise à jour automatique -->
+    <string name="update_available_title">Mise à jour disponible</string>
+    <string name="update_current_label">Version actuelle</string>
+    <string name="update_new_label">Nouvelle version</string>
+    <string name="update_release_notes_label">Notes de version</string>
+    <string name="update_data_warning">⚠️ WiFi non détecté — le téléchargement utilisera les données mobiles de la voiture.</string>
+    <string name="update_auto_btn">Installer automatiquement</string>
+    <string name="update_manual_btn">Installation manuelle</string>
+    <string name="update_later_btn">Plus tard</string>
+    <string name="update_data_warn_title">Données mobiles</string>
+    <string name="update_data_warn_message">Votre voiture ne semble pas connectée en WiFi. Le téléchargement (~10 Mo) utilisera les données mobiles de la voiture. Continuer ?</string>
+    <string name="update_continue">Continuer</string>
+    <string name="update_cancel">Annuler</string>
+    <string name="update_close">Fermer</string>
+    <string name="update_downloading">Téléchargement en cours…</string>
+    <string name="update_downloading_pct">Téléchargement… %d%%</string>
+    <string name="update_installing">Installation en cours…</string>
+    <string name="update_installed">✅ Mise à jour installée avec succès !</string>
+    <string name="update_error_download">Erreur lors du téléchargement. Vérifiez la connexion.</string>
+    <string name="update_error_install">Erreur lors de l\'installation.</string>
+    <string name="update_install_error">Erreur d\'installation : %s</string>
+    <string name="update_manual_title">Installation manuelle</string>
+    <string name="update_manual_instructions">1. Scannez le QR code ou ouvrez le lien ci-contre\n2. Téléchargez le fichier MG4Control.apk\n3. Copiez-le sur une clé USB formatée en FAT32\n4. Insérez la clé dans votre MG4\n5. Ouvrez le Gestionnaire de fichiers\n6. Sélectionnez le fichier APK et installez-le</string>
+    <string name="update_gh_releases_link">github.com/SliDeeN/MG4Control/releases</string>
 
     <!-- Console (debug) -->
     <string name="console_title">⬛  Console MG4</string>

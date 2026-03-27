@@ -12,6 +12,10 @@
     <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
     <uses-permission android:name="android.car.permission.CAR_VENDOR_EXTENSION" />
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
+    <!-- Mise à jour automatique -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
 
     <application
         android:name=".MG4App"
@@ -36,6 +40,15 @@
             android:name=".service.MG4ControlService"
             android:exported="false"
             android:directBootAware="true" />
+
+        <!-- Récepteur résultat d'installation silencieuse -->
+        <receiver
+            android:name=".update.InstallReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.mg4.control.ACTION_INSTALL_STATUS" />
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name=".receiver.BootReceiver"
