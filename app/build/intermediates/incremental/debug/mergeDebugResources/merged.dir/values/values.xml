@@ -2042,6 +2042,7 @@
     <string description="An accessibility feedback when the bottom sheet drag handle is clicked [CHAR LIMIT=NONE]" name="bottomsheet_drag_handle_clicked">Drag handle double-tapped</string>
     <string description="The content description of bottom sheet drag handles [CHAR LIMIT=NONE]" name="bottomsheet_drag_handle_content_description">Drag handle</string>
     <string name="btn_check_update">Vérifier les mises à jour</string>
+    <string name="btn_clean_apk">Nettoyer APK</string>
     <string name="btn_infos">Infos</string>
     <string name="call_notification_answer_action">Answer</string>
     <string name="call_notification_answer_video_action">Video</string>
@@ -2056,6 +2057,8 @@
     <string name="character_counter_content_description">Characters entered %1$d of %2$d</string>
     <string name="character_counter_overflowed_content_description">Character limit exceeded %1$d of %2$d</string>
     <string name="character_counter_pattern" translatable="false">%1$d/%2$d</string>
+    <string name="clean_apk_done">✓ %1$d fichier(s) supprimé(s)</string>
+    <string name="clean_apk_none">✓ Aucun fichier</string>
     <string name="clear_text_end_icon_content_description">Clear text</string>
     <string name="climate_level">Niv.</string>
     <string name="climate_level_1">Niv. 1</string>
@@ -2083,9 +2086,15 @@
     <string name="exposed_dropdown_menu_content_description">Show dropdown menu</string>
     <string name="fab_transformation_scrim_behavior" translatable="false">com.google.android.material.transformation.FabTransformationScrimBehavior</string>
     <string name="fab_transformation_sheet_behavior" translatable="false">com.google.android.material.transformation.FabTransformationSheetBehavior</string>
+    <string name="fw_unknown_body">Ce firmware n\'est pas encore pris en charge nativement par MG4 Control.\n\nVous pouvez continuer en sélectionnant manuellement un mode de compatibilité, mais certaines fonctions peuvent ne pas fonctionner correctement.</string>
+    <string name="fw_unknown_btn_close">Fermer l\'app</string>
+    <string name="fw_unknown_btn_continue">Continuer</string>
+    <string name="fw_unknown_hint">Après avoir fermé cette fenêtre, appuyez sur SWI133 ou SWI68 dans la barre du haut pour choisir votre mode de compatibilité.</string>
+    <string name="fw_unknown_title">⚠ Firmware non reconnu</string>
     <string name="hide_bottom_view_on_scroll_behavior" translatable="false">com.google.android.material.behavior.HideBottomViewOnScrollBehavior</string>
     <string description="Content description for an icon that appears in the title area of a dialog" name="icon_content_description">Dialog Icon</string>
     <string name="info_app_label">Application</string>
+    <string name="info_based_on">Basé sur DriveHub Dort by Merth4n &amp; hotboy_ist</string>
     <string name="info_close">Fermer</string>
     <string name="info_firmware_label">Firmware</string>
     <string name="info_github_link">github.com/SliDeeN/MG4Control</string>

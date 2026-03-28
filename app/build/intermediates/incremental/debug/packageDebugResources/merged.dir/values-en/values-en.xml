@@ -15,10 +15,13 @@
     <string name="adas_tja">TJA</string>
     <string name="app_name">MG4 Control</string>
     <string name="btn_check_update">Check for updates</string>
+    <string name="btn_clean_apk">Clean APK</string>
     <string name="btn_infos">Info</string>
     <string name="card_alerts">Alert settings</string>
     <string name="card_climate">Climate settings</string>
     <string name="card_drive">Drive settings</string>
+    <string name="clean_apk_done">✓ %1$d file(s) deleted</string>
+    <string name="clean_apk_none">✓ Nothing to clean</string>
     <string name="climate_level">Lvl.</string>
     <string name="climate_level_1">Lvl. 1</string>
     <string name="climate_level_2">Lvl. 2</string>
@@ -37,7 +40,13 @@
     <string name="drive_section_regen">Regeneration</string>
     <string name="drive_snow">SNOW</string>
     <string name="drive_sport">SPORT</string>
+    <string name="fw_unknown_body">This firmware is not yet natively supported by MG4 Control.\n\nYou can continue by manually selecting a compatibility mode, but some features may not work correctly.</string>
+    <string name="fw_unknown_btn_close">Close app</string>
+    <string name="fw_unknown_btn_continue">Continue</string>
+    <string name="fw_unknown_hint">After closing this window, tap SWI133 or SWI68 in the top bar to choose your compatibility mode.</string>
+    <string name="fw_unknown_title">⚠ Unknown firmware</string>
     <string name="info_app_label">Application</string>
+    <string name="info_based_on">Based on DriveHub Dort by Merth4n &amp; hotboy_ist</string>
     <string name="info_close">Close</string>
     <string name="info_firmware_label">Firmware</string>
     <string name="info_github_link">github.com/SliDeeN/MG4Control</string>

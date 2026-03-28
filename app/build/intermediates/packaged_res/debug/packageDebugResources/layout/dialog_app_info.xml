@@ -55,7 +55,16 @@
                 android:textColor="@color/text_primary"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginBottom="2dp" />
+
+            <!-- Basé sur DriveHub Dort -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/info_based_on"
+                android:textColor="@color/dash_text_lo"
+                android:textSize="10sp"
+                android:layout_marginBottom="8dp" />
 
             <!-- Version -->
             <LinearLayout

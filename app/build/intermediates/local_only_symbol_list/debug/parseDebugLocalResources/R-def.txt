@@ -59,6 +59,7 @@ id btn_add_profile
 id btn_apply
 id btn_cancel_download
 id btn_check_update
+id btn_clean_apk
 id btn_clear_console
 id btn_close_manual
 id btn_close_profiles
@@ -74,6 +75,8 @@ id btn_drive_snow_d
 id btn_drive_sport_d
 id btn_eco
 id btn_edit
+id btn_fw_close_app
+id btn_fw_continue
 id btn_info_close
 id btn_infos
 id btn_lang_en
@@ -160,6 +163,8 @@ id tv_app_version
 id tv_default_badge
 id tv_dialog_title
 id tv_firmware_info
+id tv_fw_detected_badge
+id tv_fw_unknown_body
 id tv_github_link
 id tv_manual_instructions
 id tv_profile_name
@@ -172,6 +177,7 @@ id tv_version_to
 layout activity_main
 layout dialog_app_info
 layout dialog_profile_edit
+layout dialog_unknown_firmware
 layout dialog_update
 layout fragment_adas
 layout fragment_climate
@@ -198,10 +204,13 @@ string adas_speed_limit_tone
 string adas_tja
 string app_name
 string btn_check_update
+string btn_clean_apk
 string btn_infos
 string card_alerts
 string card_climate
 string card_drive
+string clean_apk_done
+string clean_apk_none
 string climate_level
 string climate_level_1
 string climate_level_2
@@ -220,7 +229,13 @@ string drive_section_mode
 string drive_section_regen
 string drive_snow
 string drive_sport
+string fw_unknown_body
+string fw_unknown_btn_close
+string fw_unknown_btn_continue
+string fw_unknown_hint
+string fw_unknown_title
 string info_app_label
+string info_based_on
 string info_close
 string info_firmware_label
 string info_github_link

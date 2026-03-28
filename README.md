@@ -14,7 +14,7 @@
 3. [Compatibilité](#compatibilité)
 4. [Architecture](#architecture)
 5. [Structure du projet](#structure-du-projet)
-6. [Couches matérielles (Katman)](#couches-matérielles-katman)
+6. [Couches matérielles](#couches-matérielles)
 7. [Système de profils](#système-de-profils)
 8. [Interface utilisateur](#interface-utilisateur)
 9. [Compilation et installation](#compilation-et-installation)
@@ -29,6 +29,10 @@
 L'application communique avec le véhicule via le SDK propriétaire SAIC, en accédant aux services Android Automotive (`CarPropertyManager`, `CarHvacManager`) ainsi qu'aux services de bas niveau exposés par le firmware du véhicule.
 
 > **Important :** Cette application nécessite des privilèges système (`sharedUserId="android.uid.system"`) et doit être signée avec la clé de la ROM. Elle ne peut pas fonctionner sur un appareil standard débloqué.
+
+> [!WARNING]
+> **MG4Control est un projet communautaire indépendant. Il n'est en aucun cas affilié, approuvé ou soutenu par MG Motor, SAIC Motor ou l'une de leurs filiales.**
+> L'utilisation de cette application se fait entièrement à vos risques. Des réglages incorrects peuvent affecter le comportement du véhicule. Procédez avec précaution.
 
 ---
 
@@ -54,7 +58,19 @@ L'application communique avec le véhicule via le SDK propriétaire SAIC, en acc
 ### Réglages
 - Choix de la langue (Français / English)
 - Activation/désactivation de l'application automatique du profil
+- **Mise à jour automatique** : vérification GitHub + téléchargement APK vers le dossier Téléchargements
+- **Nettoyage APK** : suppression des anciens fichiers `MGControl*.apk` du dossier Téléchargements
 - Dialog "À propos" avec version de l'app, version firmware et QR code GitHub
+- Bouton "Fermer" pour revenir directement au dashboard
+
+### Profils
+- Bouton "Fermer" pour revenir directement au dashboard
+
+### Compatibilité firmware inconnue (UNKNOWN)
+- Dialog d'avertissement au démarrage si le firmware n'est ni SWI133 ni SWI68
+- L'utilisateur peut fermer l'application ou continuer
+- En mode "Continuer", les chips SWI133 / SWI68 deviennent cliquables pour forcer un mode de compatibilité
+- Le choix forcé est persisté en SharedPreferences et survit aux redémarrages de l'app
 
 ---
 
@@ -68,6 +84,7 @@ L'application communique avec le véhicule via le SDK propriétaire SAIC, en acc
 | Résolution d'écran | 1280 × 480 (orientation paysage forcée) |
 | Firmware SWI133 | Compatible ✅ |
 | Firmware SWI68 | Compatible ✅ |
+| Firmware UNKNOWN | Mode forcé SWI133/SWI68 disponible ⚠️ |
 
 ---
 
@@ -117,8 +134,10 @@ MG4ControlService.onCreate()
        │
        ▼
 MainActivity (IHM)
-  └─ Détection du firmware (SWI133 / SWI68)
-  └─ Configuration de la top bar
+  └─ FirmwareInfo.initWithContext()     ← charge mode forcé (SharedPreferences)
+  └─ Détection du firmware (SWI133 / SWI68 / UNKNOWN)
+  └─ Configuration de la top bar (chips firmware)
+  └─ checkUnknownFirmware()             ← dialog si UNKNOWN et non forcé
   └─ Navigation vers DashboardFragment
 ```
 
@@ -162,9 +181,13 @@ MG4Control/
 │   │   │   └── BootReceiver.kt        # Récepteur de démarrage système
 │   │   │
 │   │   ├── util/
-│   │   │   ├── FirmwareInfo.kt        # Détection génération firmware (SWI133 / SWI68)
+│   │   │   ├── FirmwareInfo.kt        # Détection firmware (SWI133/SWI68/UNKNOWN) + mode forcé
 │   │   │   ├── FirmwareHelper.kt      # Lecture version firmware complète (async)
 │   │   │   └── LocaleHelper.kt        # Gestion de la langue (FR / EN)
+│   │   │
+│   │   └── update/
+│   │       ├── UpdateChecker.kt       # Vérification dernière release GitHub (API)
+│   │       ├── UpdateDialogManager.kt # Dialog MAJ + DownloadManager + ouverture dossier
 │   │   │
 │   │   └── debug/
 │   │       └── AppLogger.kt           # Buffer de logs en mémoire (400 entrées)
@@ -176,8 +199,9 @@ MG4Control/
 │   │   │   ├── fragment_profile.xml   # Liste des profils
 │   │   │   ├── fragment_settings.xml  # Réglages
 │   │   │   ├── item_profile.xml       # Item liste de profil
-│   │   │   ├── dialog_profile_edit.xml# Dialog création / édition de profil
-│   │   │   └── dialog_app_info.xml    # Dialog "À propos"
+│   │   │   ├── dialog_profile_edit.xml       # Dialog création / édition de profil
+│   │   │   ├── dialog_app_info.xml           # Dialog "À propos"
+│   │   │   └── dialog_unknown_firmware.xml   # Dialog firmware inconnu (UNKNOWN)
 │   │   ├── navigation/nav_graph.xml   # Dashboard → Profils / Réglages
 │   │   ├── values/strings.xml         # Chaînes FR
 │   │   ├── values-en/strings.xml      # Chaînes EN
@@ -191,9 +215,9 @@ MG4Control/
 
 ---
 
-## Couches matérielles (Katman)
+## Couches matérielles
 
-`MG4Hardware` est organisé en **4 couches d'accès** (« Katman » = couche en turc), du plus haut niveau au plus bas, avec repli automatique en cas d'échec.
+`MG4Hardware` est organisé en **4 couches d'accès**, du plus haut niveau au plus bas, avec repli automatique en cas d'échec.
 
 ### Katman1 — Android Automotive Car API
 Couche principale. Utilise les APIs officielles Android Automotive :
@@ -217,11 +241,17 @@ Couche dédiée aux fonctions ADAS, chargée dynamiquement selon la génération
 
 ```kotlin
 // util/FirmwareInfo.kt
+FirmwareInfo.initWithContext(context)   // Charge le mode forcé depuis SharedPreferences
 val gen = FirmwareInfo.getGeneration()  // Lit ro.build.mt2712.version
 // → Gen.SWI133 | Gen.SWI68 | Gen.UNKNOWN
+
+// Si firmware inconnu, l'utilisateur peut forcer un mode :
+FirmwareInfo.forceGeneration(context, FirmwareInfo.Gen.SWI133)
+FirmwareInfo.isForced(context)          // true si mode forcé actif
+FirmwareInfo.getDetectedString()        // Ex : "SWI69-12345" (brut)
 ```
 
-Le résultat est mis en cache et utilisé dans tout l'app pour brancher le code spécifique au firmware.
+Le résultat est mis en cache. Si le firmware est `UNKNOWN` et aucun mode forcé, un dialog d'avertissement s'affiche au démarrage. L'utilisateur peut choisir de continuer et forcer SWI133 ou SWI68 via les chips de la top bar.
 
 ---
 
@@ -340,6 +370,9 @@ adb shell pm install -r --system /sdcard/app-debug.apk
 | `CONTROL_CAR_CLIMATE` | Contrôle des sièges et du volant chauffants |
 | `CAR_VENDOR_EXTENSION` | Extensions propriétaires SAIC |
 | `CAR_ENERGY` | Informations batterie / motorisation |
+| `INTERNET` | Vérification des mises à jour (GitHub API) |
+| `DOWNLOAD_WITHOUT_NOTIFICATION` | Téléchargement silencieux de l'APK de mise à jour |
+| `WRITE_EXTERNAL_STORAGE` | Enregistrement APK dans le dossier Téléchargements |
 
 </details>
 
@@ -354,7 +387,7 @@ adb shell pm install -r --system /sdcard/app-debug.apk
 3. [Compatibility](#compatibility)
 4. [Architecture](#architecture)
 5. [Project Structure](#project-structure)
-6. [Hardware Layers (Katman)](#hardware-layers-katman)
+6. [Hardware Layers](#hardware-layers)
 7. [Profile System](#profile-system)
 8. [User Interface](#user-interface)
 9. [Build & Installation](#build--installation)
@@ -369,6 +402,10 @@ adb shell pm install -r --system /sdcard/app-debug.apk
 The app communicates with the vehicle through the proprietary SAIC SDK, accessing Android Automotive services (`CarPropertyManager`, `CarHvacManager`) as well as low-level services exposed by the vehicle's firmware.
 
 > **Important:** This application requires system privileges (`sharedUserId="android.uid.system"`) and must be signed with the ROM's platform key. It cannot run on a standard unlocked device.
+
+> [!WARNING]
+> **MG4Control is an independent community project. It is in no way affiliated with, endorsed by, or supported by MG Motor, SAIC Motor, or any of their subsidiaries.**
+> Use this application entirely at your own risk. Incorrect settings may affect vehicle behaviour. Proceed with caution.
 
 ---
 
@@ -531,9 +568,9 @@ MG4Control/
 
 ---
 
-## Hardware Layers (Katman)
+## Hardware Layers
 
-`MG4Hardware` is organized into **4 access layers** ("Katman" = layer in Turkish), from highest to lowest level, with automatic fallback on failure.
+`MG4Hardware` is organized into **4 access layers**, from highest to lowest level, with automatic fallback on failure.
 
 ### Katman1 — Android Automotive Car API
 Primary layer. Uses official Android Automotive APIs:
@@ -686,6 +723,8 @@ adb shell pm install -r --system /sdcard/app-debug.apk
 ## Credits
 
 Made with ❤ by **SliDeeN** and **Claude IA**
+
+Basé sur l'application **DriveHub Dort** développée par **Merth4n** & **hotboy_ist**
 
 [![GitHub](https://img.shields.io/badge/GitHub-SliDeeN%2FMG4Control-181717?logo=github)](https://github.com/SliDeeN/MG4Control)
 

@@ -3,10 +3,13 @@ package com.mg4.control
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.view.LayoutInflater
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
@@ -29,6 +32,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Init firmware EN PREMIER — avant toute inflation de fragment
+        // Charge le mode forcé éventuel depuis les prefs
+        FirmwareInfo.initWithContext(this)
+
         // Premier lancement : choix de la langue avant tout
         if (LocaleHelper.isFirstLaunch(this)) {
             showLanguagePicker()
@@ -46,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         setupLogo()
         setupFirmwareChips()
         setupNavButtons()
+        checkUnknownFirmware()  // après setupFirmwareChips pour que les chips soient prêtes
         checkForUpdates()
     }
 
@@ -70,7 +78,6 @@ class MainActivity : AppCompatActivity() {
         val full = getString(R.string.app_name)           // "MG4 Control"
         val accent = getColor(R.color.dash_accent)
         val span = SpannableString(full)
-        // Colore tout ce qui suit "MG4" en accent
         val splitAt = full.indexOf(' ').takeIf { it >= 0 }?.plus(1) ?: 0
         if (splitAt > 0) span.setSpan(ForegroundColorSpan(accent), splitAt, full.length, 0)
         tv.text = span
@@ -81,25 +88,89 @@ class MainActivity : AppCompatActivity() {
     private fun setupFirmwareChips() {
         val chip133 = findViewById<TextView>(R.id.chip_swi133)
         val chip68  = findViewById<TextView>(R.id.chip_swi68)
-        val gen = FirmwareInfo.getGeneration()
+        val gen     = FirmwareInfo.getGeneration()
+        val forced  = FirmwareInfo.isForced(this)
 
-        fun styleChip(tv: TextView, active: Boolean) {
-            if (active) {
-                tv.setBackgroundResource(R.drawable.bg_chip_active)
-                tv.setTextColor(getColor(R.color.dash_accent))
-                tv.alpha = 1f
-                tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-            } else {
-                tv.setBackgroundResource(R.drawable.bg_chip_inactive)
-                tv.setTextColor(getColor(R.color.dash_text_lo))
-                tv.alpha = 0.4f
-                tv.paintFlags = tv.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        fun styleChipActive(tv: TextView) {
+            tv.setBackgroundResource(R.drawable.bg_chip_active)
+            tv.setTextColor(getColor(R.color.dash_accent))
+            tv.alpha = 1f
+            tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+        }
+
+        fun styleChipInactive(tv: TextView) {
+            tv.setBackgroundResource(R.drawable.bg_chip_inactive)
+            tv.setTextColor(getColor(R.color.dash_text_lo))
+            tv.alpha = 0.4f
+            tv.paintFlags = tv.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        }
+
+        fun styleChipSelectable(tv: TextView) {
+            // Firmware inconnu sans choix forcé : chip ni active ni barrée, mais cliquable
+            tv.setBackgroundResource(R.drawable.bg_chip_inactive)
+            tv.setTextColor(getColor(R.color.dash_danger))
+            tv.alpha = 0.75f
+            tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+        }
+
+        val isNaturalUnknown = gen == FirmwareInfo.Gen.UNKNOWN && !forced
+
+        when {
+            isNaturalUnknown -> {
+                // Les deux chips en mode "à choisir" (rouge dim, aucune barrée)
+                styleChipSelectable(chip133)
+                styleChipSelectable(chip68)
+            }
+            else -> {
+                val isSWI68 = gen == FirmwareInfo.Gen.SWI68
+                if (isSWI68) { styleChipActive(chip68);  styleChipInactive(chip133) }
+                else         { styleChipActive(chip133); styleChipInactive(chip68) }
             }
         }
 
-        val isSWI68 = gen == FirmwareInfo.Gen.SWI68
-        styleChip(chip133, !isSWI68)
-        styleChip(chip68,   isSWI68)
+        // Chips cliquables si firmware inconnu (naturel ou forcé) pour changer de mode
+        if (gen == FirmwareInfo.Gen.UNKNOWN || forced) {
+            chip133.setOnClickListener {
+                FirmwareInfo.forceGeneration(this, FirmwareInfo.Gen.SWI133)
+                recreate()
+            }
+            chip68.setOnClickListener {
+                FirmwareInfo.forceGeneration(this, FirmwareInfo.Gen.SWI68)
+                recreate()
+            }
+        }
+    }
+
+    // ── Dialog firmware non reconnu ───────────────────────────────────────────
+
+    private fun checkUnknownFirmware() {
+        // Ne montre le dialog que si le firmware est inconnu ET pas encore de choix forcé
+        if (FirmwareInfo.getGeneration() != FirmwareInfo.Gen.UNKNOWN) return
+        if (FirmwareInfo.isForced(this)) return
+
+        val dialogView = LayoutInflater.from(this)
+            .inflate(R.layout.dialog_unknown_firmware, null)
+
+        // Affiche la chaîne firmware brute dans le badge (ex: "SWI69-12345")
+        dialogView.findViewById<TextView>(R.id.tv_fw_detected_badge).text =
+            FirmwareInfo.getDetectedString()
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        dialogView.findViewById<MaterialButton>(R.id.btn_fw_close_app).setOnClickListener {
+            finishAffinity()
+        }
+
+        dialogView.findViewById<MaterialButton>(R.id.btn_fw_continue).setOnClickListener {
+            dialog.dismiss()
+            // L'utilisateur peut maintenant taper sur les chips SWI133/SWI68
+        }
+
+        dialog.show()
     }
 
     // ── Boutons de navigation dans la top-bar ─────────────────────────────────
@@ -108,7 +179,6 @@ class MainActivity : AppCompatActivity() {
         val btnProfiles = findViewById<MaterialButton>(R.id.btn_nav_profiles)
         val btnSettings = findViewById<MaterialButton>(R.id.btn_nav_settings)
 
-        // PROFILS : navigue / revient au dashboard si déjà sur l'écran profils
         btnProfiles.setOnClickListener {
             when (navController.currentDestination?.id) {
                 R.id.profileFragment -> navController.popBackStack()
@@ -116,7 +186,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // RÉGLAGES : ouvre les réglages, ou ferme si déjà ouvert
         btnSettings.setOnClickListener {
             when (navController.currentDestination?.id) {
                 R.id.settingsFragment -> navController.popBackStack()
@@ -124,7 +193,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Surligne le bouton actif selon la destination courante
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val accent   = getColor(R.color.dash_accent_dim)
             val inactive = getColor(R.color.dash_btn)

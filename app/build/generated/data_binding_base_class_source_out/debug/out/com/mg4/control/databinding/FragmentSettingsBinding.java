@@ -24,6 +24,9 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final MaterialButton btnCheckUpdate;
 
   @NonNull
+  public final MaterialButton btnCleanApk;
+
+  @NonNull
   public final MaterialButton btnCloseSettings;
 
   @NonNull
@@ -39,11 +42,13 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final Switch switchAutoApply;
 
   private FragmentSettingsBinding(@NonNull LinearLayout rootView,
-      @NonNull MaterialButton btnCheckUpdate, @NonNull MaterialButton btnCloseSettings,
-      @NonNull MaterialButton btnInfos, @NonNull MaterialButton btnLangEn,
-      @NonNull MaterialButton btnLangFr, @NonNull Switch switchAutoApply) {
+      @NonNull MaterialButton btnCheckUpdate, @NonNull MaterialButton btnCleanApk,
+      @NonNull MaterialButton btnCloseSettings, @NonNull MaterialButton btnInfos,
+      @NonNull MaterialButton btnLangEn, @NonNull MaterialButton btnLangFr,
+      @NonNull Switch switchAutoApply) {
     this.rootView = rootView;
     this.btnCheckUpdate = btnCheckUpdate;
+    this.btnCleanApk = btnCleanApk;
     this.btnCloseSettings = btnCloseSettings;
     this.btnInfos = btnInfos;
     this.btnLangEn = btnLangEn;
@@ -84,6 +89,12 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_clean_apk;
+      MaterialButton btnCleanApk = ViewBindings.findChildViewById(rootView, id);
+      if (btnCleanApk == null) {
+        break missingId;
+      }
+
       id = R.id.btn_close_settings;
       MaterialButton btnCloseSettings = ViewBindings.findChildViewById(rootView, id);
       if (btnCloseSettings == null) {
@@ -114,8 +125,8 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentSettingsBinding((LinearLayout) rootView, btnCheckUpdate, btnCloseSettings,
-          btnInfos, btnLangEn, btnLangFr, switchAutoApply);
+      return new FragmentSettingsBinding((LinearLayout) rootView, btnCheckUpdate, btnCleanApk,
+          btnCloseSettings, btnInfos, btnLangEn, btnLangFr, switchAutoApply);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
