@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "autoPort": true,
+  "configurations": [
+    {
+      "name": "mockup",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "mockup"]
+    }
+  ]
+}

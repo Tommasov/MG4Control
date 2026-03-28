@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local config (ne jamais committer — contient les chemins locaux SDK)
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Keystore (ne jamais committer)
+*.jks
+*.keystore
+
+# Fichiers de log
+*.log
