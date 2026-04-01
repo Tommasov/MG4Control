@@ -28,6 +28,9 @@ public final class ActivityMainBinding implements ViewBinding {
   public final MaterialButton btnNavSettings;
 
   @NonNull
+  public final MaterialButton btnNavShortcuts;
+
+  @NonNull
   public final TextView chipSwi133;
 
   @NonNull
@@ -41,11 +44,13 @@ public final class ActivityMainBinding implements ViewBinding {
 
   private ActivityMainBinding(@NonNull LinearLayout rootView,
       @NonNull MaterialButton btnNavProfiles, @NonNull MaterialButton btnNavSettings,
-      @NonNull TextView chipSwi133, @NonNull TextView chipSwi68,
-      @NonNull FragmentContainerView navHostFragment, @NonNull TextView topbarLogo) {
+      @NonNull MaterialButton btnNavShortcuts, @NonNull TextView chipSwi133,
+      @NonNull TextView chipSwi68, @NonNull FragmentContainerView navHostFragment,
+      @NonNull TextView topbarLogo) {
     this.rootView = rootView;
     this.btnNavProfiles = btnNavProfiles;
     this.btnNavSettings = btnNavSettings;
+    this.btnNavShortcuts = btnNavShortcuts;
     this.chipSwi133 = chipSwi133;
     this.chipSwi68 = chipSwi68;
     this.navHostFragment = navHostFragment;
@@ -91,6 +96,12 @@ public final class ActivityMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_nav_shortcuts;
+      MaterialButton btnNavShortcuts = ViewBindings.findChildViewById(rootView, id);
+      if (btnNavShortcuts == null) {
+        break missingId;
+      }
+
       id = R.id.chip_swi133;
       TextView chipSwi133 = ViewBindings.findChildViewById(rootView, id);
       if (chipSwi133 == null) {
@@ -116,7 +127,7 @@ public final class ActivityMainBinding implements ViewBinding {
       }
 
       return new ActivityMainBinding((LinearLayout) rootView, btnNavProfiles, btnNavSettings,
-          chipSwi133, chipSwi68, navHostFragment, topbarLogo);
+          btnNavShortcuts, chipSwi133, chipSwi68, navHostFragment, topbarLogo);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

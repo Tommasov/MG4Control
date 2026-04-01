@@ -48,7 +48,12 @@ L'application communique avec le véhicule via le SDK propriétaire SAIC, en acc
 
 ### ADAS (Assistance à la conduite)
 - **SWI133** : Off / Limiteur / Auto / ACC / ICA + alertes excès de vitesse / changement de limite
-- **SWI68** : Désactiver / ACC / TJA + avertissement sonore
+- **SWI68** : Désactiver / ACC / TJA + avertissement sonore On / Off
+
+### Raccourcis volant
+- Configuration des **4 boutons du volant** (boutons latéraux gauche/droit)
+- Actions disponibles : Mode de conduite / Régénération / ADAS / **Ouvrir l'application**
+- Activation / désactivation des raccourcis avec **dialog d'avertissement** (recommande de désactiver d'abord les raccourcis du launcher officiel pour éviter les conflits)
 
 ### Gestion de profils
 - Sauvegarde jusqu'à **5 profils** personnalisés
@@ -71,6 +76,35 @@ L'application communique avec le véhicule via le SDK propriétaire SAIC, en acc
 - L'utilisateur peut fermer l'application ou continuer
 - En mode "Continuer", les chips SWI133 / SWI68 deviennent cliquables pour forcer un mode de compatibilité
 - Le choix forcé est persisté en SharedPreferences et survit aux redémarrages de l'app
+
+---
+
+## Changelog
+
+### v2.3.0
+- **Fix** : Bouton ON/OFF alertes sonores SWI68 depuis l'écran principal non fonctionnel (mauvais mapping des valeurs : ON=2, OFF=1 au lieu de 0/1)
+- **Fix** : Correction du raccourci ADAS sur SWI133 (appel `setMixedIntelligentDrive` corrigé)
+- **Fix** : Switches du Dashboard ne réagissaient pas correctement aux clics (`isPressed` toujours `false` au moment du callback — wrapping programmatique ajouté)
+- **Ajout** : Action raccourci **"Ouvrir l'application"** (OPEN_APP) dans l'onglet raccourcis
+- **Ajout** : Dialog d'avertissement à l'activation des raccourcis (recommande de désactiver ceux du launcher officiel)
+
+### v2.2.0
+- Refonte complète en interface unifiée (Dashboard unique)
+- Ajout du système de raccourcis volant (SWI133 + SWI68)
+- Compatibilité firmware UNKNOWN avec mode forcé
+- Mise à jour automatique via GitHub API
+- Nettoyage APK dans le dossier Téléchargements
+- Support multilingue FR / EN
+
+### v2.1.0
+- Ajout des profils de conduite (jusqu'à 5 profils)
+- Application automatique du profil au démarrage
+- Refonte UI dark theme
+
+### v2.0.0
+- Réécriture complète depuis DriveHub Dort
+- Support SWI68 (VehicleSettingManager)
+- Architecture multi-couches MG4Hardware (Katman1/2/4)
 
 ---
 
@@ -421,7 +455,12 @@ The app communicates with the vehicle through the proprietary SAIC SDK, accessin
 
 ### ADAS (Advanced Driver Assistance)
 - **SWI133**: Off / Speed Limiter / Auto / ACC / ICA + overspeed alert / speed limit change alert
-- **SWI68**: Disable / ACC / TJA + audible warning
+- **SWI68**: Disable / ACC / TJA + audible warning On / Off
+
+### Steering Wheel Shortcuts
+- Configure **4 steering wheel buttons** (left/right side buttons)
+- Available actions: Drive mode / Regeneration / ADAS / **Open app**
+- Enable/disable shortcuts with a **warning dialog** (recommends disabling the official launcher shortcuts first to avoid conflicts)
 
 ### Profile Management
 - Save up to **5 custom profiles**
@@ -431,7 +470,38 @@ The app communicates with the vehicle through the proprietary SAIC SDK, accessin
 ### Settings
 - Language selection (French / English)
 - Enable/disable automatic profile application
+- **Auto-update**: GitHub release check + APK download to Downloads folder
+- **APK cleanup**: removes old `MGControl*.apk` files from Downloads folder
 - "About" dialog showing app version, firmware version, and GitHub QR code
+
+---
+
+## Changelog
+
+### v2.3.0
+- **Fix**: Sound warning ON/OFF button (SWI68) not working from main screen (wrong value mapping: ON=2, OFF=1 instead of 0/1)
+- **Fix**: ADAS shortcut on SWI133 (`setMixedIntelligentDrive` call corrected)
+- **Fix**: Dashboard switches not responding correctly to taps (`isPressed` was always `false` in callback — programmatic wrapping added)
+- **New**: **"Open app"** shortcut action (OPEN_APP) in the shortcuts tab
+- **New**: Warning dialog when enabling shortcuts (recommends disabling official launcher shortcuts first)
+
+### v2.2.0
+- Full UI rewrite as unified Dashboard
+- Steering wheel shortcut system (SWI133 + SWI68)
+- UNKNOWN firmware compatibility with forced mode
+- Auto-update via GitHub API
+- APK cleanup in Downloads folder
+- FR / EN multilingual support
+
+### v2.1.0
+- Driving profile system (up to 5 profiles)
+- Automatic profile application on startup
+- Dark theme UI overhaul
+
+### v2.0.0
+- Full rewrite from DriveHub Dort
+- SWI68 support (VehicleSettingManager)
+- Multi-layer MG4Hardware architecture (Katman1/2/4)
 
 ---
 
@@ -445,6 +515,7 @@ The app communicates with the vehicle through the proprietary SAIC SDK, accessin
 | Screen resolution | 1280 × 480 (forced landscape) |
 | SWI133 firmware | Supported ✅ |
 | SWI68 firmware | Supported ✅ |
+| UNKNOWN firmware | Forced SWI133/SWI68 mode available ⚠️ |
 
 ---
 
@@ -725,6 +796,8 @@ adb shell pm install -r --system /sdcard/app-debug.apk
 Made with ❤ by **SliDeeN** and **Claude IA**
 
 Basé sur l'application **DriveHub Dort** développée par **Merth4n** & **hotboy_ist**
+
+Remerciements spéciaux à **confor1max** pour les tests approfondis du firmware SWI68 🙏
 
 [![GitHub](https://img.shields.io/badge/GitHub-SliDeeN%2FMG4Control-181717?logo=github)](https://github.com/SliDeeN/MG4Control)
 

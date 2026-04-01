@@ -881,7 +881,9 @@ object MG4Hardware {
     fun getMixedIntelligentDrive(): Int = getMixIntProperty(PROP_MIX_INTELLIGENT_DRIVE)
     fun setMixedIntelligentDrive(value: Int): Boolean {
         if (logEnabled) AppLogger.i(TAG, "setMixedIntelligentDrive → $value")
-        return setMixIntProperty(PROP_MIX_INTELLIGENT_DRIVE, value)
+        // Primary: setMixProperty (smali-accurate). Fallback: setIntProperty if method missing.
+        if (setMixIntProperty(PROP_MIX_INTELLIGENT_DRIVE, value)) return true
+        return setIntPropertyVpm(PROP_MIX_INTELLIGENT_DRIVE, value)
     }
 
     // ── SWI68 ADAS API — VehicleSettingManager.setAccTjaMode / setLaneKeepingWarningSound ──
@@ -899,12 +901,12 @@ object MG4Hardware {
     }
 
     fun isSoundWarningOn(): Boolean {
-        return ((callVsm("getLaneKeepingWarningSound") as? Int) ?: 0) > 0
+        return ((callVsm("getLaneKeepingWarningSound") as? Int) ?: 1) == 2
     }
 
     fun setSoundWarning(on: Boolean): Boolean {
         if (logEnabled) AppLogger.i(TAG, "setSoundWarning → $on")
-        callVsm("setLaneKeepingWarningSound", if (on) 1 else 0) ?: return false
+        callVsm("setLaneKeepingWarningSound", if (on) 2 else 1) ?: return false
         return true
     }
 

@@ -178,6 +178,16 @@
                 android:textSize="11sp"
                 android:gravity="center" />
 
+            <!-- Remerciements spéciaux -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/info_special_thanks"
+                android:textColor="@color/dash_text_lo"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:layout_marginTop="4dp" />
+
         </LinearLayout>
 
     </LinearLayout>

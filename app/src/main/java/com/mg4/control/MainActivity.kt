@@ -176,8 +176,16 @@ class MainActivity : AppCompatActivity() {
     // ── Boutons de navigation dans la top-bar ─────────────────────────────────
 
     private fun setupNavButtons() {
-        val btnProfiles = findViewById<MaterialButton>(R.id.btn_nav_profiles)
-        val btnSettings = findViewById<MaterialButton>(R.id.btn_nav_settings)
+        val btnShortcuts = findViewById<MaterialButton>(R.id.btn_nav_shortcuts)
+        val btnProfiles  = findViewById<MaterialButton>(R.id.btn_nav_profiles)
+        val btnSettings  = findViewById<MaterialButton>(R.id.btn_nav_settings)
+
+        btnShortcuts.setOnClickListener {
+            when (navController.currentDestination?.id) {
+                R.id.shortcutsFragment -> navController.popBackStack()
+                else                   -> navController.navigate(R.id.shortcutsFragment)
+            }
+        }
 
         btnProfiles.setOnClickListener {
             when (navController.currentDestination?.id) {
@@ -196,6 +204,9 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val accent   = getColor(R.color.dash_accent_dim)
             val inactive = getColor(R.color.dash_btn)
+            btnShortcuts.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                if (destination.id == R.id.shortcutsFragment) accent else inactive
+            )
             btnProfiles.backgroundTintList = android.content.res.ColorStateList.valueOf(
                 if (destination.id == R.id.profileFragment) accent else inactive
             )

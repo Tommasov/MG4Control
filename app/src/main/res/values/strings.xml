@@ -15,6 +15,37 @@
     <string name="nav_profiles">Profils</string>
     <string name="nav_adas">ADAS</string>
     <string name="nav_settings">Réglages</string>
+    <string name="nav_shortcuts">Raccourcis</string>
+
+    <!-- Raccourcis au volant -->
+    <string name="shortcuts_enabled_label">Activer les raccourcis au volant</string>
+    <string name="shortcuts_btn1_label">★ Bouton Gauche</string>
+    <string name="shortcuts_btn2_label">★ Bouton Droite</string>
+    <string name="shortcuts_action_none">Aucune</string>
+    <string name="shortcuts_action_one_pedal">1 Pédale</string>
+    <string name="shortcuts_press_single">Simple</string>
+    <string name="shortcuts_press_long">Long</string>
+    <string name="shortcuts_press_double">Double</string>
+
+    <!-- Actions raccourcis -->
+    <string name="shortcuts_action_aeb">Système Anticollision</string>
+    <string name="shortcuts_action_sound">Son</string>
+    <string name="shortcuts_action_overspeed">Alerte survitesse</string>
+    <string name="shortcuts_action_speed_limit">Alerte chgt vitesse</string>
+    <string name="shortcuts_action_adas">ADAS</string>
+    <string name="shortcuts_action_open_app">Ouvrir MG4Control</string>
+    <string name="shortcuts_warning_title">Raccourcis au volant</string>
+    <string name="shortcuts_warning_message">⚠ Si le launcher officiel est configuré sur un bouton, il sera prioritaire sur MG4Control.\n\nExemple : si la caméra 360° est assignée en appui simple sur le launcher, MG4Control ne pourra pas intercepter ce bouton et la caméra s\'activera à la place.\n\nIl est recommandé de désactiver les raccourcis du launcher officiel pour éviter les conflits.</string>
+    <string name="shortcuts_warning_ok">Compris</string>
+
+    <!-- Config raccourcis -->
+    <string name="shortcuts_cfg_one_pedal">1 Pédale — Regen retour</string>
+    <string name="shortcuts_cfg_aeb">AEB — Alternance</string>
+    <string name="shortcuts_cfg_adas">ADAS — Alternance</string>
+    <string name="shortcuts_cfg_retour">Retour</string>
+    <string name="shortcuts_cfg_mode1">Mode 1</string>
+    <string name="shortcuts_cfg_mode2">Mode 2</string>
+    <string name="shortcuts_cfg_aeb_brake">Al.+Fr.</string>
 
     <!-- Drive modes -->
     <string name="drive_eco">ECO</string>
@@ -98,6 +129,7 @@
     <string name="info_firmware_label">Firmware</string>
     <string name="info_github_link">github.com/SliDeeN/MG4Control</string>
     <string name="info_made_with_love">Made with ❤ by SliDeeN and Claude IA</string>
+    <string name="info_special_thanks">Merci à confor1max pour les tests SWI68 🙏</string>
     <string name="info_based_on">Basé sur DriveHub Dort by Merth4n &amp; hotboy_ist</string>
     <string name="info_close">Fermer</string>
 

@@ -66,6 +66,9 @@ class DashboardFragment : Fragment() {
     private var btnAebAlarm: Button? = null
     private var btnAebAlarmBrake: Button? = null
 
+    /** True pendant les mises à jour programmatiques des Switch — bloque les listeners. */
+    private var isRefreshing = false
+
     // ── Couleurs (lazy pour contexte disponible) ──────────────────────────────
     private val colorActive   by lazy { requireContext().getColor(R.color.dash_accent_dim) }
     private val colorInactive by lazy { requireContext().getColor(R.color.dash_btn) }
@@ -195,9 +198,9 @@ class DashboardFragment : Fragment() {
             }
         }
 
-        // Volant chauffant (guard isPressed pour éviter le déclenchement programmatique)
+        // Volant chauffant
         switchSteering.setOnCheckedChangeListener { _, checked ->
-            if (switchSteering.isPressed)
+            if (!isRefreshing)
                 CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSteeringHeat(checked) }
         }
 
@@ -212,20 +215,20 @@ class DashboardFragment : Fragment() {
         // Alertes SWI133
         if (!isSWI68) {
             switchOverspeed?.setOnCheckedChangeListener { _, checked ->
-                if (switchOverspeed?.isPressed == true)
+                if (!isRefreshing)
                     CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setOverspeedAlarm(checked) }
             }
             switchSpeedTone?.setOnCheckedChangeListener { _, checked ->
-                if (switchSpeedTone?.isPressed == true)
+                if (!isRefreshing)
                     CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSpeedLimitTone(checked) }
             }
         }
 
-        // Alerte SWI68
+        // Alerte SWI68 — whenKatman4Ready garantit sVsmService != null ET main thread (même chemin que ProfileApplier)
         if (isSWI68) {
             switchSoundWarning?.setOnCheckedChangeListener { _, checked ->
-                if (switchSoundWarning?.isPressed == true)
-                    CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSoundWarning(checked) }
+                if (!isRefreshing)
+                    MG4Hardware.whenKatman4Ready { MG4Hardware.setSoundWarning(checked) }
             }
         }
 
@@ -233,7 +236,7 @@ class DashboardFragment : Fragment() {
         val isKnown = FirmwareInfo.getGeneration() != FirmwareInfo.Gen.UNKNOWN
         if (isKnown) {
             switchAeb?.setOnCheckedChangeListener { _, checked ->
-                if (switchAeb?.isPressed == true) {
+                if (!isRefreshing) {
                     CoroutineScope(Dispatchers.IO).launch {
                         MG4Hardware.setAebEnabled(checked)
                         withContext(Dispatchers.Main) { if (isAdded) applyAebModeButtonsEnabled(checked) }
@@ -287,7 +290,9 @@ class DashboardFragment : Fragment() {
             withContext(Dispatchers.Main) {
                 if (!isAdded) return@withContext
                 if (ready) {
+                    isRefreshing = true
                     switchSteering.isChecked = steeringOn
+                    isRefreshing = false
                     applySeatUI(seatLeftButtons, leftLevel)
                     applySeatUI(seatRightButtons, rightLevel)
                 } else {
@@ -318,10 +323,12 @@ class DashboardFragment : Fragment() {
                 view?.postDelayed({ if (isAdded) refreshAdas() }, 2_000)
                 return@withContext
             }
+            isRefreshing = true
             switchOverspeed?.isChecked = overspeed
             switchSpeedTone?.isChecked = speedTone
-            applySwi133AdasUI(adasMode)
             switchAeb?.isChecked = aebOn
+            isRefreshing = false
+            applySwi133AdasUI(adasMode)
             applyAebModeButtonsEnabled(aebOn)
             if (aebMode > 0) applyAebModeUI(aebMode)
         }
@@ -338,9 +345,11 @@ class DashboardFragment : Fragment() {
                 view?.postDelayed({ if (isAdded) refreshAdas() }, 2_000)
                 return@withContext
             }
+            isRefreshing = true
             switchSoundWarning?.isChecked = sound
-            applySwi68AdasUI(mode)
             switchAeb?.isChecked = aebOn
+            isRefreshing = false
+            applySwi68AdasUI(mode)
             applyAebModeButtonsEnabled(aebOn)
             if (aebMode > 0) applyAebModeUI(aebMode)
         }
