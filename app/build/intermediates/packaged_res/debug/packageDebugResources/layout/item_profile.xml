@@ -6,40 +6,37 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/bg_card_rounded"
-    android:padding="12dp"
-    android:layout_marginBottom="8dp">
+    android:paddingHorizontal="16dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp"
+    android:layout_marginBottom="10dp">
 
-    <!-- Nom + badge PAR DÉFAUT -->
+    <!-- Nom + résumé sur une seule ligne + badge PAR DÉFAUT -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="10dp">
+        android:layout_marginBottom="12dp">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tv_profile_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_profile_summary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_profile_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_profile_summary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/dash_text_lo"
-                android:textSize="11sp"
-                android:layout_marginTop="2dp" />
-
-        </LinearLayout>
+            android:textColor="@color/dash_text_lo"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:maxLines="1" />
 
         <!-- Badge PAR DÉFAUT -->
         <TextView
@@ -48,12 +45,13 @@
             android:layout_height="wrap_content"
             android:text="@string/profile_default_badge"
             android:textColor="@color/dash_accent"
-            android:textSize="9sp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:letterSpacing="0.08"
             android:background="@drawable/bg_chip_active"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:layout_marginStart="10dp"
             android:visibility="gone" />
 
     </LinearLayout>
@@ -63,82 +61,75 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/dash_border"
-        android:layout_marginBottom="10dp" />
+        android:layout_marginBottom="12dp" />
 
-    <!-- Boutons ligne 1 : Appliquer + Par défaut -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="6dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_apply"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="5dp"
-            android:text="@string/profile_apply_now"
-            android:textColor="@color/dash_eco"
-            android:textSize="11sp"
-            android:textAllCaps="true"
-            app:backgroundTint="@color/dash_eco_dim"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/dash_eco"
-            app:cornerRadius="7dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_set_default"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="1"
-            android:layout_marginStart="5dp"
-            android:text="@string/profile_set_default"
-            android:textColor="@color/text_secondary"
-            android:textSize="11sp"
-            android:textAllCaps="true"
-            app:backgroundTint="@color/dash_btn"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/dash_border"
-            app:cornerRadius="7dp" />
-
-    </LinearLayout>
-
-    <!-- Boutons ligne 2 : Modifier + Supprimer -->
+    <!-- Boutons sur une seule ligne -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_apply"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="2"
+            android:layout_marginEnd="5dp"
+            android:text="@string/profile_apply_now"
+            android:textColor="@color/dash_eco"
+            android:textSize="13sp"
+            android:textAllCaps="true"
+            app:backgroundTint="@color/dash_eco_dim"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/dash_eco"
+            app:cornerRadius="8dp" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_edit"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="52dp"
             android:layout_weight="1"
+            android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:text="@string/profile_edit"
             android:textColor="@color/text_secondary"
-            android:textSize="11sp"
+            android:textSize="13sp"
             android:textAllCaps="true"
             app:backgroundTint="@color/dash_btn"
             app:strokeWidth="1dp"
             app:strokeColor="@color/dash_border"
-            app:cornerRadius="7dp" />
+            app:cornerRadius="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_set_default"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:text="@string/profile_set_default"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:textAllCaps="true"
+            app:backgroundTint="@color/dash_btn"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/dash_border"
+            app:cornerRadius="8dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_delete"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="52dp"
             android:layout_weight="1"
             android:layout_marginStart="5dp"
             android:text="@string/profile_delete"
             android:textColor="@color/dash_danger"
-            android:textSize="11sp"
+            android:textSize="13sp"
             android:textAllCaps="true"
             app:backgroundTint="@color/dash_danger_dim"
             app:strokeWidth="1dp"
             app:strokeColor="@color/dash_danger"
-            app:cornerRadius="7dp" />
+            app:cornerRadius="8dp" />
 
     </LinearLayout>
 

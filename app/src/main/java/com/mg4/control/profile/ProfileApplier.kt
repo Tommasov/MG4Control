@@ -34,49 +34,60 @@ object ProfileApplier {
             AppLogger.i(TAG, "  RegenLevel=${profile.regenLevel.label} → $rlOk")
             ok = ok && rlOk
 
-            // Volant chauffant (HVAC — peut bloquer jusqu'à 2s)
-            val shOk = MG4Hardware.setSteeringHeat(profile.steeringHeat)
-            AppLogger.i(TAG, "  SteeringHeat=${profile.steeringHeat} → $shOk")
-
-            // Siège gauche (HVAC — peut bloquer jusqu'à 7s)
-            val slOk = MG4Hardware.setSeatHeatLeft(profile.seatHeatLeft)
-            AppLogger.i(TAG, "  SeatHeatLeft=${profile.seatHeatLeft} → $slOk")
-
-            // Siège droit (HVAC — peut bloquer jusqu'à 7s)
-            val srOk = MG4Hardware.setSeatHeatRight(profile.seatHeatRight)
-            AppLogger.i(TAG, "  SeatHeatRight=${profile.seatHeatRight} → $srOk")
+            // Volant + Sièges chauffants — uniquement SWI133 et SWI68 (SWI69/SWI131 n'ont pas ces équipements)
+            if (FirmwareInfo.hasHeatFeatures()) {
+                val shOk = MG4Hardware.setSteeringHeat(profile.steeringHeat)
+                AppLogger.i(TAG, "  SteeringHeat=${profile.steeringHeat} → $shOk")
+                val slOk = MG4Hardware.setSeatHeatLeft(profile.seatHeatLeft)
+                AppLogger.i(TAG, "  SeatHeatLeft=${profile.seatHeatLeft} → $slOk")
+                val srOk = MG4Hardware.setSeatHeatRight(profile.seatHeatRight)
+                AppLogger.i(TAG, "  SeatHeatRight=${profile.seatHeatRight} → $srOk")
+            }
 
             AppLogger.i(TAG, "Profil '${profile.name}' Katman1 terminé — ok=$ok")
             onComplete?.invoke(ok)
 
-            // ADAS (Katman4) — appliqué dès que mIVehiclePropertyService est prêt
+            // ADAS (Katman4) — appliqué dès que le service est prêt
             MG4Hardware.whenKatman4Ready {
                 AppLogger.i(TAG, "  Application ADAS pour profil '${profile.name}'")
-                when (FirmwareInfo.getGeneration()) {
-                    FirmwareInfo.Gen.SWI133, FirmwareInfo.Gen.UNKNOWN -> {
-                        val oaOk = MG4Hardware.setOverspeedAlarm(profile.overspeedAlarm)
-                        AppLogger.i(TAG, "  OverspeedAlarm=${profile.overspeedAlarm} → $oaOk")
-                        val stOk = MG4Hardware.setSpeedLimitTone(profile.speedLimitTone)
-                        AppLogger.i(TAG, "  SpeedLimitTone=${profile.speedLimitTone} → $stOk")
-                        val adOk = MG4Hardware.setMixedIntelligentDrive(profile.adasMode)
-                        AppLogger.i(TAG, "  AdasMode=${profile.adasMode} → $adOk")
-                        val aebOk = MG4Hardware.setAebEnabled(profile.aebEnabled)
-                        AppLogger.i(TAG, "  AebEnabled=${profile.aebEnabled} → $aebOk")
-                        val aebModeOk = MG4Hardware.setAebMode(profile.aebMode)
-                        AppLogger.i(TAG, "  AebMode=${profile.aebMode} → $aebModeOk")
-                    }
-                    FirmwareInfo.Gen.SWI68 -> {
-                        val swOk = MG4Hardware.setSoundWarning(profile.soundWarning)
-                        AppLogger.i(TAG, "  SoundWarning=${profile.soundWarning} → $swOk")
-                        val adOk = MG4Hardware.setAccTjaMode(profile.swi68AdasMode)
-                        AppLogger.i(TAG, "  Swi68AdasMode=0x${profile.swi68AdasMode.toString(16)} → $adOk")
-                        val aebOk = MG4Hardware.setAebEnabled(profile.aebEnabled)
-                        AppLogger.i(TAG, "  AebEnabled=${profile.aebEnabled} → $aebOk")
-                        val aebModeOk = MG4Hardware.setAebMode(profile.aebMode)
-                        AppLogger.i(TAG, "  AebMode=${profile.aebMode} → $aebModeOk")
-                    }
+                if (FirmwareInfo.isVsmBased()) {
+                    // SWI68/SWI69/SWI131 : même interface ADAS (ACC/TJA/Off + alerte sonore)
+                    // Les méthodes MG4Hardware.setAccTjaMode / setSoundWarning sont déjà adaptées
+                    val swOk = MG4Hardware.setSoundWarning(profile.soundWarning)
+                    AppLogger.i(TAG, "  SoundWarning=${profile.soundWarning} → $swOk")
+                    val adOk = MG4Hardware.setAccTjaMode(profile.swi68AdasMode)
+                    AppLogger.i(TAG, "  AdasMode=0x${profile.swi68AdasMode.toString(16)} → $adOk")
+                    applyAeb(profile.aebEnabled, profile.aebMode)
+                } else {
+                    // SWI133/UNKNOWN : ADAS mixte
+                    val oaOk = MG4Hardware.setOverspeedAlarm(profile.overspeedAlarm)
+                    AppLogger.i(TAG, "  OverspeedAlarm=${profile.overspeedAlarm} → $oaOk")
+                    val stOk = MG4Hardware.setSpeedLimitTone(profile.speedLimitTone)
+                    AppLogger.i(TAG, "  SpeedLimitTone=${profile.speedLimitTone} → $stOk")
+                    val adOk = MG4Hardware.setMixedIntelligentDrive(profile.adasMode)
+                    AppLogger.i(TAG, "  AdasMode=${profile.adasMode} → $adOk")
+                    applyAeb(profile.aebEnabled, profile.aebMode)
                 }
             }
+        }
+    }
+
+    /**
+     * Applique les réglages AEB du profil.
+     * Si aebEnabled=false ET aebMode=1 (valeurs par défaut — profil créé avant l'ajout de l'AEB),
+     * on ne touche pas à l'état AEB de la voiture pour éviter une désactivation involontaire.
+     */
+    private fun applyAeb(aebEnabled: Boolean, aebMode: Int) {
+        val isDefault = !aebEnabled && aebMode == 1
+        if (isDefault) {
+            AppLogger.i(TAG, "  AEB — valeurs par défaut, skip (évite désactivation involontaire)")
+            return
+        }
+        val aebOk = MG4Hardware.setAebEnabled(aebEnabled)
+        AppLogger.i(TAG, "  AebEnabled=$aebEnabled → $aebOk")
+        if (aebEnabled) {
+            val aebModeOk = MG4Hardware.setAebMode(aebMode)
+            AppLogger.i(TAG, "  AebMode=$aebMode → $aebModeOk")
         }
     }
 }

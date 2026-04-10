@@ -34,6 +34,9 @@
     <string name="shortcuts_action_speed_limit">Speed limit alert</string>
     <string name="shortcuts_action_adas">ADAS</string>
     <string name="shortcuts_action_open_app">Open MG4Control</string>
+    <string name="shortcuts_action_open_custom_app">Open…</string>
+    <string name="shortcuts_pick_app_title">Choose an app</string>
+    <string name="shortcuts_open_custom_prefix">Open</string>
     <string name="shortcuts_warning_title">Steering wheel shortcuts</string>
     <string name="shortcuts_warning_message">⚠ If the official launcher is configured on a button, it will take priority over MG4Control.\n\nExample: if the 360° camera is assigned to a single press in the launcher, MG4Control will not be able to intercept that button and the camera will activate instead.\n\nIt is recommended to disable the official launcher\'s shortcuts to avoid conflicts.</string>
     <string name="shortcuts_warning_ok">Got it</string>
@@ -176,6 +179,8 @@
     <string name="fw_unknown_btn_continue">Continue</string>
 
     <!-- Settings -->
+    <string name="settings_default_screen">Default screen</string>
+    <string name="settings_default_screen_dashboard">Dashboard</string>
     <string name="settings_auto_apply">Apply profile at startup</string>
     <string name="settings_auto_apply_desc">The default profile is applied automatically at launch</string>
     <string name="settings_language">Language</string>

@@ -362,8 +362,9 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- ── Section Volant chauffant ───────────────────── -->
+                <!-- ── Section Volant chauffant (masquée en SWI69) ── -->
                 <LinearLayout
+                    android:id="@+id/section_steering_dialog"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -429,8 +430,9 @@
 
                 </LinearLayout>
 
-                <!-- ── Sièges gauche et droit (côte à côte) ──────── -->
+                <!-- ── Sièges gauche et droit (masqués en SWI69) ─── -->
                 <LinearLayout
+                    android:id="@+id/section_seats_dialog"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"

@@ -62,7 +62,17 @@ object MG4Hardware {
     private const val PROP_AEB_MODE      = 0x302000b  // ID_AAD_AUTO_EME_BREAK (VPM)
 
     // SWI68 : VehicleSettingManager class name (loaded via launcher context)
-    private const val VSM_CLASS = "com.saicmotor.sdk.vehiclesettings.manager.VehicleSettingManager"
+    private const val VSM_CLASS      = "com.saicmotor.sdk.vehiclesettings.manager.VehicleSettingManager"
+    private const val LAUNCHER68_PKG = "com.saicmotor.hmi.launcher"
+
+    // SWI69/SWI131 : accès via CarAdapterClient → queryClient(0x8) → CarVehicleSettingClient
+    // Architecture réelle : CarAdapterClient se connecte à com.saicmotor.caradapter.CarAdapterService,
+    // puis queryClient(code) retourne l'IBinder pour chaque service.
+    // Code 0x8 = CarVehicleSettingClient (vérifié dans VehicleSettingService.onResult() smali)
+    private const val LAUNCHER69_PKG      = "com.saicmotor.launcher"
+    private const val CAR_ADAPTER_CLASS   = "com.saicmotor.carapi.CarAdapterClient"
+    private const val VSM69_CLIENT_CLASS  = "com.saicmotor.carapi.client.CarVehicleSettingClient"
+    private const val VSM_SERVICE_CODE    = 0x8   // queryClient(0x8) → ICarVehicleSettingService
 
     /** Valeurs de mode ADAS pour firmware SWI68. */
     object Swi68Mode {
@@ -113,11 +123,10 @@ object MG4Hardware {
 
     /**
      * Exécute [action] dès que le service ADAS (Katman4) est disponible.
-     * SWI133 → mIVehiclePropertyService ; SWI68 → mVehicleSettingService
+     * SWI133 → mIVehiclePropertyService ; SWI68/SWI69/SWI131 → mVehicleSettingService
      */
     fun whenKatman4Ready(action: () -> Unit) {
-        val ready = if (FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68)
-            sVsmService != null else sVpmService != null
+        val ready = if (FirmwareInfo.isVsmBased()) sVsmService != null else sVpmService != null
         if (ready) action() else katman4ReadyListeners.add(action)
     }
 
@@ -138,10 +147,11 @@ object MG4Hardware {
         AppLogger.i(TAG, "=== MG4Hardware.init() === uid=${android.os.Process.myUid()} sdk=${android.os.Build.VERSION.SDK_INT} device=${android.os.Build.DEVICE}")
         bindCarService(context)
         sVehicleBinder = getBinderService("vehiclesetting")
-        if (FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68)
-            initKatman4Swi68(context)
-        else
-            initKatman4(context)
+        when {
+            FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68 -> initKatman4Swi68(context)
+            FirmwareInfo.isNewGenVsm()                             -> initKatman4Swi69(context)  // SWI69 + SWI131
+            else                                                   -> initKatman4(context)
+        }
         if (sVehicleBinder != null)
             AppLogger.i(TAG, "  ✓ Katman2: vehiclesetting binder OK")
         else
@@ -316,7 +326,7 @@ object MG4Hardware {
         val vpmClass: Class<*>
         try {
             launcherCtx = context.createPackageContext(
-                "com.saicmotor.hmi.launcher",
+                LAUNCHER68_PKG,
                 android.content.Context.CONTEXT_INCLUDE_CODE or android.content.Context.CONTEXT_IGNORE_SECURITY
             )
             vpmClass = launcherCtx.classLoader
@@ -497,7 +507,7 @@ object MG4Hardware {
         val vsmClass: Class<*>
         try {
             launcherCtx = context.createPackageContext(
-                "com.saicmotor.hmi.launcher",
+                LAUNCHER68_PKG,
                 android.content.Context.CONTEXT_INCLUDE_CODE or android.content.Context.CONTEXT_IGNORE_SECURITY
             )
             vsmClass = launcherCtx.classLoader.loadClass(VSM_CLASS)
@@ -586,6 +596,123 @@ object MG4Hardware {
                 }
                 return
             } catch (_: NoSuchFieldException) { continue } catch (_: Exception) { return }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Katman4 SWI69/SWI131 — CarVehicleSettingClient via CarAdapterClient
+    //
+    // Architecture réelle (vérifiée dans smali) :
+    //   CarAdapterClient.getInstance(ctx).start()
+    //   → bindService(com.saicmotor.caradapter / CarAdapterService)
+    //   → onResult(0=OK) : queryClient(0x8) → IBinder (ICarVehicleSettingService)
+    //   → new CarVehicleSettingClient(ibinder)
+    //
+    // CarVehicleSettingClient expose exactement les mêmes méthodes que VehicleSettingManager
+    // (getAccTjaState, setAccTjaState, getLasWarningSound, getFcwState, etc.)
+    // -------------------------------------------------------------------------
+
+    private fun initKatman4Swi69(context: Context) {
+        if (sVsm != null) return
+
+        val launcherCtx: Context
+        val adapterClass: Class<*>
+        val clientClass: Class<*>
+        try {
+            launcherCtx = context.createPackageContext(
+                LAUNCHER69_PKG,
+                android.content.Context.CONTEXT_INCLUDE_CODE or android.content.Context.CONTEXT_IGNORE_SECURITY
+            )
+            adapterClass = launcherCtx.classLoader.loadClass(CAR_ADAPTER_CLASS)
+            clientClass  = launcherCtx.classLoader.loadClass(VSM69_CLIENT_CLASS)
+            AppLogger.i(TAG, "  SWI69: CarAdapterClient + CarVehicleSettingClient classes found ✓")
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  SWI69: class load error: ${e.message} — retry in 5s")
+            Handler(Looper.getMainLooper()).postDelayed({ initKatman4Swi69(context.applicationContext) }, 5_000)
+            return
+        }
+
+        // Obtenir le singleton CarAdapterClient
+        val adapter = tryInvoke("SWI69 CarAdapterClient.getInstance(appCtx)") {
+            adapterClass.getMethod("getInstance", Context::class.java).invoke(null, context.applicationContext)
+        } ?: tryInvoke("SWI69 CarAdapterClient.getInstance(launcherCtx)") {
+            adapterClass.getMethod("getInstance", Context::class.java).invoke(null, launcherCtx)
+        }
+
+        if (adapter == null) {
+            AppLogger.w(TAG, "  SWI69: CarAdapterClient.getInstance() failed — retry in 10s")
+            Handler(Looper.getMainLooper()).postDelayed({ initKatman4Swi69(context.applicationContext) }, 10_000)
+            return
+        }
+
+        // Enregistrer le ServiceConnListener (onResult(0) = connecté)
+        val listenerType = adapterClass.declaredClasses
+            .firstOrNull { it.simpleName == "ServiceConnListener" }
+        if (listenerType != null && listenerType.isInterface) {
+            try {
+                val proxy = java.lang.reflect.Proxy.newProxyInstance(
+                    listenerType.classLoader, arrayOf(listenerType)
+                ) { _, method, args ->
+                    if (method.name == "onResult") {
+                        val code = (args?.getOrNull(0) as? Int) ?: -1
+                        AppLogger.i(TAG, "  SWI69: CarAdapterClient.onResult($code)")
+                        if (code == 0) tryInitClientFromAdapter(adapter, adapterClass, clientClass)
+                    }
+                    null
+                }
+                adapterClass.getMethod("setConnListener", listenerType).invoke(adapter, proxy)
+                AppLogger.i(TAG, "  SWI69: ServiceConnListener registered ✓")
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "  SWI69: setConnListener error: ${e.message}")
+            }
+        }
+
+        // Démarrer la connexion à CarAdapterService
+        tryInvoke("SWI69 adapter.start()") {
+            adapterClass.getMethod("start").invoke(adapter)
+        }
+
+        // Tentative immédiate si CarAdapterService était déjà connecté
+        tryInitClientFromAdapter(adapter, adapterClass, clientClass)
+
+        // Retries échelonnés
+        val h = Handler(Looper.getMainLooper())
+        listOf(1_000L, 3_000L, 5_000L, 10_000L, 15_000L, 20_000L, 30_000L, 60_000L).forEach { delay ->
+            h.postDelayed({
+                if (sVsm == null) tryInitClientFromAdapter(adapter, adapterClass, clientClass)
+            }, delay)
+        }
+    }
+
+    /**
+     * Tente d'obtenir un CarVehicleSettingClient via queryClient(0x8).
+     * Appelée à la connexion (onResult=0) et lors des retries.
+     */
+    private fun tryInitClientFromAdapter(adapter: Any, adapterClass: Class<*>, clientClass: Class<*>) {
+        if (sVsm != null) return
+        try {
+            val ibinder = adapterClass
+                .getMethod("queryClient", Int::class.javaPrimitiveType!!)
+                .invoke(adapter, VSM_SERVICE_CODE) as? IBinder
+
+            if (ibinder == null) {
+                AppLogger.d(TAG, "  SWI69: queryClient(0x${VSM_SERVICE_CODE.toString(16)}) → null (pas encore connecté)")
+                return
+            }
+
+            val client = clientClass
+                .getConstructor(IBinder::class.java)
+                .newInstance(ibinder)
+
+            sVsm        = client
+            sVsmService = ibinder
+            AppLogger.i(TAG, "  SWI69: CarVehicleSettingClient READY ✓")
+
+            val toNotify = katman4ReadyListeners.toList()
+            katman4ReadyListeners.clear()
+            Handler(Looper.getMainLooper()).post { toNotify.forEach { it() } }
+        } catch (e: Exception) {
+            AppLogger.d(TAG, "  SWI69: tryInitClientFromAdapter error: ${e.message}")
         }
     }
 
@@ -886,27 +1013,40 @@ object MG4Hardware {
         return setIntPropertyVpm(PROP_MIX_INTELLIGENT_DRIVE, value)
     }
 
-    // ── SWI68 ADAS API — VehicleSettingManager.setAccTjaMode / setLaneKeepingWarningSound ──
+    // ── SWI68 / SWI69 ADAS API — VehicleSettingManager (noms de méthodes différents) ──
 
-    /** Retourne le mode ACC/TJA actuel (0x4=Off, 0x1=ACC, 0x2=TJA), ou -1 si pas prêt. */
+    /**
+     * Retourne le mode ACC/TJA actuel (0x4=Off, 0x1=ACC, 0x2=TJA), ou -1 si pas prêt.
+     * SWI68 : getAccTjaMode()   SWI69/SWI131 : getAccTjaState()
+     */
     fun getAccTjaMode(): Int {
-        if (logEnabled) AppLogger.i(TAG, "getAccTjaMode →")
-        return (callVsm("getAccTjaMode") as? Int) ?: -1
+        val method = if (FirmwareInfo.isNewGenVsm()) "getAccTjaState" else "getAccTjaMode"
+        if (logEnabled) AppLogger.i(TAG, "$method →")
+        return (callVsm(method) as? Int) ?: -1
     }
 
+    /** SWI68 : setAccTjaMode(I)   SWI69/SWI131 : setAccTjaState(I) */
     fun setAccTjaMode(mode: Int): Boolean {
-        if (logEnabled) AppLogger.i(TAG, "setAccTjaMode → 0x${mode.toString(16)}")
-        callVsm("setAccTjaMode", mode) ?: return false
+        val method = if (FirmwareInfo.isNewGenVsm()) "setAccTjaState" else "setAccTjaMode"
+        if (logEnabled) AppLogger.i(TAG, "$method → 0x${mode.toString(16)}")
+        callVsm(method, mode) ?: return false
         return true
     }
 
+    /**
+     * SWI68 : getLaneKeepingWarningSound()   SWI69/SWI131 : getLasWarningSound()
+     * Valeurs : 2=ON / 1=OFF
+     */
     fun isSoundWarningOn(): Boolean {
-        return ((callVsm("getLaneKeepingWarningSound") as? Int) ?: 1) == 2
+        val method = if (FirmwareInfo.isNewGenVsm()) "getLasWarningSound" else "getLaneKeepingWarningSound"
+        return ((callVsm(method) as? Int) ?: 1) == 2
     }
 
+    /** SWI68 : setLaneKeepingWarningSound(I)   SWI69/SWI131 : setLasWarningSound(I) */
     fun setSoundWarning(on: Boolean): Boolean {
         if (logEnabled) AppLogger.i(TAG, "setSoundWarning → $on")
-        callVsm("setLaneKeepingWarningSound", if (on) 2 else 1) ?: return false
+        val method = if (FirmwareInfo.isNewGenVsm()) "setLasWarningSound" else "setLaneKeepingWarningSound"
+        callVsm(method, if (on) 2 else 1) ?: return false
         return true
     }
 
@@ -914,42 +1054,56 @@ object MG4Hardware {
 
     /**
      * Retourne true si le système anti-collision avant est activé.
-     * SWI133 : lit PROP_AEB_SWITCH (2=ON, 1=OFF) via CarPropertyManager (même couche que DRIVE_MODE).
-     * SWI68  : getFcwAlarmMode() == 2 (2=ON, 1=OFF) — méthode utilisée par vehiclesettings.
+     * SWI133      : lit PROP_AEB_SWITCH (2=ON, 1=OFF) via CarPropertyManager.
+     * SWI68       : getFcwAlarmMode() == 2  (2=ON, 1=OFF)
+     * SWI69/SWI131: getFcwState() — vérifié empiriquement sur véhicule réel :
+     *               1 = DÉSACTIVÉ, 2 = ACTIVÉ
+     *               (attention : 1 ≠ ON — contrairement à l'hypothèse précédente)
      */
     fun isAebEnabled(): Boolean {
-        return if (FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68) {
-            (callVsm("getFcwAlarmMode") as? Int) == 2
-        } else {
-            getIntPropertyCPM(PROP_AEB_SWITCH, AREA_GLOBAL) == 0x2
+        return when {
+            FirmwareInfo.isNewGenVsm()                             -> (callVsm("getFcwState") as? Int) == 2
+            FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68 -> (callVsm("getFcwAlarmMode") as? Int) == 2
+            else                                                   -> getIntPropertyCPM(PROP_AEB_SWITCH, AREA_GLOBAL) == 0x2
         }
     }
 
     fun setAebEnabled(on: Boolean): Boolean {
         if (logEnabled) AppLogger.i(TAG, "setAebEnabled → $on")
-        return if (FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68) {
-            // Reproduction exacte du smali vehiclesettings SWI68 (SafeSettingsViewModel) :
-            // • ON  → setFcwAlarmMode(2)  [le frein auto reste selon son propre état]
-            // • OFF → setFcwAlarmMode(1) + setFcwAutoBrakeMode(1)
-            if (on) {
-                callVsm("setFcwAlarmMode", 2) != null
-            } else {
-                val r1 = callVsm("setFcwAlarmMode", 1) != null
-                val r2 = callVsm("setFcwAutoBrakeMode", 1) != null
-                r1 || r2
+        return when {
+            FirmwareInfo.isNewGenVsm() -> {
+                // SWI69/SWI131 — séquences identiques au launcher officiel :
+                // OFF : setFcwState(1) + setFcwAutoBrakeMode(1) + setFcwSensitivity(0)
+                // ON  : setFcwState(2) + setFcwAutoBrakeMode(curMode)
+                // Le launcher conditionne son affichage à fcwState==1 AND autoBreakState==1
+                // → sans setFcwAutoBrakeMode, son switch reste ON même quand l'AEB est désactivé
+                if (on) {
+                    val sOk = callVsm("setFcwState", 2) != null
+                    val curMode = (callVsm("getFcwAutoBrakeMode") as? Int) ?: 1
+                    val mOk = callVsm("setFcwAutoBrakeMode", curMode) != null
+                    sOk || mOk
+                } else {
+                    callVsm("setFcwState", 1)
+                    callVsm("setFcwAutoBrakeMode", 1)
+                    callVsm("setFcwSensitivity", 0) != null
+                }
             }
-        } else {
-            setIntPropertyCPM(PROP_AEB_SWITCH, AREA_GLOBAL, if (on) 0x2 else 0x1)
+            FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68 -> {
+                // SWI68 : setFcwAlarmMode(2=ON / 1=OFF) + setFcwAutoBrakeMode(1) si OFF
+                if (on) callVsm("setFcwAlarmMode", 2) != null
+                else { (callVsm("setFcwAlarmMode", 1) != null) or (callVsm("setFcwAutoBrakeMode", 1) != null) }
+            }
+            else -> setIntPropertyCPM(PROP_AEB_SWITCH, AREA_GLOBAL, if (on) 0x2 else 0x1)
         }
     }
 
     /**
      * Retourne le mode AEB courant (1=Alerte, 2=Alerte+Freinage), ou -1 si pas prêt.
-     * SWI133 : lit PROP_AEB_MODE (0x302000b) via VehiclePropertyManager.
-     * SWI68  : getFcwAutoBrakeMode() — 2=Alerte+Freinage, 1=Alerte seule.
+     * SWI133          : PROP_AEB_MODE (0x302000b) via VehiclePropertyManager.
+     * SWI68/SWI69/SWI131 : getFcwAutoBrakeMode() (1=Alerte, 2=Alerte+Freinage).
      */
     fun getAebMode(): Int {
-        return if (FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68) {
+        return if (FirmwareInfo.isVsmBased()) {
             (callVsm("getFcwAutoBrakeMode") as? Int) ?: AebMode.ALARM
         } else {
             val raw = getIntPropertyVpm(PROP_AEB_MODE)
@@ -959,31 +1113,37 @@ object MG4Hardware {
 
     fun setAebMode(mode: Int): Boolean {
         if (logEnabled) AppLogger.i(TAG, "setAebMode → $mode")
-        return if (FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68) {
-            // Reproduction exacte du smali vehiclesettings SWI68 (SafeSettingsViewModel$1) :
-            // • Alerte seule    → setFcwAlarmMode(2) + setFcwAutoBrakeMode(1)
-            // • Alerte+Freinage → setFcwAlarmMode(2) + setFcwAutoBrakeMode(2)
-            val r1 = callVsm("setFcwAlarmMode", 2) != null
-            val r2 = callVsm("setFcwAutoBrakeMode", if (mode == AebMode.ALARM_BRAKE) 2 else 1) != null
-            r1 || r2
-        } else {
-            // Reproduction exacte du smali vehiclesettings (r0/h.smali) :
-            // • Alerte seule    → écrit UNIQUEMENT 0x302000b = 1  (ne pas toucher à 0x302000a)
-            // • Alerte+Freinage → écrit 0x302000a = 2  ET  0x302000b = 2
-            if (mode == AebMode.ALARM_BRAKE) {
-                val r1 = setIntPropertyVpmRecovery(PROP_AEB_SYS_MODE, AebMode.ALARM_BRAKE)
-                val r2 = setIntPropertyVpmRecovery(PROP_AEB_MODE, AebMode.ALARM_BRAKE)
-                r1 || r2
-            } else {
-                setIntPropertyVpmRecovery(PROP_AEB_MODE, AebMode.ALARM)
+        return when {
+            FirmwareInfo.isNewGenVsm() -> {
+                // SWI69/SWI131 : il faut fixer le mode VIA setFcwAutoBrakeMode,
+                // puis appeler setFcwState(2) pour que le service applique le nouveau mode.
+                // setFcwState(2) seul active avec le MODE COURANT stocké — il ne change pas le mode.
+                // L'ordre : 1) fixer le mode, 2) activer (commit le mode).
+                val modeVal = if (mode == AebMode.ALARM_BRAKE) 2 else 1
+                val mOk = callVsm("setFcwAutoBrakeMode", modeVal) != null
+                val sOk = callVsm("setFcwState", 2) != null
+                mOk || sOk
+            }
+            FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68 -> {
+                // SWI68 : setFcwAutoBrakeMode uniquement, sans toucher l'état AEB
+                callVsm("setFcwAutoBrakeMode", if (mode == AebMode.ALARM_BRAKE) 2 else 1) != null
+            }
+            else -> {
+                // SWI133 smali exact
+                if (mode == AebMode.ALARM_BRAKE) {
+                    val r1 = setIntPropertyVpmRecovery(PROP_AEB_SYS_MODE, AebMode.ALARM_BRAKE)
+                    val r2 = setIntPropertyVpmRecovery(PROP_AEB_MODE, AebMode.ALARM_BRAKE)
+                    r1 || r2
+                } else {
+                    setIntPropertyVpmRecovery(PROP_AEB_MODE, AebMode.ALARM)
+                }
             }
         }
     }
 
-    fun isKatman4Ready(): Boolean = when (FirmwareInfo.getGeneration()) {
-        FirmwareInfo.Gen.SWI68 -> sVsm != null && sVsmService != null
-        else                    -> sVpm != null && sVpmService != null
-    }
+    fun isKatman4Ready(): Boolean =
+        if (FirmwareInfo.isVsmBased()) sVsm != null && sVsmService != null
+        else                           sVpm != null && sVpmService != null
     fun isKatman4VpmCreated(): Boolean      = sVpm != null || sVsm != null
     fun isCarPropertyManagerReady(): Boolean = sCarPropertyManager != null
     fun isCarHvacManagerReady(): Boolean     = sCarHvacManager != null

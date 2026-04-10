@@ -120,6 +120,9 @@ public final class FragmentDashboardBinding implements ViewBinding {
   public final Button btnSwi68Tja;
 
   @NonNull
+  public final LinearLayout climateCard;
+
+  @NonNull
   public final LinearLayout sectionRegen;
 
   @NonNull
@@ -150,9 +153,10 @@ public final class FragmentDashboardBinding implements ViewBinding {
       @NonNull Button btnSeatRight0, @NonNull Button btnSeatRight1, @NonNull Button btnSeatRight2,
       @NonNull Button btnSeatRight3, @NonNull Button btnSnow, @NonNull Button btnSport,
       @NonNull Button btnSwi68Acc, @NonNull Button btnSwi68Off, @NonNull Button btnSwi68Tja,
-      @NonNull LinearLayout sectionRegen, @NonNull Switch switchAeb,
-      @NonNull Switch switchOverspeed, @NonNull Switch switchSoundWarning,
-      @NonNull Switch switchSpeedTone, @NonNull Switch switchSteeringHeat) {
+      @NonNull LinearLayout climateCard, @NonNull LinearLayout sectionRegen,
+      @NonNull Switch switchAeb, @NonNull Switch switchOverspeed,
+      @NonNull Switch switchSoundWarning, @NonNull Switch switchSpeedTone,
+      @NonNull Switch switchSteeringHeat) {
     this.rootView = rootView;
     this.adasGroupSwi133 = adasGroupSwi133;
     this.adasGroupSwi68 = adasGroupSwi68;
@@ -187,6 +191,7 @@ public final class FragmentDashboardBinding implements ViewBinding {
     this.btnSwi68Acc = btnSwi68Acc;
     this.btnSwi68Off = btnSwi68Off;
     this.btnSwi68Tja = btnSwi68Tja;
+    this.climateCard = climateCard;
     this.sectionRegen = sectionRegen;
     this.switchAeb = switchAeb;
     this.switchOverspeed = switchOverspeed;
@@ -420,6 +425,12 @@ public final class FragmentDashboardBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.climate_card;
+      LinearLayout climateCard = ViewBindings.findChildViewById(rootView, id);
+      if (climateCard == null) {
+        break missingId;
+      }
+
       id = R.id.section_regen;
       LinearLayout sectionRegen = ViewBindings.findChildViewById(rootView, id);
       if (sectionRegen == null) {
@@ -461,8 +472,9 @@ public final class FragmentDashboardBinding implements ViewBinding {
           btnAdasOff, btnAebAlarm, btnAebAlarmBrake, btnCustom, btnEco, btnNormal, btnRegenAdaptive,
           btnRegenHigh, btnRegenLow, btnRegenMedium, btnRegenOff, btnRegenOnePedal, btnSeatLeft0,
           btnSeatLeft1, btnSeatLeft2, btnSeatLeft3, btnSeatRight0, btnSeatRight1, btnSeatRight2,
-          btnSeatRight3, btnSnow, btnSport, btnSwi68Acc, btnSwi68Off, btnSwi68Tja, sectionRegen,
-          switchAeb, switchOverspeed, switchSoundWarning, switchSpeedTone, switchSteeringHeat);
+          btnSeatRight3, btnSnow, btnSport, btnSwi68Acc, btnSwi68Off, btnSwi68Tja, climateCard,
+          sectionRegen, switchAeb, switchOverspeed, switchSoundWarning, switchSpeedTone,
+          switchSteeringHeat);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

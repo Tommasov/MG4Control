@@ -73,6 +73,9 @@ id btn_close_manual
 id btn_close_profiles
 id btn_close_settings
 id btn_custom
+id btn_default_dashboard
+id btn_default_profiles
+id btn_default_shortcuts
 id btn_delete
 id btn_dialog_cancel
 id btn_dialog_save
@@ -133,9 +136,12 @@ id btn_swi68_tja
 id btn_update_auto
 id btn_update_later
 id btn_update_manual
+id chip_swi131
 id chip_swi133
 id chip_swi68
+id chip_swi69
 id climateFragment
+id climate_card
 id config_adas_section
 id config_adas_swi133
 id config_adas_swi68
@@ -179,6 +185,8 @@ id section_aeb
 id section_bottom_row
 id section_regen
 id section_regen_dialog
+id section_seats_dialog
+id section_steering_dialog
 id section_swi133
 id section_swi68
 id settingsFragment
@@ -323,6 +331,8 @@ string regen_one_pedal
 string regen_one_pedal_short
 string settings_auto_apply
 string settings_auto_apply_desc
+string settings_default_screen
+string settings_default_screen_dashboard
 string settings_firmware_loading
 string settings_firmware_version
 string settings_language
@@ -335,6 +345,7 @@ string shortcuts_action_aeb
 string shortcuts_action_none
 string shortcuts_action_one_pedal
 string shortcuts_action_open_app
+string shortcuts_action_open_custom_app
 string shortcuts_action_overspeed
 string shortcuts_action_sound
 string shortcuts_action_speed_limit
@@ -348,6 +359,8 @@ string shortcuts_cfg_mode2
 string shortcuts_cfg_one_pedal
 string shortcuts_cfg_retour
 string shortcuts_enabled_label
+string shortcuts_open_custom_prefix
+string shortcuts_pick_app_title
 string shortcuts_press_double
 string shortcuts_press_long
 string shortcuts_press_single

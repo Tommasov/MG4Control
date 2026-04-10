@@ -143,23 +143,29 @@ class DashboardFragment : Fragment() {
         btnAebAlarmBrake = view.findViewById(R.id.btn_aeb_alarm_brake)
     }
 
-    /** Affiche la section ADAS et alertes correspondant au firmware détecté. */
+    /** Affiche la section ADAS, alertes et climat correspondant au firmware détecté. */
     private fun applyFirmwareVisibility(view: View) {
-        val gen     = FirmwareInfo.getGeneration()
-        val isSWI68 = gen == FirmwareInfo.Gen.SWI68
-        val isKnown = gen != FirmwareInfo.Gen.UNKNOWN
-        view.findViewById<View>(R.id.adas_group_swi133).visibility   = if (!isSWI68) View.VISIBLE else View.GONE
-        view.findViewById<View>(R.id.adas_group_swi68).visibility    = if (isSWI68)  View.VISIBLE else View.GONE
-        view.findViewById<View>(R.id.alerts_group_swi133).visibility = if (!isSWI68) View.VISIBLE else View.GONE
-        view.findViewById<View>(R.id.alerts_group_swi68).visibility  = if (isSWI68)  View.VISIBLE else View.GONE
+        val gen            = FirmwareInfo.getGeneration()
+        val isVsmBased  = FirmwareInfo.isVsmBased()
+        val isKnown     = gen != FirmwareInfo.Gen.UNKNOWN
+        val hasClimate  = FirmwareInfo.hasHeatFeatures()
+
+        view.findViewById<View>(R.id.adas_group_swi133).visibility   = if (!isVsmBased) View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.adas_group_swi68).visibility    = if (isVsmBased)  View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.alerts_group_swi133).visibility = if (!isVsmBased) View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.alerts_group_swi68).visibility  = if (isVsmBased)  View.VISIBLE else View.GONE
         // AEB disponible uniquement si firmware connu
-        view.findViewById<View>(R.id.aeb_group).visibility           = if (isKnown)  View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.aeb_group).visibility           = if (isKnown)    View.VISIBLE else View.GONE
+        // Carte Climat : masquée pour SWI69/SWI131 (pas de chauffage siège/volant)
+        view.findViewById<View>(R.id.climate_card).visibility        = if (hasClimate) View.VISIBLE else View.GONE
     }
 
     // ── Listeners ────────────────────────────────────────────────────────────
 
     private fun setupListeners() {
-        val isSWI68 = FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI68
+        val gen          = FirmwareInfo.getGeneration()
+        val isVsmBased  = FirmwareInfo.isVsmBased()
+        val hasClimate  = FirmwareInfo.hasHeatFeatures()
 
         // Drive mode
         driveModeButtons.forEach { (mode, btn) ->
@@ -178,7 +184,7 @@ class DashboardFragment : Fragment() {
         }
 
         // ADAS
-        if (!isSWI68) {
+        if (!isVsmBased) {
             swi133AdasMap.forEach { (modeIndex, btn) ->
                 btn?.setOnClickListener {
                     CoroutineScope(Dispatchers.IO).launch {
@@ -188,6 +194,7 @@ class DashboardFragment : Fragment() {
                 }
             }
         } else {
+            // SWI68/SWI69/SWI131 : mêmes boutons ACC/TJA/Off, API hardware adaptée dans MG4Hardware
             swi68AdasMap.forEach { (modeValue, btn) ->
                 btn?.setOnClickListener {
                     CoroutineScope(Dispatchers.IO).launch {
@@ -198,22 +205,22 @@ class DashboardFragment : Fragment() {
             }
         }
 
-        // Volant chauffant
-        switchSteering.setOnCheckedChangeListener { _, checked ->
-            if (!isRefreshing)
-                CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSteeringHeat(checked) }
-        }
-
-        // Sièges
-        setupSeatButtons(seatLeftButtons)  { level ->
-            CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSeatHeatLeft(level) }
-        }
-        setupSeatButtons(seatRightButtons) { level ->
-            CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSeatHeatRight(level) }
+        // Climat — uniquement SWI133 et SWI68 (SWI69/SWI131 n'ont pas de sièges/volant chauffant)
+        if (hasClimate) {
+            switchSteering.setOnCheckedChangeListener { _, checked ->
+                if (!isRefreshing)
+                    CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSteeringHeat(checked) }
+            }
+            setupSeatButtons(seatLeftButtons)  { level ->
+                CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSeatHeatLeft(level) }
+            }
+            setupSeatButtons(seatRightButtons) { level ->
+                CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSeatHeatRight(level) }
+            }
         }
 
         // Alertes SWI133
-        if (!isSWI68) {
+        if (!isVsmBased) {
             switchOverspeed?.setOnCheckedChangeListener { _, checked ->
                 if (!isRefreshing)
                     CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setOverspeedAlarm(checked) }
@@ -224,16 +231,16 @@ class DashboardFragment : Fragment() {
             }
         }
 
-        // Alerte SWI68 — whenKatman4Ready garantit sVsmService != null ET main thread (même chemin que ProfileApplier)
-        if (isSWI68) {
+        // Alerte sonore — SWI68/SWI69/SWI131 (même switch, méthode hardware adaptée)
+        if (isVsmBased) {
             switchSoundWarning?.setOnCheckedChangeListener { _, checked ->
                 if (!isRefreshing)
                     MG4Hardware.whenKatman4Ready { MG4Hardware.setSoundWarning(checked) }
             }
         }
 
-        // AEB (commun SWI133 + SWI68)
-        val isKnown = FirmwareInfo.getGeneration() != FirmwareInfo.Gen.UNKNOWN
+        // AEB (commun SWI133 + SWI68 + SWI69)
+        val isKnown = gen != FirmwareInfo.Gen.UNKNOWN
         if (isKnown) {
             switchAeb?.setOnCheckedChangeListener { _, checked ->
                 if (!isRefreshing) {
@@ -282,6 +289,8 @@ class DashboardFragment : Fragment() {
     }
 
     private fun refreshClimate() {
+        // SWI69/SWI131 : pas de sièges/volant chauffant — pas besoin de rafraîchir
+        if (!FirmwareInfo.hasHeatFeatures()) return
         CoroutineScope(Dispatchers.IO).launch {
             val steeringOn = MG4Hardware.isSteeringHeatOn()
             val leftLevel  = MG4Hardware.getSeatHeatLeft()
@@ -304,10 +313,7 @@ class DashboardFragment : Fragment() {
 
     private fun refreshAdas() {
         CoroutineScope(Dispatchers.IO).launch {
-            when (FirmwareInfo.getGeneration()) {
-                FirmwareInfo.Gen.SWI133, FirmwareInfo.Gen.UNKNOWN -> refreshSwi133Adas()
-                FirmwareInfo.Gen.SWI68                            -> refreshSwi68Adas()
-            }
+            if (FirmwareInfo.isVsmBased()) refreshSwi68Adas() else refreshSwi133Adas()
         }
     }
 

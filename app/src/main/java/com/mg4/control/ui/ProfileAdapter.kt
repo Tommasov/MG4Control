@@ -7,7 +7,9 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mg4.control.R
+import com.mg4.control.hardware.MG4Hardware.Swi68Mode
 import com.mg4.control.model.DrivingProfile
+import com.mg4.control.util.FirmwareInfo
 
 class ProfileAdapter(
     private var profiles: MutableList<DrivingProfile>,
@@ -36,8 +38,32 @@ class ProfileAdapter(
         val isDefault = profile.id == defaultId
         val context = holder.itemView.context
 
+        val adasLabel = when (FirmwareInfo.getGeneration()) {
+            FirmwareInfo.Gen.SWI133 -> when (profile.adasMode) {
+                0 -> "ADAS Off"
+                1 -> "Lim."
+                2 -> "Auto"
+                3 -> "ACC"
+                4 -> "ICA"
+                else -> ""
+            }
+            // SWI68/SWI69/SWI131 : mêmes modes ADAS (ACC / TJA / Off)
+            else -> if (!FirmwareInfo.isVsmBased()) "" else when (profile.swi68AdasMode) {
+                Swi68Mode.OFF -> "ADAS Off"
+                Swi68Mode.ACC -> "ACC"
+                Swi68Mode.TJA -> "TJA"
+                else -> ""
+            }
+        }
+
         holder.tvName.text    = profile.name
-        holder.tvSummary.text = "${profile.driveMode.label} · ${profile.regenLevel.label}"
+        holder.tvSummary.text = buildString {
+            append(": ")
+            append(profile.driveMode.label)
+            append(" · ")
+            append(profile.regenLevel.label)
+            if (adasLabel.isNotEmpty()) { append(" · "); append(adasLabel) }
+        }
 
         holder.tvDefault.visibility = if (isDefault) View.VISIBLE else View.GONE
         holder.tvName.setTextColor(

@@ -120,6 +120,8 @@
     <string name="regen_one_pedal_short">1 Péd.</string>
     <string name="settings_auto_apply">Appliquer profil au démarrage</string>
     <string name="settings_auto_apply_desc">Le profil par défaut s\'applique automatiquement au lancement</string>
+    <string name="settings_default_screen">Écran par défaut</string>
+    <string name="settings_default_screen_dashboard">Tableau de bord</string>
     <string name="settings_firmware_loading">Lecture…</string>
     <string name="settings_firmware_version">Version firmware</string>
     <string name="settings_language">Langue</string>
@@ -132,6 +134,7 @@
     <string name="shortcuts_action_none">Aucune</string>
     <string name="shortcuts_action_one_pedal">1 Pédale</string>
     <string name="shortcuts_action_open_app">Ouvrir MG4Control</string>
+    <string name="shortcuts_action_open_custom_app">Ouvrir…</string>
     <string name="shortcuts_action_overspeed">Alerte survitesse</string>
     <string name="shortcuts_action_sound">Son</string>
     <string name="shortcuts_action_speed_limit">Alerte chgt vitesse</string>
@@ -145,6 +148,8 @@
     <string name="shortcuts_cfg_one_pedal">1 Pédale — Regen retour</string>
     <string name="shortcuts_cfg_retour">Retour</string>
     <string name="shortcuts_enabled_label">Activer les raccourcis au volant</string>
+    <string name="shortcuts_open_custom_prefix">Ouvrir</string>
+    <string name="shortcuts_pick_app_title">Choisir une application</string>
     <string name="shortcuts_press_double">Double</string>
     <string name="shortcuts_press_long">Long</string>
     <string name="shortcuts_press_single">Simple</string>

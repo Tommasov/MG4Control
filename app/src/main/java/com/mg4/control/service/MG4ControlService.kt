@@ -10,7 +10,6 @@ import android.content.Intent
 import com.mg4.control.MainActivity
 import android.content.IntentFilter
 import android.os.IBinder
-import android.os.SystemClock
 import com.mg4.control.debug.AppLogger
 import com.mg4.control.hardware.MG4Hardware
 import com.mg4.control.hardware.MG4Hardware.AebMode
@@ -40,8 +39,6 @@ class MG4ControlService : Service() {
         private const val KEYCODE_BTN2     = 286   // STAR_RIGHT
         private const val KEYCODE_BTN2_ALT = 18    // alias STAR_RIGHT (certains firmwares)
 
-        private const val DOUBLE_TAP_MS = 700L
-
         /**
          * Flag one-shot : le profil n'est appliqué qu'une seule fois par session de processus.
          * Évite le double-apply quand MainActivity et BootReceiver démarrent le service.
@@ -53,9 +50,8 @@ class MG4ControlService : Service() {
 
     private var hardkeyReceiver: BroadcastReceiver? = null
 
-    // État par slot pour la détection d'appui long / double
+    // État par slot pour la détection d'appui long
     private val slotLongTriggered = mutableMapOf<String, Boolean>()
-    private val slotLastUpTime    = mutableMapOf<String, Long>()
 
     override fun onCreate() {
         super.onCreate()
@@ -122,8 +118,9 @@ class MG4ControlService : Service() {
         when {
             isDown && isLong -> {
                 slotLongTriggered[slot] = true
-                val action = ShortcutAction.fromId(prefs.getInt("shortcut_${slot}_long", 0))
-                if (action != ShortcutAction.NONE) executeToggle(action)
+                val pressKey = "${slot}_long"
+                val action = ShortcutAction.fromId(prefs.getInt("shortcut_$pressKey", 0))
+                if (action != ShortcutAction.NONE) executeToggle(action, pressKey)
             }
             isDown -> {
                 slotLongTriggered[slot] = false
@@ -133,27 +130,16 @@ class MG4ControlService : Service() {
                     slotLongTriggered[slot] = false
                     return
                 }
-
-                val now   = SystemClock.elapsedRealtime()
-                val last  = slotLastUpTime[slot] ?: 0L
-                val isDbl = (now - last) < DOUBLE_TAP_MS
-
-                if (isDbl) {
-                    slotLastUpTime[slot] = 0L
-                    val action = ShortcutAction.fromId(prefs.getInt("shortcut_${slot}_double", 0))
-                    if (action != ShortcutAction.NONE) executeToggle(action)
-                } else {
-                    slotLastUpTime[slot] = now
-                    val action = ShortcutAction.fromId(prefs.getInt("shortcut_${slot}_single", 0))
-                    if (action != ShortcutAction.NONE) executeToggle(action)
-                }
+                val pressKey = "${slot}_single"
+                val action = ShortcutAction.fromId(prefs.getInt("shortcut_$pressKey", 0))
+                if (action != ShortcutAction.NONE) executeToggle(action, pressKey)
             }
         }
     }
 
-    // ── Exécution du toggle (état partagé par action, pas par slot) ──────────
+    // ── Exécution du toggle ──────────────────────────────────────────────────
 
-    private fun executeToggle(action: ShortcutAction) {
+    private fun executeToggle(action: ShortcutAction, pressKey: String = "") {
         val prefs    = getSharedPreferences(PREFS_SHORTCUTS, MODE_PRIVATE)
         val stateKey = "shortcut_state_${action.name.lowercase()}"
         val newState = !prefs.getBoolean(stateKey, false)
@@ -184,22 +170,30 @@ class MG4ControlService : Service() {
                 ShortcutAction.OVERSPEED_ALARM  -> MG4Hardware.setOverspeedAlarm(newState)
                 ShortcutAction.SPEED_LIMIT_TONE -> MG4Hardware.setSpeedLimitTone(newState)
                 ShortcutAction.ADAS_CYCLE -> {
-                    val gen   = FirmwareInfo.getGeneration()
+                    val isVsmBased = FirmwareInfo.isVsmBased()
                     val modeA = prefs.getInt("shortcut_adas_mode_a",
-                        if (gen == FirmwareInfo.Gen.SWI68) Swi68Mode.ACC else 3)
+                        if (isVsmBased) Swi68Mode.ACC else 3)
                     val modeB = prefs.getInt("shortcut_adas_mode_b",
-                        if (gen == FirmwareInfo.Gen.SWI68) Swi68Mode.OFF else 0)
+                        if (isVsmBased) Swi68Mode.OFF else 0)
                     val mode  = if (newState) modeA else modeB
-                    if (gen == FirmwareInfo.Gen.SWI68)
-                        MG4Hardware.setAccTjaMode(mode)
-                    else
-                        MG4Hardware.setMixedIntelligentDrive(mode)
+                    if (isVsmBased) MG4Hardware.setAccTjaMode(mode)
+                    else            MG4Hardware.setMixedIntelligentDrive(mode)
                 }
                 ShortcutAction.OPEN_APP -> {
                     val intent = Intent(this@MG4ControlService, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     }
                     startActivity(intent)
+                }
+                ShortcutAction.OPEN_CUSTOM_APP -> {
+                    val pkg = prefs.getString("shortcut_${pressKey}_custom_app", null)
+                    if (pkg != null) {
+                        val launchIntent = packageManager.getLaunchIntentForPackage(pkg)
+                        if (launchIntent != null) {
+                            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(launchIntent)
+                        }
+                    }
                 }
                 else -> {}
             }

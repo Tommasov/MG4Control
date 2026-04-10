@@ -54,7 +54,21 @@ class MainActivity : AppCompatActivity() {
         setupFirmwareChips()
         setupNavButtons()
         checkUnknownFirmware()  // après setupFirmwareChips pour que les chips soient prêtes
+        navigateToDefaultScreen(savedInstanceState)
         checkForUpdates()
+    }
+
+    // ── Navigation vers l'écran par défaut au démarrage ─────────────────────
+
+    private fun navigateToDefaultScreen(savedInstanceState: android.os.Bundle?) {
+        // Ne naviguer que si c'est un vrai démarrage (pas une rotation / recreate)
+        if (savedInstanceState != null) return
+        val prefs = getSharedPreferences("mg4_settings", android.content.Context.MODE_PRIVATE)
+        when (prefs.getString("default_screen", "dashboard")) {
+            "profiles"  -> navController.navigate(R.id.profileFragment)
+            "shortcuts" -> navController.navigate(R.id.shortcutsFragment)
+            // "dashboard" → rien à faire, c'est déjà le startDestination
+        }
     }
 
     // ── Vérification de mise à jour au démarrage ──────────────────────────────
@@ -83,11 +97,13 @@ class MainActivity : AppCompatActivity() {
         tv.text = span
     }
 
-    // ── Indicateur firmware (chips SWI133 / SWI68) ───────────────────────────
+    // ── Indicateur firmware (chips SWI133 / SWI68 / SWI69 / SWI131) ─────────
 
     private fun setupFirmwareChips() {
         val chip133 = findViewById<TextView>(R.id.chip_swi133)
         val chip68  = findViewById<TextView>(R.id.chip_swi68)
+        val chip69  = findViewById<TextView>(R.id.chip_swi69)
+        val chip131 = findViewById<TextView>(R.id.chip_swi131)
         val gen     = FirmwareInfo.getGeneration()
         val forced  = FirmwareInfo.isForced(this)
 
@@ -106,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun styleChipSelectable(tv: TextView) {
-            // Firmware inconnu sans choix forcé : chip ni active ni barrée, mais cliquable
+            // Firmware inconnu sans choix forcé : chip cliquable, surlignée en rouge
             tv.setBackgroundResource(R.drawable.bg_chip_inactive)
             tv.setTextColor(getColor(R.color.dash_danger))
             tv.alpha = 0.75f
@@ -117,14 +133,35 @@ class MainActivity : AppCompatActivity() {
 
         when {
             isNaturalUnknown -> {
-                // Les deux chips en mode "à choisir" (rouge dim, aucune barrée)
+                // Les quatre chips en mode "à choisir" (rouge dim, aucune barrée)
                 styleChipSelectable(chip133)
                 styleChipSelectable(chip68)
+                styleChipSelectable(chip69)
+                styleChipSelectable(chip131)
             }
-            else -> {
-                val isSWI68 = gen == FirmwareInfo.Gen.SWI68
-                if (isSWI68) { styleChipActive(chip68);  styleChipInactive(chip133) }
-                else         { styleChipActive(chip133); styleChipInactive(chip68) }
+            gen == FirmwareInfo.Gen.SWI131 -> {
+                styleChipActive(chip131)
+                styleChipInactive(chip133)
+                styleChipInactive(chip68)
+                styleChipInactive(chip69)
+            }
+            gen == FirmwareInfo.Gen.SWI69 -> {
+                styleChipActive(chip69)
+                styleChipInactive(chip133)
+                styleChipInactive(chip68)
+                styleChipInactive(chip131)
+            }
+            gen == FirmwareInfo.Gen.SWI68 -> {
+                styleChipActive(chip68)
+                styleChipInactive(chip133)
+                styleChipInactive(chip69)
+                styleChipInactive(chip131)
+            }
+            else -> { // SWI133 ou forcé SWI133
+                styleChipActive(chip133)
+                styleChipInactive(chip68)
+                styleChipInactive(chip69)
+                styleChipInactive(chip131)
             }
         }
 
@@ -136,6 +173,14 @@ class MainActivity : AppCompatActivity() {
             }
             chip68.setOnClickListener {
                 FirmwareInfo.forceGeneration(this, FirmwareInfo.Gen.SWI68)
+                recreate()
+            }
+            chip69.setOnClickListener {
+                FirmwareInfo.forceGeneration(this, FirmwareInfo.Gen.SWI69)
+                recreate()
+            }
+            chip131.setOnClickListener {
+                FirmwareInfo.forceGeneration(this, FirmwareInfo.Gen.SWI131)
                 recreate()
             }
         }

@@ -90,6 +90,8 @@
     <string name="regen_one_pedal_short">1 Ped.</string>
     <string name="settings_auto_apply">Apply profile at startup</string>
     <string name="settings_auto_apply_desc">The default profile is applied automatically at launch</string>
+    <string name="settings_default_screen">Default screen</string>
+    <string name="settings_default_screen_dashboard">Dashboard</string>
     <string name="settings_firmware_loading">Reading…</string>
     <string name="settings_firmware_version">Firmware version</string>
     <string name="settings_language">Language</string>
@@ -102,6 +104,7 @@
     <string name="shortcuts_action_none">None</string>
     <string name="shortcuts_action_one_pedal">1 Pedal</string>
     <string name="shortcuts_action_open_app">Open MG4Control</string>
+    <string name="shortcuts_action_open_custom_app">Open…</string>
     <string name="shortcuts_action_overspeed">Overspeed alert</string>
     <string name="shortcuts_action_sound">Sound</string>
     <string name="shortcuts_action_speed_limit">Speed limit alert</string>
@@ -115,6 +118,8 @@
     <string name="shortcuts_cfg_one_pedal">1 Pedal — Return regen</string>
     <string name="shortcuts_cfg_retour">Return</string>
     <string name="shortcuts_enabled_label">Enable steering wheel shortcuts</string>
+    <string name="shortcuts_open_custom_prefix">Open</string>
+    <string name="shortcuts_pick_app_title">Choose an app</string>
     <string name="shortcuts_press_double">Double</string>
     <string name="shortcuts_press_long">Long</string>
     <string name="shortcuts_press_single">Single</string>

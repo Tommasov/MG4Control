@@ -110,23 +110,27 @@ class ProfileFragment : Fragment() {
 
     private fun openNewProfileDialog() {
         CoroutineScope(Dispatchers.IO).launch {
-            val prefill = when (FirmwareInfo.getGeneration()) {
-                FirmwareInfo.Gen.SWI68 -> DrivingProfile(
+            val hasHeat = FirmwareInfo.hasHeatFeatures()
+            val prefill = if (FirmwareInfo.isVsmBased()) {
+                // SWI68/SWI69/SWI131 : ADAS ACC/TJA — sièges/volant uniquement sur SWI68
+                DrivingProfile(
                     name          = "",
-                    driveMode     = MG4Hardware.getDriveMode()                       ?: DriveMode.NORMAL,
-                    regenLevel    = MG4Hardware.getRegenLevel()                      ?: RegenLevel.MEDIUM,
-                    steeringHeat  = MG4Hardware.isSteeringHeatOn(),
-                    seatHeatLeft  = MG4Hardware.getSeatHeatLeft().coerceAtLeast(0),
-                    seatHeatRight = MG4Hardware.getSeatHeatRight().coerceAtLeast(0),
+                    driveMode     = MG4Hardware.getDriveMode()  ?: DriveMode.NORMAL,
+                    regenLevel    = MG4Hardware.getRegenLevel() ?: RegenLevel.MEDIUM,
+                    steeringHeat  = if (hasHeat) MG4Hardware.isSteeringHeatOn() else false,
+                    seatHeatLeft  = if (hasHeat) MG4Hardware.getSeatHeatLeft().coerceAtLeast(0) else 0,
+                    seatHeatRight = if (hasHeat) MG4Hardware.getSeatHeatRight().coerceAtLeast(0) else 0,
                     soundWarning  = MG4Hardware.isSoundWarningOn(),
                     swi68AdasMode = MG4Hardware.getAccTjaMode().let { if (it < 0) Swi68Mode.OFF else it },
                     aebEnabled    = MG4Hardware.isAebEnabled(),
                     aebMode       = MG4Hardware.getAebMode().let { if (it < 1) AebMode.ALARM else it }
                 )
-                else -> DrivingProfile(
+            } else {
+                // SWI133/UNKNOWN : ADAS mixte, sièges et volant chauffants
+                DrivingProfile(
                     name           = "",
-                    driveMode      = MG4Hardware.getDriveMode()                      ?: DriveMode.NORMAL,
-                    regenLevel     = MG4Hardware.getRegenLevel()                     ?: RegenLevel.MEDIUM,
+                    driveMode      = MG4Hardware.getDriveMode()  ?: DriveMode.NORMAL,
+                    regenLevel     = MG4Hardware.getRegenLevel() ?: RegenLevel.MEDIUM,
                     steeringHeat   = MG4Hardware.isSteeringHeatOn(),
                     seatHeatLeft   = MG4Hardware.getSeatHeatLeft().coerceAtLeast(0),
                     seatHeatRight  = MG4Hardware.getSeatHeatRight().coerceAtLeast(0),
@@ -251,7 +255,14 @@ class ProfileFragment : Fragment() {
         )
         bindGroup(seatRightPairs, seatRight) { seatRight = it }
 
-        // ── Section AEB (commune SWI133 + SWI68) ────────────────────────────
+        // ── Sections Climat (Volant + Sièges) — masquées si pas de chauffage (SWI69/SWI131) ─
+        val hasHeat = FirmwareInfo.hasHeatFeatures()
+        dialogView.findViewById<View>(R.id.section_steering_dialog)?.visibility =
+            if (hasHeat) View.VISIBLE else View.GONE
+        dialogView.findViewById<View>(R.id.section_seats_dialog)?.visibility =
+            if (hasHeat) View.VISIBLE else View.GONE
+
+        // ── Section AEB (commune SWI133 + SWI68 + SWI69) ────────────────────
         val sectionAeb = dialogView.findViewById<View>(R.id.adas_section_aeb)
         if (gen != FirmwareInfo.Gen.UNKNOWN) {
             sectionAeb.visibility = View.VISIBLE
@@ -281,7 +292,8 @@ class ProfileFragment : Fragment() {
         val sectionSwi133 = dialogView.findViewById<View>(R.id.adas_section_swi133)
         val sectionSwi68  = dialogView.findViewById<View>(R.id.adas_section_swi68)
 
-        if (gen == FirmwareInfo.Gen.SWI68) {
+        // SWI68/SWI69/SWI131 : même interface ADAS (ACC / TJA / Off + alerte sonore)
+        if (FirmwareInfo.isVsmBased()) {
             sectionSwi68.visibility  = View.VISIBLE
             sectionSwi133.visibility = View.GONE
 

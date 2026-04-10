@@ -69,12 +69,13 @@ class AdasFragment : Fragment() {
         btnAebAlarmBrake  = view.findViewById(R.id.btn_aeb_alarm_brake)
 
         // ── Afficher la bonne section selon le firmware ──────────────────────
-        val gen = FirmwareInfo.getGeneration()
-        val isKnown = gen != FirmwareInfo.Gen.UNKNOWN
+        val gen        = FirmwareInfo.getGeneration()
+        val isKnown    = gen != FirmwareInfo.Gen.UNKNOWN
+        val isVsmBased = FirmwareInfo.isVsmBased()
         view.findViewById<View>(R.id.section_swi133).visibility =
-            if (gen == FirmwareInfo.Gen.SWI133 || gen == FirmwareInfo.Gen.UNKNOWN) View.VISIBLE else View.GONE
+            if (!isVsmBased) View.VISIBLE else View.GONE
         view.findViewById<View>(R.id.section_swi68).visibility =
-            if (gen == FirmwareInfo.Gen.SWI68) View.VISIBLE else View.GONE
+            if (isVsmBased) View.VISIBLE else View.GONE
         // Ligne du bas (AEB + alertes) — disponible si firmware connu
         view.findViewById<View>(R.id.section_bottom_row).visibility =
             if (isKnown) View.VISIBLE else View.GONE
@@ -82,10 +83,10 @@ class AdasFragment : Fragment() {
         view.findViewById<View>(R.id.alerts_swi133).visibility =
             if (gen == FirmwareInfo.Gen.SWI133) View.VISIBLE else View.GONE
         view.findViewById<View>(R.id.alerts_swi68).visibility =
-            if (gen == FirmwareInfo.Gen.SWI68) View.VISIBLE else View.GONE
+            if (isVsmBased) View.VISIBLE else View.GONE
 
         // ── Listeners SWI133 ─────────────────────────────────────────────────
-        if (gen != FirmwareInfo.Gen.SWI68) {
+        if (!isVsmBased) {
             switchOverspeed?.setOnCheckedChangeListener { _, checked ->
                 if (switchOverspeed?.isPressed == true)
                     CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setOverspeedAlarm(checked) }
@@ -128,8 +129,8 @@ class AdasFragment : Fragment() {
             }
         }
 
-        // ── Listeners SWI68 ──────────────────────────────────────────────────
-        if (gen == FirmwareInfo.Gen.SWI68) {
+        // ── Listeners SWI68 / SWI69 / SWI131 (mêmes boutons, API adaptée dans MG4Hardware) ─
+        if (isVsmBased) {
             switchSoundWarning?.setOnCheckedChangeListener { _, checked ->
                 if (switchSoundWarning?.isPressed == true)
                     CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSoundWarning(checked) }
@@ -158,12 +159,8 @@ class AdasFragment : Fragment() {
     }
 
     private fun refreshState() {
-        val gen = FirmwareInfo.getGeneration()
         CoroutineScope(Dispatchers.IO).launch {
-            when (gen) {
-                FirmwareInfo.Gen.SWI133, FirmwareInfo.Gen.UNKNOWN -> refreshSwi133()
-                FirmwareInfo.Gen.SWI68 -> refreshSwi68()
-            }
+            if (FirmwareInfo.isVsmBased()) refreshSwi68() else refreshSwi133()
         }
     }
 

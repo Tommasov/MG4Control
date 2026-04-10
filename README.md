@@ -49,11 +49,12 @@ L'application communique avec le véhicule via le SDK propriétaire SAIC, en acc
 ### ADAS (Assistance à la conduite)
 - **SWI133** : Off / Limiteur / Auto / ACC / ICA + alertes excès de vitesse / changement de limite
 - **SWI68** : Désactiver / ACC / TJA + avertissement sonore On / Off
+- **SWI69 / SWI131** : Anti-collision avant (AEB) — On / Off + mode Alerte uniquement / Alerte + Freinage
 
 ### Raccourcis volant
 - Configuration des **4 boutons du volant** (boutons latéraux gauche/droit)
 - Actions disponibles : Mode de conduite / Régénération / ADAS / **Ouvrir l'application**
-- Activation / désactivation des raccourcis avec **dialog d'avertissement** (recommande de désactiver d'abord les raccourcis du launcher officiel pour éviter les conflits)
+- Activation / désactivation des raccourcis avec **dialog d'avertissement**
 
 ### Gestion de profils
 - Sauvegarde jusqu'à **5 profils** personnalisés
@@ -74,12 +75,17 @@ L'application communique avec le véhicule via le SDK propriétaire SAIC, en acc
 ### Compatibilité firmware inconnue (UNKNOWN)
 - Dialog d'avertissement au démarrage si le firmware n'est ni SWI133 ni SWI68
 - L'utilisateur peut fermer l'application ou continuer
-- En mode "Continuer", les chips SWI133 / SWI68 deviennent cliquables pour forcer un mode de compatibilité
+- En mode "Continuer", les chips SWI133 / SWI68 / SWI69 / SWI131 deviennent cliquables pour forcer un mode de compatibilité
 - Le choix forcé est persisté en SharedPreferences et survit aux redémarrages de l'app
 
 ---
 
 ## Changelog
+
+### v2.4.0
+- **Nouveau** : Support pour **SWI69 et SWI131**
+- **Nouveau** : Action raccourci **"Ouvrir... "** dans l'onglet raccourcis et laisse le choix de l'application a l'utilisateur
+
 
 ### v2.3.0
 - **Fix** : Bouton ON/OFF alertes sonores SWI68 depuis l'écran principal non fonctionnel (mauvais mapping des valeurs : ON=2, OFF=1 au lieu de 0/1)
@@ -118,7 +124,8 @@ L'application communique avec le véhicule via le SDK propriétaire SAIC, en acc
 | Résolution d'écran | 1280 × 480 (orientation paysage forcée) |
 | Firmware SWI133 | Compatible ✅ |
 | Firmware SWI68 | Compatible ✅ |
-| Firmware UNKNOWN | Mode forcé SWI133/SWI68 disponible ⚠️ |
+| Firmware SWI69 / SWI131 | Compatible ✅ |
+| Firmware UNKNOWN | Mode forcé SWI133/SWI68/SWI69/SWI131 disponible ⚠️ |
 
 ---
 
@@ -270,6 +277,7 @@ Couche dédiée aux fonctions ADAS, chargée dynamiquement selon la génération
 |----------|---------|-----------|
 | **SWI133** | `VehiclePropertyManager` | Chargé depuis l'APK launcher via `ClassLoader` + réflexion sur `mIVehiclePropertyService`. Utilise `getMixProperty()` / `setMixProperty()` |
 | **SWI68** | `VehicleSettingManager` | Singleton statique chargé via réflexion. Utilise `setAccTjaMode()` / `setLaneKeepingWarningSound()` |
+| **SWI69 / SWI131** | `VehicleSettingManager` | Même singleton que SWI68. Utilise `setFcwState()` / `getFcwState()` / `setFcwAutoBrakeMode()` / `setFcwSensitivity()` pour l'AEB. Valeurs confirmées empiriquement sur véhicule réel : `setFcwState(1)` = DÉSACTIVER, `setFcwState(2)` = ACTIVER. |
 
 ### Détection du firmware
 
@@ -456,11 +464,12 @@ The app communicates with the vehicle through the proprietary SAIC SDK, accessin
 ### ADAS (Advanced Driver Assistance)
 - **SWI133**: Off / Speed Limiter / Auto / ACC / ICA + overspeed alert / speed limit change alert
 - **SWI68**: Disable / ACC / TJA + audible warning On / Off
+- **SWI69 / SWI131**: Forward Collision Warning (AEB) — On / Off + mode Alert only / Alert + Emergency Braking
 
 ### Steering Wheel Shortcuts
 - Configure **4 steering wheel buttons** (left/right side buttons)
 - Available actions: Drive mode / Regeneration / ADAS / **Open app**
-- Enable/disable shortcuts with a **warning dialog** (recommends disabling the official launcher shortcuts first to avoid conflicts)
+- Enable/disable shortcuts with a **warning dialog**
 
 ### Profile Management
 - Save up to **5 custom profiles**
@@ -477,6 +486,10 @@ The app communicates with the vehicle through the proprietary SAIC SDK, accessin
 ---
 
 ## Changelog
+
+### v2.4.0
+- **New**: Support for **SWI69 and SWI131**
+- **New**: The **"Open..."** shortcut in the Shortcuts tab lets the user choose the application
 
 ### v2.3.0
 - **Fix**: Sound warning ON/OFF button (SWI68) not working from main screen (wrong value mapping: ON=2, OFF=1 instead of 0/1)
@@ -515,7 +528,8 @@ The app communicates with the vehicle through the proprietary SAIC SDK, accessin
 | Screen resolution | 1280 × 480 (forced landscape) |
 | SWI133 firmware | Supported ✅ |
 | SWI68 firmware | Supported ✅ |
-| UNKNOWN firmware | Forced SWI133/SWI68 mode available ⚠️ |
+| SWI69 / SWI131 firmware | Supported ✅|
+| UNKNOWN firmware | Forced SWI133/SWI68/SWI69/SWI131 mode available ⚠️ |
 
 ---
 
@@ -660,6 +674,7 @@ Dedicated layer for ADAS functions, dynamically loaded according to the detected
 |----------|---------|-----------|
 | **SWI133** | `VehiclePropertyManager` | Loaded from the launcher APK via `ClassLoader` + reflection on `mIVehiclePropertyService`. Uses `getMixProperty()` / `setMixProperty()` |
 | **SWI68** | `VehicleSettingManager` | Static singleton loaded via reflection. Uses `setAccTjaMode()` / `setLaneKeepingWarningSound()` |
+| **SWI69 / SWI131** | `VehicleSettingManager` | Same singleton as SWI68. Uses `setFcwState()` / `getFcwState()` / `setFcwAutoBrakeMode()` / `setFcwSensitivity()` for AEB. Values confirmed empirically on real hardware: `setFcwState(1)` = DISABLE, `setFcwState(2)` = ENABLE. |
 
 ### Firmware Detection
 

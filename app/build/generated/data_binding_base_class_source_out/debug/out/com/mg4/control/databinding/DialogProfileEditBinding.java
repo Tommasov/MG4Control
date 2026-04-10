@@ -137,6 +137,12 @@ public final class DialogProfileEditBinding implements ViewBinding {
   public final LinearLayout sectionRegenDialog;
 
   @NonNull
+  public final LinearLayout sectionSeatsDialog;
+
+  @NonNull
+  public final LinearLayout sectionSteeringDialog;
+
+  @NonNull
   public final Switch swAebEnabled;
 
   @NonNull
@@ -174,6 +180,7 @@ public final class DialogProfileEditBinding implements ViewBinding {
       @NonNull MaterialButton btnSr2D, @NonNull MaterialButton btnSr3D,
       @NonNull MaterialButton btnSteerOffD, @NonNull MaterialButton btnSteerOnD,
       @NonNull TextInputEditText etProfileName, @NonNull LinearLayout sectionRegenDialog,
+      @NonNull LinearLayout sectionSeatsDialog, @NonNull LinearLayout sectionSteeringDialog,
       @NonNull Switch swAebEnabled, @NonNull Switch swOverspeedAlarm, @NonNull Switch swSetDefault,
       @NonNull Switch swSoundWarning, @NonNull Switch swSpeedLimitTone,
       @NonNull TextView tvDialogTitle) {
@@ -216,6 +223,8 @@ public final class DialogProfileEditBinding implements ViewBinding {
     this.btnSteerOnD = btnSteerOnD;
     this.etProfileName = etProfileName;
     this.sectionRegenDialog = sectionRegenDialog;
+    this.sectionSeatsDialog = sectionSeatsDialog;
+    this.sectionSteeringDialog = sectionSteeringDialog;
     this.swAebEnabled = swAebEnabled;
     this.swOverspeedAlarm = swOverspeedAlarm;
     this.swSetDefault = swSetDefault;
@@ -479,6 +488,18 @@ public final class DialogProfileEditBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.section_seats_dialog;
+      LinearLayout sectionSeatsDialog = ViewBindings.findChildViewById(rootView, id);
+      if (sectionSeatsDialog == null) {
+        break missingId;
+      }
+
+      id = R.id.section_steering_dialog;
+      LinearLayout sectionSteeringDialog = ViewBindings.findChildViewById(rootView, id);
+      if (sectionSteeringDialog == null) {
+        break missingId;
+      }
+
       id = R.id.sw_aeb_enabled;
       Switch swAebEnabled = ViewBindings.findChildViewById(rootView, id);
       if (swAebEnabled == null) {
@@ -522,8 +543,8 @@ public final class DialogProfileEditBinding implements ViewBinding {
           btnDriveNormalD, btnDriveSnowD, btnDriveSportD, btnRegenAdaptiveD, btnRegenHighD,
           btnRegenLowD, btnRegenMediumD, btnRegenOffD, btnRegenOnePedalD, btnSl0D, btnSl1D, btnSl2D,
           btnSl3D, btnSr0D, btnSr1D, btnSr2D, btnSr3D, btnSteerOffD, btnSteerOnD, etProfileName,
-          sectionRegenDialog, swAebEnabled, swOverspeedAlarm, swSetDefault, swSoundWarning,
-          swSpeedLimitTone, tvDialogTitle);
+          sectionRegenDialog, sectionSeatsDialog, sectionSteeringDialog, swAebEnabled,
+          swOverspeedAlarm, swSetDefault, swSoundWarning, swSpeedLimitTone, tvDialogTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

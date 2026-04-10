@@ -1,15 +1,15 @@
 [
     {
+        "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-47:\\layout_fragment_dashboard.xml.flat",
+        "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-49:\\layout\\fragment_dashboard.xml"
+    },
+    {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-47:\\layout_dialog_update.xml.flat",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-49:\\layout\\dialog_update.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-47:\\drawable_bg_chip_inactive.xml.flat",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-49:\\drawable\\bg_chip_inactive.xml"
-    },
-    {
-        "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-47:\\layout_fragment_dashboard.xml.flat",
-        "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-49:\\layout\\fragment_dashboard.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-47:\\layout_dialog_unknown_firmware.xml.flat",
@@ -72,8 +72,8 @@
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-49:\\xml\\file_provider_paths.xml"
     },
     {
-        "merged": "com.mg4.control.app-debug-47:/layout_dialog_app_info.xml.flat",
-        "source": "com.mg4.control.app-main-49:/layout/dialog_app_info.xml"
+        "merged": "com.mg4.control.app-debug-47:/layout_fragment_shortcuts.xml.flat",
+        "source": "com.mg4.control.app-main-49:/layout/fragment_shortcuts.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-47:\\drawable_bg_chip_active.xml.flat",

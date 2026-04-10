@@ -73,6 +73,34 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        // ── Écran par défaut ─────────────────────────────────────────────────
+        val btnDefDashboard  = view.findViewById<MaterialButton>(R.id.btn_default_dashboard)
+        val btnDefProfiles   = view.findViewById<MaterialButton>(R.id.btn_default_profiles)
+        val btnDefShortcuts  = view.findViewById<MaterialButton>(R.id.btn_default_shortcuts)
+        val defaultScreenBtns = listOf(
+            "dashboard" to btnDefDashboard,
+            "profiles"  to btnDefProfiles,
+            "shortcuts" to btnDefShortcuts
+        )
+
+        fun updateDefaultScreenButtons(selected: String) {
+            defaultScreenBtns.forEach { (key, btn) ->
+                val active = key == selected
+                btn.backgroundTintList = ColorStateList.valueOf(if (active) accentDim else inactiveColor)
+                btn.setTextColor(if (active) textActive else textInactive)
+            }
+        }
+
+        val currentDefault = prefs.getString("default_screen", "dashboard") ?: "dashboard"
+        updateDefaultScreenButtons(currentDefault)
+
+        defaultScreenBtns.forEach { (key, btn) ->
+            btn.setOnClickListener {
+                prefs.edit().putString("default_screen", key).apply()
+                updateDefaultScreenButtons(key)
+            }
+        }
+
         // ── Auto-apply ───────────────────────────────────────────────────────
         val switchAutoApply = view.findViewById<Switch>(R.id.switch_auto_apply)
         switchAutoApply.isChecked = prefs.getBoolean("auto_apply_profile", true)
