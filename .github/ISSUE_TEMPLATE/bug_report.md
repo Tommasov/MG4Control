@@ -23,9 +23,12 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - Model : [e.g. SE/Standard/Luxury..]
- - Firmware Version : SWIXXX [e.g. SWI133]
+**Environment**
+| Field | Value |
+|---|---|
+| Vehicle model | e.g. MG4 Standard / Trophy / Luxury / XPower |
+| Infotainment firmware | e.g. SWI133-29176-1300R30 |
+| MG4Control version | e.g. v2.1.0 |
 
 **Additional context**
 Add any other context about the problem here.
