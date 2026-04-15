@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: "[IMPROVEMENT]"
+title: "[IMPROVEMENT] Your title"
 labels: enhancement
 assignees: SliDeeN
 
@@ -15,13 +15,6 @@ A clear and concise description of what you want to happen.
 
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
-
-**Environment**
-| Field | Value |
-|---|---|
-| Vehicle model | e.g. MG4 Standard / Trophy / Luxury / XPower |
-| Infotainment firmware | e.g. SWI133-29176-1300R30 |
-| MG4Control version | e.g. v2.1.0 |
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
