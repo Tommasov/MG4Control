@@ -172,7 +172,7 @@ class ShortcutsFragment : Fragment() {
         val savedProfileId = prefs.getString("shortcut_${slotKey}_profile_id", null)
         val profileLabel = if (savedProfileId != null) {
             val profile = ProfileManager(requireContext()).getById(savedProfileId)
-            if (profile != null) "▶ ${profile.name}"
+            if (profile != null) getString(R.string.shortcuts_profile_prefix) + " " + profile.name
             else getString(R.string.shortcuts_action_apply_profile)
         } else {
             getString(R.string.shortcuts_action_apply_profile)
@@ -254,7 +254,7 @@ class ShortcutsFragment : Fragment() {
             .setTitle(R.string.shortcuts_pick_profile_title)
             .setItems(labels) { _, which ->
                 val profile  = profiles[which]
-                val newLabel = "▶ ${profile.name}"
+                val newLabel = getString(R.string.shortcuts_profile_prefix) + " " + profile.name
                 prefs.edit().putString("shortcut_${slotKey}_profile_id", profile.id).apply()
                 updateProfileLabel(slotKey, newLabel)
             }

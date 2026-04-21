@@ -4,6 +4,10 @@
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\page_dashboard_elk.xml"
     },
     {
+        "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\dialog_language_picker.xml",
+        "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\dialog_language_picker.xml"
+    },
+    {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\fragment_climate.xml",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_climate.xml"
     },
@@ -20,12 +24,12 @@
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_drive_regen.xml"
     },
     {
-        "merged": "com.mg4.control.app-mergeDebugResources-47:/layout/dialog_profile_edit.xml",
-        "source": "com.mg4.control.app-main-50:/layout/dialog_profile_edit.xml"
-    },
-    {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\fragment_profile.xml",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_profile.xml"
+    },
+    {
+        "merged": "com.mg4.control.app-mergeDebugResources-47:/layout/activity_main.xml",
+        "source": "com.mg4.control.app-main-50:/layout/activity_main.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\dialog_unknown_firmware.xml",
@@ -40,12 +44,12 @@
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\item_profile.xml"
     },
     {
-        "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\dialog_profile_edit.xml",
-        "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\dialog_profile_edit.xml"
-    },
-    {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\fragment_settings.xml",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_settings.xml"
+    },
+    {
+        "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\dialog_profile_edit.xml",
+        "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\dialog_profile_edit.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\fragment_adas.xml",
@@ -62,10 +66,6 @@
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\dialog_app_info.xml",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\dialog_app_info.xml"
-    },
-    {
-        "merged": "com.mg4.control.app-mergeDebugResources-47:/layout/page_dashboard_main.xml",
-        "source": "com.mg4.control.app-main-50:/layout/page_dashboard_main.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\fragment_dashboard.xml",

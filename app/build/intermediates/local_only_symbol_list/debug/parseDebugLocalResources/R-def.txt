@@ -27,6 +27,7 @@ color dash_text_lo
 color dash_warn
 color dash_warn_dim
 color divider
+color ic_launcher_background
 color text_active
 color text_primary
 color text_secondary
@@ -36,6 +37,7 @@ drawable bg_chip_inactive
 drawable bg_fw_indicator
 drawable bg_section_rounded
 drawable dot_indicator
+drawable logo_topbar
 id adasFragment
 id adas_group_swi133
 id adas_group_swi68
@@ -115,12 +117,22 @@ id btn_fw_close_app
 id btn_fw_continue
 id btn_info_close
 id btn_infos
+id btn_lang_de
 id btn_lang_en
+id btn_lang_es
 id btn_lang_fr
+id btn_lang_it
+id btn_lang_pt
 id btn_nav_profiles
 id btn_nav_settings
 id btn_nav_shortcuts
 id btn_normal
+id btn_pick_de
+id btn_pick_en
+id btn_pick_es
+id btn_pick_fr
+id btn_pick_it
+id btn_pick_pt
 id btn_regen_adaptive
 id btn_regen_adaptive_d
 id btn_regen_high
@@ -265,6 +277,7 @@ id tv_version_from
 id tv_version_to
 layout activity_main
 layout dialog_app_info
+layout dialog_language_picker
 layout dialog_profile_edit
 layout dialog_unknown_firmware
 layout dialog_update
@@ -280,6 +293,9 @@ layout item_profile
 layout page_dashboard_elk
 layout page_dashboard_main
 menu bottom_nav_menu
+mipmap ic_launcher
+mipmap ic_launcher_foreground
+mipmap ic_launcher_round
 navigation nav_graph
 plurals update_skipped_hint
 string adas_acc
@@ -397,9 +413,12 @@ string settings_firmware_version
 string settings_language
 string settings_language_de
 string settings_language_en
+string settings_language_es
 string settings_language_fr
+string settings_language_it
 string settings_language_pick_msg
 string settings_language_pick_title
+string settings_language_pt
 string shortcuts_action_adas
 string shortcuts_action_aeb
 string shortcuts_action_apply_profile
@@ -430,6 +449,7 @@ string shortcuts_press_double
 string shortcuts_press_long
 string shortcuts_press_single
 string shortcuts_profile_not_found
+string shortcuts_profile_prefix
 string shortcuts_warning_message
 string shortcuts_warning_ok
 string shortcuts_warning_title

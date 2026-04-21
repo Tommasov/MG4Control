@@ -1495,6 +1495,7 @@ color foreground_material_dark
 color foreground_material_light
 color highlighted_text_material_dark
 color highlighted_text_material_light
+color ic_launcher_background
 color m3_appbar_overlay_color
 color m3_assist_chip_icon_tint_color
 color m3_assist_chip_stroke_color
@@ -3099,6 +3100,7 @@ drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_search_black_24
 drawable indeterminate_static
+drawable logo_topbar
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
 drawable m3_bottom_sheet_drag_handle
@@ -3352,12 +3354,22 @@ id btn_fw_close_app
 id btn_fw_continue
 id btn_info_close
 id btn_infos
+id btn_lang_de
 id btn_lang_en
+id btn_lang_es
 id btn_lang_fr
+id btn_lang_it
+id btn_lang_pt
 id btn_nav_profiles
 id btn_nav_settings
 id btn_nav_shortcuts
 id btn_normal
+id btn_pick_de
+id btn_pick_en
+id btn_pick_es
+id btn_pick_fr
+id btn_pick_it
+id btn_pick_pt
 id btn_regen_adaptive
 id btn_regen_adaptive_d
 id btn_regen_high
@@ -4044,6 +4056,7 @@ layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout dialog_app_info
+layout dialog_language_picker
 layout dialog_profile_edit
 layout dialog_unknown_firmware
 layout dialog_update
@@ -4122,6 +4135,9 @@ layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout support_simple_spinner_dropdown_item
 menu bottom_nav_menu
+mipmap ic_launcher
+mipmap ic_launcher_foreground
+mipmap ic_launcher_round
 navigation nav_graph
 plurals mtrl_badge_content_description
 plurals update_skipped_hint
@@ -4406,9 +4422,12 @@ string settings_firmware_version
 string settings_language
 string settings_language_de
 string settings_language_en
+string settings_language_es
 string settings_language_fr
+string settings_language_it
 string settings_language_pick_msg
 string settings_language_pick_title
+string settings_language_pt
 string shortcuts_action_adas
 string shortcuts_action_aeb
 string shortcuts_action_apply_profile
@@ -4439,6 +4458,7 @@ string shortcuts_press_double
 string shortcuts_press_long
 string shortcuts_press_single
 string shortcuts_profile_not_found
+string shortcuts_profile_prefix
 string shortcuts_warning_message
 string shortcuts_warning_ok
 string shortcuts_warning_title

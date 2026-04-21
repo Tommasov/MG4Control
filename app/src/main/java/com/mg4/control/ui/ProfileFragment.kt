@@ -235,17 +235,23 @@ class ProfileFragment : Fragment() {
             dialogView.findViewById<MaterialButton>(R.id.btn_regen_one_pedal_d)
         )
 
+        val btnOnePedal = dialogView.findViewById<MaterialButton>(R.id.btn_regen_one_pedal_d)
+
         fun setRegenEnabled(enabled: Boolean) {
+            val isSnow = selectedDrive == DriveMode.SNOW
             regenBtns.forEach { btn ->
-                btn.isEnabled = enabled
-                btn.alpha = if (enabled) 1f else 0.35f
+                // ONE_PEDAL reste accessible même quand Éco énergie est actif,
+                // sauf en mode SNOW où tous les niveaux de regen sont indisponibles.
+                val btnEnabled = enabled || (btn == btnOnePedal && !isSnow)
+                btn.isEnabled = btnEnabled
+                btn.alpha = if (btnEnabled) 1f else 0.35f
             }
         }
 
         bindGroup(drivePairs, selectedDrive) { mode ->
             selectedDrive = mode
             val isSnow = mode == DriveMode.SNOW
-            // Regen : indisponible si SNOW ou Éco énergie actif
+            // Regen : indisponible si SNOW ou Éco énergie actif (ONE_PEDAL exempt de l'Éco)
             setRegenEnabled(!isSnow && !energySavingSel)
             // Bouton Éco énergie : indisponible en mode SNOW (modes exclusifs)
             if (gen != FirmwareInfo.Gen.UNKNOWN) {

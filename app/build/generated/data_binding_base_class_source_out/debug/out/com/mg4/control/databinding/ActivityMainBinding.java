@@ -4,6 +4,7 @@ package com.mg4.control.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -49,14 +50,14 @@ public final class ActivityMainBinding implements ViewBinding {
   public final FragmentContainerView navHostFragment;
 
   @NonNull
-  public final TextView topbarLogo;
+  public final ImageView topbarLogo;
 
   private ActivityMainBinding(@NonNull LinearLayout rootView,
       @NonNull MaterialButton btnNavProfiles, @NonNull MaterialButton btnNavSettings,
       @NonNull MaterialButton btnNavShortcuts, @NonNull TextView chipSwi131,
       @NonNull TextView chipSwi133, @NonNull TextView chipSwi165, @NonNull TextView chipSwi68,
       @NonNull TextView chipSwi69, @NonNull FragmentContainerView navHostFragment,
-      @NonNull TextView topbarLogo) {
+      @NonNull ImageView topbarLogo) {
     this.rootView = rootView;
     this.btnNavProfiles = btnNavProfiles;
     this.btnNavSettings = btnNavSettings;
@@ -152,7 +153,7 @@ public final class ActivityMainBinding implements ViewBinding {
       }
 
       id = R.id.topbar_logo;
-      TextView topbarLogo = ViewBindings.findChildViewById(rootView, id);
+      ImageView topbarLogo = ViewBindings.findChildViewById(rootView, id);
       if (topbarLogo == null) {
         break missingId;
       }

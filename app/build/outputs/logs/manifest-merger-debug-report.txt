@@ -148,9 +148,9 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\SliDS\.gradle\cach
 	android:label
 		ADDED from C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:22:9-41
 	android:roundIcon
-		ADDED from C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:24:9-66
+		ADDED from C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:24:9-54
 	android:icon
-		ADDED from C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:23:9-61
+		ADDED from C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:23:9-43
 	android:theme
 		ADDED from C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:25:9-48
 	android:name

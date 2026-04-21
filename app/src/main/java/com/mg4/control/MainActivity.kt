@@ -7,8 +7,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -50,7 +48,6 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        setupLogo()
         setupFirmwareChips()
         setupNavButtons()
         checkUnknownFirmware()  // après setupFirmwareChips pour que les chips soient prêtes
@@ -83,18 +80,6 @@ class MainActivity : AppCompatActivity() {
             }
             // onNoUpdate et onError ignorés au démarrage — silencieux si tout va bien
         )
-    }
-
-    // ── Logo "MG4Control" avec "Control" en couleur accent ───────────────────
-
-    private fun setupLogo() {
-        val tv = findViewById<TextView>(R.id.topbar_logo)
-        val full = getString(R.string.app_name)           // "MG4 Control"
-        val accent = getColor(R.color.dash_accent)
-        val span = SpannableString(full)
-        val splitAt = full.indexOf(' ').takeIf { it >= 0 }?.plus(1) ?: 0
-        if (splitAt > 0) span.setSpan(ForegroundColorSpan(accent), splitAt, full.length, 0)
-        tv.text = span
     }
 
     // ── Indicateur firmware (chips SWI133 / SWI68 / SWI69 / SWI131 / SWI165) ──
@@ -263,18 +248,31 @@ class MainActivity : AppCompatActivity() {
     // ── Dialogue de choix de langue au premier lancement ─────────────────────
 
     private fun showLanguagePicker() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.settings_language_pick_title)
-            .setMessage(R.string.settings_language_pick_msg)
+        val dialogView = LayoutInflater.from(this)
+            .inflate(R.layout.dialog_language_picker, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
             .setCancelable(false)
-            .setPositiveButton(R.string.settings_language_fr) { _, _ ->
-                LocaleHelper.setLanguage(this, "fr")
+            .create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val buttons = mapOf(
+            R.id.btn_pick_fr to "fr",
+            R.id.btn_pick_en to "en",
+            R.id.btn_pick_de to "de",
+            R.id.btn_pick_es to "es",
+            R.id.btn_pick_pt to "pt",
+            R.id.btn_pick_it to "it"
+        )
+        buttons.forEach { (viewId, code) ->
+            dialogView.findViewById<MaterialButton>(viewId).setOnClickListener {
+                dialog.dismiss()
+                LocaleHelper.setLanguage(this, code)
                 recreate()
             }
-            .setNegativeButton(R.string.settings_language_en) { _, _ ->
-                LocaleHelper.setLanguage(this, "en")
-                recreate()
-            }
-            .show()
+        }
+
+        dialog.show()
     }
 }

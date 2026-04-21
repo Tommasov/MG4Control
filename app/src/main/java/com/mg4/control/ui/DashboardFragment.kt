@@ -670,9 +670,13 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setRegenEnabled(enabled: Boolean) {
-        regenButtons.values.forEach { btn ->
-            btn.isEnabled = enabled
-            btn.alpha = if (enabled) 1f else 0.35f
+        val isSnow = currentDriveMode == DriveMode.SNOW
+        regenButtons.forEach { (level, btn) ->
+            // ONE_PEDAL reste accessible même quand Éco énergie est actif,
+            // sauf en mode SNOW où tous les niveaux de regen sont indisponibles.
+            val btnEnabled = enabled || (level == RegenLevel.ONE_PEDAL && !isSnow)
+            btn.isEnabled = btnEnabled
+            btn.alpha = if (btnEnabled) 1f else 0.35f
         }
     }
 

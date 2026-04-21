@@ -42,10 +42,22 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final MaterialButton btnInfos;
 
   @NonNull
+  public final MaterialButton btnLangDe;
+
+  @NonNull
   public final MaterialButton btnLangEn;
 
   @NonNull
+  public final MaterialButton btnLangEs;
+
+  @NonNull
   public final MaterialButton btnLangFr;
+
+  @NonNull
+  public final MaterialButton btnLangIt;
+
+  @NonNull
+  public final MaterialButton btnLangPt;
 
   @NonNull
   public final Switch switchAutoApply;
@@ -54,8 +66,10 @@ public final class FragmentSettingsBinding implements ViewBinding {
       @NonNull MaterialButton btnCheckUpdate, @NonNull MaterialButton btnCleanApk,
       @NonNull MaterialButton btnCloseSettings, @NonNull MaterialButton btnDefaultDashboard,
       @NonNull MaterialButton btnDefaultProfiles, @NonNull MaterialButton btnDefaultShortcuts,
-      @NonNull MaterialButton btnInfos, @NonNull MaterialButton btnLangEn,
-      @NonNull MaterialButton btnLangFr, @NonNull Switch switchAutoApply) {
+      @NonNull MaterialButton btnInfos, @NonNull MaterialButton btnLangDe,
+      @NonNull MaterialButton btnLangEn, @NonNull MaterialButton btnLangEs,
+      @NonNull MaterialButton btnLangFr, @NonNull MaterialButton btnLangIt,
+      @NonNull MaterialButton btnLangPt, @NonNull Switch switchAutoApply) {
     this.rootView = rootView;
     this.btnCheckUpdate = btnCheckUpdate;
     this.btnCleanApk = btnCleanApk;
@@ -64,8 +78,12 @@ public final class FragmentSettingsBinding implements ViewBinding {
     this.btnDefaultProfiles = btnDefaultProfiles;
     this.btnDefaultShortcuts = btnDefaultShortcuts;
     this.btnInfos = btnInfos;
+    this.btnLangDe = btnLangDe;
     this.btnLangEn = btnLangEn;
+    this.btnLangEs = btnLangEs;
     this.btnLangFr = btnLangFr;
+    this.btnLangIt = btnLangIt;
+    this.btnLangPt = btnLangPt;
     this.switchAutoApply = switchAutoApply;
   }
 
@@ -138,15 +156,39 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_lang_de;
+      MaterialButton btnLangDe = ViewBindings.findChildViewById(rootView, id);
+      if (btnLangDe == null) {
+        break missingId;
+      }
+
       id = R.id.btn_lang_en;
       MaterialButton btnLangEn = ViewBindings.findChildViewById(rootView, id);
       if (btnLangEn == null) {
         break missingId;
       }
 
+      id = R.id.btn_lang_es;
+      MaterialButton btnLangEs = ViewBindings.findChildViewById(rootView, id);
+      if (btnLangEs == null) {
+        break missingId;
+      }
+
       id = R.id.btn_lang_fr;
       MaterialButton btnLangFr = ViewBindings.findChildViewById(rootView, id);
       if (btnLangFr == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_lang_it;
+      MaterialButton btnLangIt = ViewBindings.findChildViewById(rootView, id);
+      if (btnLangIt == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_lang_pt;
+      MaterialButton btnLangPt = ViewBindings.findChildViewById(rootView, id);
+      if (btnLangPt == null) {
         break missingId;
       }
 
@@ -158,7 +200,7 @@ public final class FragmentSettingsBinding implements ViewBinding {
 
       return new FragmentSettingsBinding((LinearLayout) rootView, btnCheckUpdate, btnCleanApk,
           btnCloseSettings, btnDefaultDashboard, btnDefaultProfiles, btnDefaultShortcuts, btnInfos,
-          btnLangEn, btnLangFr, switchAutoApply);
+          btnLangDe, btnLangEn, btnLangEs, btnLangFr, btnLangIt, btnLangPt, switchAutoApply);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

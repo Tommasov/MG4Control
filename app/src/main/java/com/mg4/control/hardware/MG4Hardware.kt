@@ -111,6 +111,39 @@ object MG4Hardware {
     private const val CAR_ADAPTER_CLASS   = "com.saicmotor.carapi.CarAdapterClient"
     private const val VSM69_CLIENT_CLASS  = "com.saicmotor.carapi.client.CarVehicleSettingClient"
     private const val VSM_SERVICE_CODE    = 0x8   // queryClient(0x8) → ICarVehicleSettingService
+    private const val VEHICLE_SETTING_PKG = "com.saicmotor.vehiclesetting"  // SWI131 : carapi dans VS
+
+    // Katman5 — VehicleConditionManager (IVehicleConditionService via IHubService "vehiclecondition")
+    private const val VCM_CLASS          = "com.saicmotor.sdk.vehiclesettings.manager.VehicleConditionManager"
+    private const val VCM_LISTENER_CLASS = "com.saicmotor.sdk.vehiclesettings.IVehicleConditionListener"
+
+    // Katman5 SWI69/SWI131 — ICarGeneralService via CarAdapterClient (queryClient(0x1))
+    private const val CAR_GENERAL_CLIENT_CLASS = "com.saicmotor.carapi.client.CarGeneralClient"
+    private const val BIND_CODE_CAR_GENERAL    = 0x1   // ICarAdapterService.queryClient(0x1)
+
+    // Standard AAOS — VehicleProperty.IGNITION_STATE (compatible tous firmwares via CarPropertyManager)
+    private const val PROP_IGNITION_STATE = 0x11400409
+
+    /** Valeurs de IGNITION_STATE (VehicleIgnitionState) — propriété AAOS standard. */
+    object IgnitionState {
+        const val UNDEFINED = 0
+        const val LOCK      = 1
+        const val OFF       = 2
+        const val ACC       = 3
+        const val ON        = 4   // Clé détectée + frein appuyé = état READY
+        const val START     = 5
+    }
+
+    /**
+     * Valeurs retournées par IVehicleConditionService.getVehicleIgnition() (Katman5).
+     * Source : VehicleConditionConst.smali + CarIgnitionItem.smali (SWI133 launcher).
+     */
+    object CarIgnitionItem {
+        const val OFF       = 0x0   // Voiture éteinte
+        const val ACCESSORY = 0x1   // Accessoires uniquement
+        const val RUN       = 0x2   // Clé ON / état READY
+        const val CRANK     = 0x3   // Démarrage
+    }
 
     /** Valeurs de mode ADAS pour firmware SWI68. */
     object Swi68Mode {
@@ -149,6 +182,19 @@ object MG4Hardware {
     @Volatile private var sDriveModeListener: DriveModeListener? = null
     @Volatile private var sHvacListener: HvacListener? = null
 
+    // ── Katman5 — IGNITION_STATE via CarPropertyManager (standard AAOS) ──────
+    @Volatile private var sIgnitionCallbackProxy: Any? = null
+    @Volatile private var sIgnitionCallbackRegistered = false
+    private val ignitionCallbacks = java.util.concurrent.CopyOnWriteArrayList<(Int) -> Unit>()
+
+    // ── Katman5 — VehicleConditionManager / ICarGeneralService ───────────────
+    @Volatile private var sVcm: Any? = null
+    @Volatile private var sVcmListener: Any? = null
+    @Volatile private var sVcmCallbackRegistered = false
+    @Volatile private var sLastVcmIgnitionState = -1   // filtre les faux RUN répétés
+    private val vehicleConditionCallbacks = java.util.concurrent.CopyOnWriteArrayList<(Int) -> Unit>()
+    private val katman5ReadyListeners     = java.util.concurrent.CopyOnWriteArrayList<() -> Unit>()
+
     /** Listeners notifiés dès que Katman1 (CPM + HVAC) est opérationnel. */
     private val katman1ReadyListeners = java.util.concurrent.CopyOnWriteArrayList<() -> Unit>()
 
@@ -176,6 +222,57 @@ object MG4Hardware {
         if (ready) action() else katman4ReadyListeners.add(action)
     }
 
+    /** Exécute [action] dès que Katman5 (IVehicleConditionService) est opérationnel. */
+    fun whenKatman5Ready(action: () -> Unit) {
+        if (sVcmCallbackRegistered) action() else katman5ReadyListeners.add(action)
+    }
+
+    /** Enregistre un callback invoqué à chaque changement d'état d'allumage (CarIgnitionItem). */
+    fun registerVehicleConditionListener(callback: (Int) -> Unit) {
+        vehicleConditionCallbacks.add(callback)
+    }
+
+    fun unregisterVehicleConditionListener(callback: (Int) -> Unit) {
+        vehicleConditionCallbacks.remove(callback)
+    }
+
+    /** Enregistre un callback sur IGNITION_STATE via CarPropertyManager (standard AAOS). */
+    fun registerIgnitionCallback(callback: (Int) -> Unit) {
+        ignitionCallbacks.add(callback)
+        if (sCarPropertyManager != null) registerIgnitionPropertyCallback()
+    }
+
+    fun unregisterIgnitionCallback(callback: (Int) -> Unit) {
+        ignitionCallbacks.remove(callback)
+    }
+
+    /** Désenregistre le proxy CarPropertyManager (appeler depuis Service.onDestroy). */
+    fun unregisterIgnitionPropertyCallback() {
+        val cpm = sCarPropertyManager ?: return
+        val proxy = sIgnitionCallbackProxy ?: return
+        try {
+            val m = cpm.javaClass.methods.firstOrNull {
+                it.name == "unregisterCallback" && it.parameterCount == 1
+            } ?: return
+            m.invoke(cpm, proxy)
+            sIgnitionCallbackProxy = null
+            sIgnitionCallbackRegistered = false
+            AppLogger.i(TAG, "  IGNITION_STATE callback unregistered ✓")
+        } catch (e: Exception) {
+            AppLogger.d(TAG, "  IGNITION: unregisterCallback error: ${e.message}")
+        }
+    }
+
+    /**
+     * Lit l'état d'allumage courant via CarPropertyManager.
+     * Retourne -1 si CPM non prêt, 0 si propriété non supportée.
+     */
+    fun getCurrentIgnitionState(): Int {
+        val v0 = getIntPropertyCPM(PROP_IGNITION_STATE, 0)
+        if (v0 > 0) return v0
+        return getIntPropertyCPM(PROP_IGNITION_STATE, AREA_GLOBAL)
+    }
+
     interface DriveModeListener { fun onDriveModeChanged(mode: DriveMode) }
     interface HvacListener {
         fun onSeatHeatChanged(left: Int, right: Int)
@@ -199,6 +296,9 @@ object MG4Hardware {
             FirmwareInfo.isNewGenVsm()                              -> initKatman4Swi69(context)   // SWI69 + SWI131
             else                                                    -> initKatman4(context)
         }
+        // Katman5 — détection IGNITION_STATE push (VehicleConditionManager ou ICarGeneralService)
+        if (FirmwareInfo.isNewGenVsm()) initKatman5Swi69(context)
+        else                            initKatman5(context)
         if (sVehicleBinder != null)
             AppLogger.i(TAG, "  ✓ Katman2: vehiclesetting binder OK")
         else
@@ -341,6 +441,9 @@ object MG4Hardware {
                 katman1ReadyListeners.clear()
                 Handler(Looper.getMainLooper()).post { toNotify.forEach { it() } }
             }
+
+            // Tentative d'enregistrement du callback IGNITION_STATE (best-effort)
+            if (sCarPropertyManager != null) registerIgnitionPropertyCallback()
         } catch (e: Exception) {
             AppLogger.e(TAG, "  Katman1: tryGetManagersFromCar error: ${e.message}")
         }
@@ -1571,6 +1674,460 @@ object MG4Hardware {
     fun isKatman4VpmCreated(): Boolean      = sVpm != null || sVsm != null
     fun isCarPropertyManagerReady(): Boolean = sCarPropertyManager != null
     fun isCarHvacManagerReady(): Boolean     = sCarHvacManager != null
+
+    // -------------------------------------------------------------------------
+    // IGNITION_STATE — CarPropertyManager callback (standard AAOS, tous firmwares)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Enregistre un CarPropertyEventCallback sur PROP_IGNITION_STATE via réflexion.
+     * Protégé par [sIgnitionCallbackRegistered] — ne s'exécute qu'une seule fois.
+     * Lit l'état courant immédiatement après l'enregistrement : CPM ne notifie que sur changement,
+     * donc si la voiture est déjà READY au moment du bind, aucun event ne serait reçu sans cette lecture.
+     */
+    private fun registerIgnitionPropertyCallback() {
+        if (sIgnitionCallbackRegistered) return
+        val cpm = sCarPropertyManager ?: return
+        try {
+            val allRegMethods = cpm.javaClass.methods
+                .filter { it.name == "registerCallback" }
+                .joinToString(" | ") { m ->
+                    "(${m.parameterTypes.joinToString(",") { it.simpleName }})"
+                }
+            AppLogger.i(TAG, "  IGNITION: CPM.registerCallback variants: $allRegMethods")
+
+            val registerMethod = cpm.javaClass.methods.firstOrNull { m ->
+                m.name == "registerCallback" && m.parameterCount == 3
+            } ?: run {
+                AppLogger.w(TAG, "  IGNITION: NO 3-param registerCallback! Available: $allRegMethods")
+                return
+            }
+
+            val callbackType = registerMethod.parameterTypes[0]
+            AppLogger.i(TAG, "  IGNITION: callbackType=${callbackType.simpleName} isInterface=${callbackType.isInterface}")
+
+            if (!callbackType.isInterface) {
+                AppLogger.w(TAG, "  IGNITION: ${callbackType.name} NOT interface — proxy impossible")
+                return
+            }
+
+            val proxy = java.lang.reflect.Proxy.newProxyInstance(
+                callbackType.classLoader, arrayOf(callbackType)
+            ) { _, method, args ->
+                if (method.name == "onChangeEvent" && args != null) {
+                    val cpv = args[0] ?: return@newProxyInstance null
+                    try {
+                        val value = cpv.javaClass.getMethod("getValue").invoke(cpv) as? Int
+                        if (value != null) {
+                            AppLogger.i(TAG, "IGNITION_STATE event → $value (${ignitionStateName(value)})")
+                            dispatchIgnitionState(value)
+                        } else {
+                            AppLogger.w(TAG, "  IGNITION: onChangeEvent getValue() retourné null")
+                        }
+                    } catch (e: Exception) {
+                        AppLogger.w(TAG, "  IGNITION: onChangeEvent parse error: ${e.message}")
+                    }
+                } else if (method.name == "onErrorEvent") {
+                    AppLogger.w(TAG, "  IGNITION: onErrorEvent args=${args?.joinToString()}")
+                }
+                null
+            }
+
+            sIgnitionCallbackProxy = proxy   // référence forte pour éviter le GC
+            registerMethod.invoke(cpm, proxy, PROP_IGNITION_STATE, 0f)
+            sIgnitionCallbackRegistered = true
+            AppLogger.i(TAG, "  IGNITION_STATE callback registered ✓ (propId=0x${PROP_IGNITION_STATE.toString(16)})")
+
+            // Lecture immédiate de l'état courant
+            Handler(Looper.getMainLooper()).postDelayed({
+                val currentState = getCurrentIgnitionState()
+                AppLogger.i(TAG, "  IGNITION: état initial lu = $currentState (${ignitionStateName(currentState)})")
+                if (currentState > 0) {
+                    dispatchIgnitionState(currentState)
+                }
+            }, 300L)
+
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  IGNITION: registerCallback error: ${e.javaClass.simpleName}: ${e.message}")
+        }
+    }
+
+    private fun dispatchIgnitionState(state: Int) {
+        val toNotify = ignitionCallbacks.toList()
+        if (toNotify.isEmpty()) return
+        Handler(Looper.getMainLooper()).post { toNotify.forEach { it(state) } }
+    }
+
+    private fun ignitionStateName(state: Int) = when (state) {
+        IgnitionState.ON        -> "ON/READY"
+        IgnitionState.OFF       -> "OFF"
+        IgnitionState.ACC       -> "ACC"
+        IgnitionState.LOCK      -> "LOCK"
+        IgnitionState.START     -> "START"
+        IgnitionState.UNDEFINED -> "UNDEFINED"
+        else                    -> "?"
+    }
+
+    // -------------------------------------------------------------------------
+    // Katman5 SWI69/SWI131 — ICarGeneralService via CarAdapterClient (queryClient(0x1))
+    // -------------------------------------------------------------------------
+
+    private data class Swi69Ctx(
+        val ctx: Context,
+        val adapterClass: Class<*>,
+        val generalClientClass: Class<*>
+    )
+
+    private fun findSwi69Classes(context: Context): Swi69Ctx? {
+        for (pkg in listOf(LAUNCHER69_PKG, VEHICLE_SETTING_PKG)) {
+            try {
+                val ctx = context.createPackageContext(
+                    pkg,
+                    android.content.Context.CONTEXT_INCLUDE_CODE or android.content.Context.CONTEXT_IGNORE_SECURITY
+                )
+                return Swi69Ctx(
+                    ctx,
+                    ctx.classLoader.loadClass(CAR_ADAPTER_CLASS),
+                    ctx.classLoader.loadClass(CAR_GENERAL_CLIENT_CLASS)
+                )
+            } catch (_: Exception) {}
+        }
+        return null
+    }
+
+    private fun initKatman5Swi69(context: Context) {
+        if (sVcmCallbackRegistered) return
+
+        val classes = findSwi69Classes(context) ?: run {
+            AppLogger.w(TAG, "  Katman5 SWI69: CarAdapterClient/CarGeneralClient introuvable — retry in 10s")
+            Handler(Looper.getMainLooper()).postDelayed({ initKatman5Swi69(context.applicationContext) }, 10_000)
+            return
+        }
+        val (_, adapterClass, generalClientClass) = classes
+        AppLogger.i(TAG, "  Katman5 SWI69: classes chargées ✓")
+
+        fun trySetupGeneralClient(): Boolean {
+            if (sVcmCallbackRegistered) return true
+
+            val adapter = try {
+                adapterClass.getMethod("getInstance", Context::class.java)
+                    .invoke(null, context.applicationContext)
+            } catch (_: Exception) { null } ?: return false
+
+            val ibinder = try {
+                adapterClass.getMethod("queryClient", Int::class.javaPrimitiveType!!)
+                    .invoke(adapter, BIND_CODE_CAR_GENERAL) as? IBinder
+            } catch (_: Exception) { null } ?: run {
+                AppLogger.d(TAG, "  Katman5 SWI69: queryClient(0x${BIND_CODE_CAR_GENERAL.toString(16)}) → null")
+                return false
+            }
+
+            val client = try {
+                generalClientClass.getConstructor(IBinder::class.java).newInstance(ibinder)
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "  Katman5 SWI69: CarGeneralClient ctor error: ${e.message}")
+                return false
+            }
+
+            val registMethod = generalClientClass.methods.firstOrNull {
+                it.name == "registListener" && it.parameterCount == 1
+            } ?: run {
+                AppLogger.w(TAG, "  Katman5 SWI69: registListener non trouvé")
+                return false
+            }
+
+            val callbackType = registMethod.parameterTypes[0]
+            if (!callbackType.isInterface) {
+                AppLogger.w(TAG, "  Katman5 SWI69: callback non-interface — proxy impossible")
+                return false
+            }
+
+            // Binder réel nécessaire pour l'enregistrement cross-process via AIDL.
+            // ICarGeneralService est dans un processus distant (com.saicmotor.caradapter) :
+            // registListener() appelle writeStrongBinder(callback.asBinder()) — un proxy qui
+            // retourne null pour asBinder() transmettrait un binder null au service, qui ne
+            // pourrait jamais rappeler. On crée donc un Binder concret qui implémente onTransact
+            // pour le code 0x7 (TRANSACTION_onIgnitionStateChange, identique sur SWI69 et SWI131).
+            val callbackBinder = object : android.os.Binder() {
+                override fun onTransact(
+                    code: Int, data: android.os.Parcel,
+                    reply: android.os.Parcel?, flags: Int
+                ): Boolean {
+                    return when (code) {
+                        0x7 -> { // TRANSACTION_onIgnitionStateChange
+                            data.enforceInterface("com.saicmotor.carapi.general.ICarGeneralCallback")
+                            val ignition = data.readInt()
+                            AppLogger.i(TAG, "  Katman5 SWI69: onTransact ignition=$ignition (${carIgnitionName(ignition)})")
+                            dispatchVehicleConditionIgnition(ignition)
+                            reply?.writeNoException()
+                            true
+                        }
+                        else -> super.onTransact(code, data, reply, flags)
+                    }
+                }
+            }
+
+            val proxy = try {
+                java.lang.reflect.Proxy.newProxyInstance(
+                    callbackType.classLoader, arrayOf(callbackType)
+                ) { _, method, args ->
+                    when (method.name) {
+                        "onIgnitionStateChange" -> {
+                            // Chemin in-process (rare) — le service appelle directement l'interface
+                            val ignition = args?.get(0) as? Int
+                            if (ignition != null) {
+                                AppLogger.i(TAG, "  Katman5 SWI69: ignition=$ignition (${carIgnitionName(ignition)})")
+                                dispatchVehicleConditionIgnition(ignition)
+                            }
+                        }
+                        "asBinder" -> return@newProxyInstance callbackBinder
+                    }
+                    null
+                }
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "  Katman5 SWI69: proxy creation error: ${e.message}")
+                return false
+            }
+
+            return try {
+                registMethod.invoke(client, proxy)
+                sVcmListener = callbackBinder  // référence forte sur le Binder pour éviter le GC
+                sVcmCallbackRegistered = true
+                AppLogger.i(TAG, "  Katman5 SWI69: ICarGeneralCallback enregistré ✓")
+
+                val toNotify = katman5ReadyListeners.toList()
+                katman5ReadyListeners.clear()
+                Handler(Looper.getMainLooper()).post { toNotify.forEach { it() } }
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    try {
+                        val ignition = generalClientClass.getMethod("getIgnitionState").invoke(client) as? Int
+                        if (ignition != null) {
+                            AppLogger.i(TAG, "  Katman5 SWI69: état initial ignition=$ignition")
+                            dispatchVehicleConditionIgnition(ignition)
+                        }
+                    } catch (e: Exception) {
+                        AppLogger.d(TAG, "  Katman5 SWI69: getIgnitionState error: ${e.message}")
+                    }
+                }, 500L)
+
+                true
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "  Katman5 SWI69: registListener error: ${e.message}")
+                false
+            }
+        }
+
+        if (!trySetupGeneralClient()) {
+            val h = Handler(Looper.getMainLooper())
+            listOf(2_000L, 5_000L, 10_000L, 20_000L, 30_000L, 60_000L).forEach { delay ->
+                h.postDelayed({ if (!sVcmCallbackRegistered) trySetupGeneralClient() }, delay)
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Katman5 — VehicleConditionManager (IVehicleConditionService via IHubService)
+    // SWI133 / SWI68 / SWI165
+    // -------------------------------------------------------------------------
+
+    private fun initKatman5(context: Context) {
+        if (sVcmCallbackRegistered) return
+
+        val launcherCtx = listOf(LAUNCHER68_PKG, LAUNCHER69_PKG).firstNotNullOfOrNull { pkg ->
+            try {
+                context.createPackageContext(
+                    pkg,
+                    android.content.Context.CONTEXT_INCLUDE_CODE or android.content.Context.CONTEXT_IGNORE_SECURITY
+                )
+            } catch (_: Exception) { null }
+        } ?: run {
+            AppLogger.w(TAG, "  Katman5: launcher package introuvable")
+            return
+        }
+
+        val vcmClass = try {
+            launcherCtx.classLoader.loadClass(VCM_CLASS)
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  Katman5: classe VCM non trouvée: ${e.message} — retry in 10s")
+            Handler(Looper.getMainLooper()).postDelayed({ initKatman5(context.applicationContext) }, 10_000)
+            return
+        }
+
+        // Tentative 1 : singleton déjà initialisé par le launcher
+        val existing = try {
+            val f = vcmClass.getDeclaredField("sVehicleConditionManager")
+            f.isAccessible = true
+            f.get(null)
+        } catch (_: Exception) { null }
+
+        if (existing != null) {
+            AppLogger.i(TAG, "  Katman5: singleton VCM déjà existant ✓")
+            sVcm = existing
+            setupVcmCallback(existing, launcherCtx)
+            return
+        }
+
+        // Tentative 2 : appeler init(Context, IVehicleServiceListener)
+        val initMethod = vcmClass.methods.firstOrNull { m ->
+            m.name == "init" && m.parameterCount == 2 &&
+            Context::class.java.isAssignableFrom(m.parameterTypes[0])
+        }
+
+        if (initMethod != null) {
+            val listenerType = initMethod.parameterTypes[1]
+            val listenerArg: Any? = if (listenerType.isInterface) {
+                try {
+                    java.lang.reflect.Proxy.newProxyInstance(
+                        listenerType.classLoader, arrayOf(listenerType)
+                    ) { _, method, args ->
+                        when (method.name) {
+                            "onServiceConnected" -> {
+                                AppLogger.i(TAG, "  Katman5: onServiceConnected ✓")
+                                val mgr = args?.getOrNull(0)
+                                    ?.takeIf { it.javaClass.name.contains("VehicleConditionManager") }
+                                val instance = mgr ?: try {
+                                    val f = vcmClass.getDeclaredField("sVehicleConditionManager")
+                                    f.isAccessible = true
+                                    f.get(null)
+                                } catch (_: Exception) { null }
+                                if (instance != null) {
+                                    sVcm = instance
+                                    setupVcmCallback(instance, launcherCtx)
+                                }
+                            }
+                            "onServiceDisconnected" -> {
+                                AppLogger.w(TAG, "  Katman5: onServiceDisconnected")
+                                sVcmCallbackRegistered = false
+                                sVcmListener = null
+                            }
+                        }
+                        null
+                    }
+                } catch (e: Exception) {
+                    AppLogger.d(TAG, "  Katman5: proxy init error: ${e.message}")
+                    null
+                }
+            } else null
+
+            try {
+                initMethod.invoke(null, context.applicationContext, listenerArg)
+                AppLogger.i(TAG, "  Katman5: VehicleConditionManager.init() called")
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "  Katman5: init() error: ${e.message}")
+            }
+        } else {
+            AppLogger.w(TAG, "  Katman5: init(Context, listener) non trouvé")
+        }
+
+        // Retries — singleton disponible après connexion asynchrone
+        val h = Handler(Looper.getMainLooper())
+        listOf(2_000L, 5_000L, 10_000L, 20_000L, 30_000L, 60_000L).forEach { delay ->
+            h.postDelayed({
+                if (!sVcmCallbackRegistered) {
+                    val mgr = try {
+                        val f = vcmClass.getDeclaredField("sVehicleConditionManager")
+                        f.isAccessible = true
+                        f.get(null)
+                    } catch (_: Exception) { null }
+                    if (mgr != null && sVcm == null) {
+                        AppLogger.i(TAG, "  Katman5: singleton récupéré @${delay}ms")
+                        sVcm = mgr
+                        setupVcmCallback(mgr, launcherCtx)
+                    } else if (sVcm != null && !sVcmCallbackRegistered) {
+                        setupVcmCallback(sVcm!!, launcherCtx)
+                    }
+                }
+            }, delay)
+        }
+    }
+
+    private fun setupVcmCallback(vcm: Any, launcherCtx: Context) {
+        if (sVcmCallbackRegistered) return
+
+        val registerMethod = vcm.javaClass.methods.firstOrNull { m ->
+            m.name == "registerVehicleConditionCallback" && m.parameterCount == 1
+        } ?: vcm.javaClass.methods.firstOrNull { m ->
+            m.name.startsWith("register") && m.parameterCount == 1 &&
+            m.parameterTypes[0].isInterface &&
+            m.parameterTypes[0].methods.any { it.name.contains("ConditionChange", ignoreCase = true) }
+        } ?: run {
+            AppLogger.w(TAG, "  Katman5: registerVehicleConditionCallback non trouvé — méthodes: ${
+                vcm.javaClass.methods.filter { it.name.startsWith("register") }.joinToString { it.name }
+            }")
+            return
+        }
+
+        val callbackType = registerMethod.parameterTypes[0]
+        AppLogger.i(TAG, "  Katman5: callback type = ${callbackType.name}")
+
+        val proxy = try {
+            java.lang.reflect.Proxy.newProxyInstance(
+                callbackType.classLoader, arrayOf(callbackType)
+            ) { _, method, args ->
+                if (method.name.contains("ChangeEvent", ignoreCase = true) && args != null) {
+                    val bean = args[0] ?: return@newProxyInstance null
+                    try {
+                        val ignition = bean.javaClass.getMethod("getVehicleIgnition").invoke(bean) as? Int
+                        if (ignition != null) {
+                            AppLogger.i(TAG, "  Katman5 event: ignition=$ignition (${carIgnitionName(ignition)})")
+                            dispatchVehicleConditionIgnition(ignition)
+                        }
+                    } catch (e: Exception) {
+                        AppLogger.w(TAG, "  Katman5: onChangeEvent parse error: ${e.message}")
+                    }
+                }
+                null
+            }
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  Katman5: proxy creation error: ${e.message}")
+            return
+        }
+
+        try {
+            registerMethod.invoke(vcm, proxy)
+            sVcmListener = proxy
+            sVcmCallbackRegistered = true
+            AppLogger.i(TAG, "  Katman5: callback enregistré ✓")
+
+            val toNotify = katman5ReadyListeners.toList()
+            katman5ReadyListeners.clear()
+            Handler(Looper.getMainLooper()).post { toNotify.forEach { it() } }
+
+            // Lecture immédiate (le callback ne se déclenche que sur CHANGEMENT)
+            Handler(Looper.getMainLooper()).postDelayed({
+                val ignition = try {
+                    vcm.javaClass.getMethod("getVehicleIgnition").invoke(vcm) as? Int
+                } catch (_: Exception) { null }
+                if (ignition != null) {
+                    AppLogger.i(TAG, "  Katman5: état initial = $ignition (${carIgnitionName(ignition)})")
+                    dispatchVehicleConditionIgnition(ignition)
+                }
+            }, 500L)
+
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  Katman5: registerVehicleConditionCallback error: ${e.message}")
+        }
+    }
+
+    private fun dispatchVehicleConditionIgnition(state: Int) {
+        // Ne dispatcher que si l'état change réellement — évite les faux RUN répétés
+        // que VehicleConditionManager envoie à chaque changement de condition véhicule
+        // (changement de rapport D/N/R, etc.) alors que la voiture est déjà en RUN.
+        if (state == sLastVcmIgnitionState) return
+        sLastVcmIgnitionState = state
+        val toNotify = vehicleConditionCallbacks.toList()
+        if (toNotify.isEmpty()) return
+        Handler(Looper.getMainLooper()).post { toNotify.forEach { it(state) } }
+    }
+
+    private fun carIgnitionName(state: Int) = when (state) {
+        CarIgnitionItem.OFF       -> "OFF"
+        CarIgnitionItem.ACCESSORY -> "ACC"
+        CarIgnitionItem.RUN       -> "RUN/READY"
+        CarIgnitionItem.CRANK     -> "CRANK"
+        else                      -> "?(${state})"
+    }
 
     // -------------------------------------------------------------------------
     // Listener management

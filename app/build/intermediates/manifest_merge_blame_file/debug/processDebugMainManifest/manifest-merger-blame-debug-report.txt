@@ -2,8 +2,8 @@
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
 3    package="com.mg4.control"
 4    android:sharedUserId="android.uid.system"
-5    android:versionCode="10"
-6    android:versionName="2.5.1" >
+5    android:versionCode="11"
+6    android:versionName="2.5.2" >
 7
 8    <uses-sdk
 9        android:minSdkVersion="28"
@@ -65,12 +65,12 @@
 35-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 36        android:debuggable="true"
 37        android:extractNativeLibs="false"
-38        android:icon="@android:drawable/ic_menu_preferences"
-38-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:23:9-61
+38        android:icon="@mipmap/ic_launcher"
+38-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:23:9-43
 39        android:label="@string/app_name"
 39-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:22:9-41
-40        android:roundIcon="@android:drawable/ic_menu_preferences"
-40-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:24:9-66
+40        android:roundIcon="@mipmap/ic_launcher_round"
+40-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:24:9-54
 41        android:supportsRtl="true"
 41-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:26:9-35
 42        android:theme="@style/Theme.MG4Control" >

@@ -47,29 +47,31 @@ class SettingsFragment : Fragment() {
         val textInactive  = requireContext().getColor(R.color.text_secondary)
 
         // ── Langue ───────────────────────────────────────────────────────────
-        val btnFr = view.findViewById<MaterialButton>(R.id.btn_lang_fr)
-        val btnEn = view.findViewById<MaterialButton>(R.id.btn_lang_en)
+        val langButtons = listOf(
+            "fr" to view.findViewById<MaterialButton>(R.id.btn_lang_fr),
+            "en" to view.findViewById(R.id.btn_lang_en),
+            "de" to view.findViewById(R.id.btn_lang_de),
+            "es" to view.findViewById(R.id.btn_lang_es),
+            "pt" to view.findViewById(R.id.btn_lang_pt),
+            "it" to view.findViewById(R.id.btn_lang_it)
+        )
 
         fun updateLangButtons(lang: String) {
-            val isFr = lang == "fr"
-            btnFr.backgroundTintList  = ColorStateList.valueOf(if (isFr) accentDim   else inactiveColor)
-            btnFr.setTextColor(if (isFr) textActive else textInactive)
-            btnEn.backgroundTintList  = ColorStateList.valueOf(if (!isFr) accentDim  else inactiveColor)
-            btnEn.setTextColor(if (!isFr) textActive else textInactive)
+            langButtons.forEach { (code, btn) ->
+                val active = lang == code
+                btn.backgroundTintList = ColorStateList.valueOf(if (active) accentDim else inactiveColor)
+                btn.setTextColor(if (active) textActive else textInactive)
+            }
         }
 
         updateLangButtons(LocaleHelper.getLanguage(requireContext()))
 
-        btnFr.setOnClickListener {
-            if (LocaleHelper.getLanguage(requireContext()) != "fr") {
-                LocaleHelper.setLanguage(requireContext(), "fr")
-                requireActivity().recreate()
-            }
-        }
-        btnEn.setOnClickListener {
-            if (LocaleHelper.getLanguage(requireContext()) != "en") {
-                LocaleHelper.setLanguage(requireContext(), "en")
-                requireActivity().recreate()
+        langButtons.forEach { (code, btn) ->
+            btn.setOnClickListener {
+                if (LocaleHelper.getLanguage(requireContext()) != code) {
+                    LocaleHelper.setLanguage(requireContext(), code)
+                    requireActivity().recreate()
+                }
             }
         }
 

@@ -9,7 +9,10 @@ import android.content.Context
 import android.content.Intent
 import com.mg4.control.MainActivity
 import android.content.IntentFilter
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import com.mg4.control.R
 import com.mg4.control.debug.AppLogger
 import com.mg4.control.hardware.MG4Hardware
 import com.mg4.control.hardware.MG4Hardware.AebMode
@@ -44,11 +47,15 @@ class MG4ControlService : Service() {
          * Évite le double-apply quand MainActivity et BootReceiver démarrent le service.
          */
         @Volatile private var profileScheduled = false
+
     }
 
     // ── Hardkey receiver ─────────────────────────────────────────────────────
 
     private var hardkeyReceiver: BroadcastReceiver? = null
+
+    // ── Listener de cycle d'allumage (Katman5) ──────────────────────────────
+    private var vehicleConditionListener: ((Int) -> Unit)? = null
 
     // État par slot pour la détection d'appui long
     private val slotLongTriggered = mutableMapOf<String, Boolean>()
@@ -64,10 +71,13 @@ class MG4ControlService : Service() {
         startForeground(NOTIF_ID, buildNotification())
         MG4Hardware.init(applicationContext)
         registerHardkeyReceiver()
+        registerIgnitionListener()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        vehicleConditionListener?.let { MG4Hardware.unregisterVehicleConditionListener(it) }
+        vehicleConditionListener = null
         hardkeyReceiver?.let { unregisterReceiver(it) }
         hardkeyReceiver = null
     }
@@ -226,8 +236,9 @@ class MG4ControlService : Service() {
     }
 
     /**
-     * Planifie l'application du profil par défaut une seule fois.
-     * Attend que Katman1 soit opérationnel avant d'envoyer les commandes au véhicule.
+     * Planifie l'application du profil par défaut une seule fois (au démarrage du processus).
+     * Marque [profileAppliedThisIgnitionCycle] pour éviter le double-apply si
+     * le listener Katman5 lit l'état initial RUN au même moment.
      */
     private fun scheduleDefaultProfileOnce() {
         if (profileScheduled) {
@@ -257,6 +268,45 @@ class MG4ControlService : Service() {
         }
     }
 
+    // ── Listener IGNITION_STATE (Katman5) ────────────────────────────────────
+
+    /**
+     * Enregistre le listener Katman5 sur les changements d'état d'allumage.
+     * À chaque RUN (0x2), applique le profil par défaut.
+     */
+    private fun registerIgnitionListener() {
+        val vcListener: (Int) -> Unit = { state ->
+            if (state == MG4Hardware.CarIgnitionItem.RUN) {
+                AppLogger.i(TAG, "Katman5 IGNITION_RUN → application du profil par défaut")
+                Handler(Looper.getMainLooper()).postDelayed({
+                    applyDefaultProfileOnIgnition()
+                }, 500L)
+            }
+        }
+        vehicleConditionListener = vcListener
+        MG4Hardware.registerVehicleConditionListener(vcListener)
+        AppLogger.i(TAG, "Listener Katman5 enregistré")
+    }
+
+    /** Applique le profil par défaut suite à un événement IGNITION_STATE=RUN. */
+    private fun applyDefaultProfileOnIgnition() {
+        val prefs = getSharedPreferences("mg4_settings", MODE_PRIVATE)
+        if (!prefs.getBoolean("auto_apply_profile", true)) {
+            AppLogger.i(TAG, "IGNITION → auto_apply_profile désactivé, skip")
+            return
+        }
+        val profile = ProfileManager(applicationContext).getDefaultProfile() ?: run {
+            AppLogger.i(TAG, "IGNITION → aucun profil par défaut, skip")
+            return
+        }
+        AppLogger.i(TAG, "IGNITION → application du profil '${profile.name}'")
+        MG4Hardware.whenKatman1Ready {
+            ProfileApplier.apply(profile) { ok ->
+                AppLogger.i(TAG, "IGNITION → profil '${profile.name}' appliqué — ok=$ok")
+            }
+        }
+    }
+
     private fun buildNotification(): Notification {
         val nm = getSystemService(NotificationManager::class.java)
         if (nm.getNotificationChannel(CHANNEL_ID) == null) {
@@ -267,7 +317,7 @@ class MG4ControlService : Service() {
         return Notification.Builder(this, CHANNEL_ID)
             .setContentTitle("MG4 Control")
             .setContentText("Service actif")
-            .setSmallIcon(android.R.drawable.ic_menu_preferences)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .build()
     }
 }
