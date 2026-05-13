@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.mg4.control.R
+import com.mg4.control.bluetooth.BluetoothProfileManager
 import com.mg4.control.hardware.MG4Hardware
 import com.mg4.control.hardware.MG4Hardware.AebMode
 import com.mg4.control.hardware.MG4Hardware.AebSensitivity
@@ -200,6 +201,7 @@ class ProfileFragment : Fragment() {
         }
 
         // ── Variables de sélection ───────────────────────────────────────────
+        var selectedBtMac: String? = data.btDeviceMac   // [BT-PROFILES]
         var selectedDrive   = data.driveMode
         var selectedRegen   = data.regenLevel
         var steeringOn      = data.steeringHeat
@@ -489,6 +491,44 @@ class ProfileFragment : Fragment() {
             swTsr.setOnCheckedChangeListener { _, checked -> tsrEnabledSel = checked }
         }
 
+        // ── [BT-PROFILES] Spinner appareil Bluetooth ────────────────────────
+        val spinnerBt = dialogView.findViewById<Spinner>(R.id.spinner_bt_device)
+
+        // "Aucun" en première entrée, suivi des appareils appairés
+        data class BtEntry(val label: String, val mac: String?)
+        val noneLabel = getString(R.string.profile_bt_none)
+
+        // Chargement async des appareils appairés, puis population du Spinner
+        CoroutineScope(Dispatchers.IO).launch {
+            val bonded = BluetoothProfileManager.getBondedDevices(requireContext())
+            val entries = mutableListOf(BtEntry(noneLabel, null))
+            entries.addAll(bonded.map { BtEntry("${it.name}  (${it.mac})", it.mac) })
+
+            withContext(Dispatchers.Main) {
+                if (!isAdded) return@withContext
+                val labels = entries.map { it.label }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, labels)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                spinnerBt.adapter = adapter
+
+                // Pré-sélectionner l'appareil déjà associé au profil
+                val currentMac = data.btDeviceMac
+                val selIdx = entries.indexOfFirst { it.mac.equals(currentMac, ignoreCase = true) }
+                    .takeIf { it >= 0 } ?: 0
+                spinnerBt.setSelection(selIdx)
+
+                // Callback de sélection — stocké dans une var accessible lors du Save
+                spinnerBt.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                        selectedBtMac = entries.getOrNull(pos)?.mac
+                    }
+                    override fun onNothingSelected(parent: AdapterView<*>?) { selectedBtMac = null }
+                }
+                // Initialise selectedBtMac avec la valeur pré-sélectionnée
+                selectedBtMac = entries.getOrNull(selIdx)?.mac
+            }
+        }
+
         // ── Profil par défaut ────────────────────────────────────────────────
         val swDefault = dialogView.findViewById<Switch>(R.id.sw_set_default)
         swDefault.isChecked = existing?.id == manager.getDefaultId()
@@ -553,7 +593,8 @@ class ProfileFragment : Fragment() {
                 elkMode        = elkModeSel,
                 elkSensitivity = elkSenSel,
                 energySaving   = energySavingSel,
-                tsrEnabled     = tsrEnabledSel
+                tsrEnabled     = tsrEnabledSel,
+                btDeviceMac    = selectedBtMac   // [BT-PROFILES]
             )
             manager.save(profile)
             if (swDefault.isChecked) manager.setDefault(profile.id)

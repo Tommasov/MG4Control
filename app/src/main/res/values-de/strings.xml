@@ -106,6 +106,9 @@
     <string name="profile_applied">Profil angewendet: %s</string>
     <string name="profile_max_reached">Maximum %d Profile erreicht</string>
     <string name="profile_auto_applied">Standardprofil beim Start angewendet</string>
+    <string name="profile_bt_device_label">Bluetooth-Gerät</string>
+    <string name="profile_bt_none">Keines</string>
+    <string name="profile_bt_applied">BT-Profil angewendet: %s</string>
 
     <!-- ADAS -->
     <string name="adas_section_sounds">Klangwarnungen</string>
@@ -221,6 +224,11 @@
     <string name="settings_default_screen_dashboard">Dashboard</string>
     <string name="settings_auto_apply">Profil beim Start anwenden</string>
     <string name="settings_auto_apply_desc">Das Standardprofil wird beim Start automatisch angewendet</string>
+    <string name="settings_theme">Erscheinungsbild</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_theme_dark">Dunkles Design</string>
+    <string name="settings_theme_light">Helles Design</string>
+    <string name="settings_theme_desc">Zwischen dunklem und hellem Design wechseln</string>
     <string name="settings_language">Sprache</string>
     <string name="settings_language_fr">Français</string>
     <string name="settings_language_en">English</string>
@@ -232,4 +240,11 @@
     <string name="settings_language_pick_msg">Diese Einstellung kann später in den Einstellungen geändert werden.</string>
     <string name="settings_firmware_version">Firmware-Version</string>
     <string name="settings_firmware_loading">Lesen…</string>
+
+    <!-- [BT-PROFILES] Bluetooth-Profile -->
+    <string name="bt_section_title">Bluetooth</string>
+    <string name="bt_no_device">Keines</string>
+    <string name="bt_pick_device_title">Bluetooth-Gerät</string>
+    <string name="bt_profile_applied">Profil über Bluetooth angewendet: %s</string>
+    <string name="bt_no_paired_devices">Keine gekoppelten Geräte</string>
 </resources>

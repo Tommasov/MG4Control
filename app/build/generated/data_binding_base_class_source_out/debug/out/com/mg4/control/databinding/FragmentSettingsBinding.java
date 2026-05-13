@@ -63,6 +63,15 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final MaterialButton btnLangPt;
 
   @NonNull
+  public final MaterialButton btnThemeAuto;
+
+  @NonNull
+  public final MaterialButton btnThemeDark;
+
+  @NonNull
+  public final MaterialButton btnThemeLight;
+
+  @NonNull
   public final Switch switchAutoApply;
 
   private FragmentSettingsBinding(@NonNull LinearLayout rootView,
@@ -73,7 +82,8 @@ public final class FragmentSettingsBinding implements ViewBinding {
       @NonNull MaterialButton btnLangDe, @NonNull MaterialButton btnLangEn,
       @NonNull MaterialButton btnLangEs, @NonNull MaterialButton btnLangFr,
       @NonNull MaterialButton btnLangIt, @NonNull MaterialButton btnLangPt,
-      @NonNull Switch switchAutoApply) {
+      @NonNull MaterialButton btnThemeAuto, @NonNull MaterialButton btnThemeDark,
+      @NonNull MaterialButton btnThemeLight, @NonNull Switch switchAutoApply) {
     this.rootView = rootView;
     this.btnCheckUpdate = btnCheckUpdate;
     this.btnCleanApk = btnCleanApk;
@@ -89,6 +99,9 @@ public final class FragmentSettingsBinding implements ViewBinding {
     this.btnLangFr = btnLangFr;
     this.btnLangIt = btnLangIt;
     this.btnLangPt = btnLangPt;
+    this.btnThemeAuto = btnThemeAuto;
+    this.btnThemeDark = btnThemeDark;
+    this.btnThemeLight = btnThemeLight;
     this.switchAutoApply = switchAutoApply;
   }
 
@@ -203,6 +216,24 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_theme_auto;
+      MaterialButton btnThemeAuto = ViewBindings.findChildViewById(rootView, id);
+      if (btnThemeAuto == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_theme_dark;
+      MaterialButton btnThemeDark = ViewBindings.findChildViewById(rootView, id);
+      if (btnThemeDark == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_theme_light;
+      MaterialButton btnThemeLight = ViewBindings.findChildViewById(rootView, id);
+      if (btnThemeLight == null) {
+        break missingId;
+      }
+
       id = R.id.switch_auto_apply;
       Switch switchAutoApply = ViewBindings.findChildViewById(rootView, id);
       if (switchAutoApply == null) {
@@ -212,7 +243,7 @@ public final class FragmentSettingsBinding implements ViewBinding {
       return new FragmentSettingsBinding((LinearLayout) rootView, btnCheckUpdate, btnCleanApk,
           btnCloseSettings, btnDefaultDashboard, btnDefaultProfiles, btnDefaultShortcuts,
           btnDiagnostic, btnInfos, btnLangDe, btnLangEn, btnLangEs, btnLangFr, btnLangIt, btnLangPt,
-          switchAutoApply);
+          btnThemeAuto, btnThemeDark, btnThemeLight, switchAutoApply);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

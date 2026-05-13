@@ -27,5 +27,7 @@ data class DrivingProfile(
     // Économie d'énergie + TSR
     val energySaving: Boolean = false,
     val tsrEnabled: Boolean = false,
-    val isDefault: Boolean = false
+    val isDefault: Boolean = false,
+    // [BT-PROFILES] MAC de l'appareil Bluetooth associé à ce profil (null = aucun)
+    val btDeviceMac: String? = null
 )

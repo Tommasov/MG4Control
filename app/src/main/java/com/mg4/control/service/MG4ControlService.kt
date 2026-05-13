@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import com.mg4.control.R
+import com.mg4.control.bluetooth.BluetoothProfileManager
 import com.mg4.control.debug.AppLogger
 import com.mg4.control.hardware.MG4Hardware
 import com.mg4.control.hardware.MG4Hardware.AebMode
@@ -22,6 +24,7 @@ import com.mg4.control.profile.ProfileApplier
 import com.mg4.control.profile.ProfileManager
 import com.mg4.control.shortcut.ShortcutAction
 import com.mg4.control.util.FirmwareInfo
+import com.mg4.control.util.ThemeHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,6 +57,12 @@ class MG4ControlService : Service() {
 
     private var hardkeyReceiver: BroadcastReceiver? = null
 
+    // ── [BT-PROFILES] Receiver ACL Bluetooth ─────────────────────────────────
+    private var btAclReceiver: BroadcastReceiver? = null
+
+    // ── Receiver sync thème launcher ─────────────────────────────────────────
+    private var skinChangeReceiver: BroadcastReceiver? = null
+
     // ── Listener de cycle d'allumage (Katman5) ──────────────────────────────
     private var vehicleConditionListener: ((Int) -> Unit)? = null
 
@@ -71,6 +80,8 @@ class MG4ControlService : Service() {
         startForeground(NOTIF_ID, buildNotification())
         MG4Hardware.init(applicationContext)
         registerHardkeyReceiver()
+        registerBtAclReceiver()        // [BT-PROFILES]
+        registerSkinChangeReceiver()   // [THEME-AUTO]
         registerIgnitionListener()
     }
 
@@ -80,6 +91,10 @@ class MG4ControlService : Service() {
         vehicleConditionListener = null
         hardkeyReceiver?.let { unregisterReceiver(it) }
         hardkeyReceiver = null
+        btAclReceiver?.let { unregisterReceiver(it) }     // [BT-PROFILES]
+        btAclReceiver = null
+        skinChangeReceiver?.let { unregisterReceiver(it) } // [THEME-AUTO]
+        skinChangeReceiver = null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -236,9 +251,10 @@ class MG4ControlService : Service() {
     }
 
     /**
-     * Planifie l'application du profil par défaut une seule fois (au démarrage du processus).
-     * Marque [profileAppliedThisIgnitionCycle] pour éviter le double-apply si
-     * le listener Katman5 lit l'état initial RUN au même moment.
+     * Planifie l'application du profil au démarrage du processus (one-shot).
+     * Priorité : profil BT associé → profil par défaut.
+     * Si connectedMacs est vide (téléphone connecté avant démarrage du service),
+     * une requête HFP async est effectuée en fallback.
      */
     private fun scheduleDefaultProfileOnce() {
         if (profileScheduled) {
@@ -253,17 +269,49 @@ class MG4ControlService : Service() {
             return
         }
 
-        val profile = ProfileManager(applicationContext).getDefaultProfile()
-        if (profile == null) {
-            AppLogger.i(TAG, "Aucun profil par défaut défini — skip")
+        val pm = ProfileManager(applicationContext)
+
+        // [BT-PROFILES] Cherche un profil BT parmi les appareils déjà connus en mémoire
+        val btProfile = BluetoothProfileManager.getConnectedMacs()
+            .firstNotNullOfOrNull { mac -> pm.getProfileForBtDevice(mac) }
+
+        if (btProfile != null) {
+            AppLogger.i(TAG, "[BT] Profil BT '${btProfile.name}' trouvé au démarrage — en attente Katman1")
+            MG4Hardware.whenKatman1Ready {
+                ProfileApplier.apply(btProfile) { ok ->
+                    AppLogger.i(TAG, "[BT] Profil '${btProfile.name}' appliqué — ok=$ok")
+                }
+            }
             return
         }
 
-        AppLogger.i(TAG, "Profil '${profile.name}' en attente hardware Katman1...")
-        MG4Hardware.whenKatman1Ready {
-            AppLogger.i(TAG, "Hardware prêt → application du profil '${profile.name}'")
-            ProfileApplier.apply(profile) { ok ->
-                AppLogger.i(TAG, "Profil '${profile.name}' appliqué — ok=$ok")
+        // [BT-PROFILES] Fallback : requête HFP async (cas téléphone connecté avant démarrage service)
+        BluetoothProfileManager.checkConnectedHfpDevices(applicationContext) { devices ->
+            val hfpProfile = devices.firstNotNullOfOrNull { dev ->
+                pm.getProfileForBtDevice(dev.address)
+            }
+            if (hfpProfile != null) {
+                AppLogger.i(TAG, "[BT-HFP] Profil '${hfpProfile.name}' trouvé via HFP — en attente Katman1")
+                MG4Hardware.whenKatman1Ready {
+                    ProfileApplier.apply(hfpProfile) { ok ->
+                        AppLogger.i(TAG, "[BT-HFP] Profil '${hfpProfile.name}' appliqué — ok=$ok")
+                    }
+                }
+                return@checkConnectedHfpDevices
+            }
+
+            // Aucun match BT → profil par défaut
+            val defaultProfile = pm.getDefaultProfile()
+            if (defaultProfile == null) {
+                AppLogger.i(TAG, "Aucun profil par défaut défini — skip")
+                return@checkConnectedHfpDevices
+            }
+            AppLogger.i(TAG, "Profil par défaut '${defaultProfile.name}' — en attente Katman1")
+            MG4Hardware.whenKatman1Ready {
+                AppLogger.i(TAG, "Hardware prêt → application du profil '${defaultProfile.name}'")
+                ProfileApplier.apply(defaultProfile) { ok ->
+                    AppLogger.i(TAG, "Profil '${defaultProfile.name}' appliqué — ok=$ok")
+                }
             }
         }
     }
@@ -288,23 +336,105 @@ class MG4ControlService : Service() {
         AppLogger.i(TAG, "Listener Katman5 enregistré")
     }
 
-    /** Applique le profil par défaut suite à un événement IGNITION_STATE=RUN. */
+    /**
+     * [BT-PROFILES] Enregistre les receivers ACL Bluetooth pour maintenir
+     * la liste des appareils connectés dans BluetoothProfileManager.
+     */
+    private fun registerBtAclReceiver() {
+        btAclReceiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context, intent: Intent) {
+                val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    ?: return
+                val mac = device.address ?: return
+                when (intent.action) {
+                    BluetoothDevice.ACTION_ACL_CONNECTED -> {
+                        BluetoothProfileManager.onDeviceConnected(mac)
+                        AppLogger.i(TAG, "[BT] Appareil connecté : $mac")
+                    }
+                    BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                        BluetoothProfileManager.onDeviceDisconnected(mac)
+                        AppLogger.i(TAG, "[BT] Appareil déconnecté : $mac")
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+        }
+        registerReceiver(btAclReceiver, filter)
+        AppLogger.i(TAG, "[BT] BtAclReceiver enregistré")
+    }
+
+    /**
+     * Applique le profil approprié suite à un événement IGNITION_STATE=RUN.
+     * Priorité : profil BT associé → profil par défaut.
+     */
     private fun applyDefaultProfileOnIgnition() {
         val prefs = getSharedPreferences("mg4_settings", MODE_PRIVATE)
         if (!prefs.getBoolean("auto_apply_profile", true)) {
             AppLogger.i(TAG, "IGNITION → auto_apply_profile désactivé, skip")
             return
         }
-        val profile = ProfileManager(applicationContext).getDefaultProfile() ?: run {
+
+        val pm = ProfileManager(applicationContext)
+
+        // [BT-PROFILES] Cherche un profil BT parmi les appareils connectés
+        val btProfile = BluetoothProfileManager.getConnectedMacs()
+            .firstNotNullOfOrNull { mac -> pm.getProfileForBtDevice(mac) }
+
+        if (btProfile != null) {
+            AppLogger.i(TAG, "IGNITION [BT] → application du profil '${btProfile.name}'")
+            MG4Hardware.whenKatman1Ready {
+                ProfileApplier.apply(btProfile) { ok ->
+                    AppLogger.i(TAG, "IGNITION [BT] → profil '${btProfile.name}' appliqué — ok=$ok")
+                }
+            }
+            return
+        }
+
+        // Aucun match BT → profil par défaut
+        val defaultProfile = pm.getDefaultProfile() ?: run {
             AppLogger.i(TAG, "IGNITION → aucun profil par défaut, skip")
             return
         }
-        AppLogger.i(TAG, "IGNITION → application du profil '${profile.name}'")
+        AppLogger.i(TAG, "IGNITION → application du profil par défaut '${defaultProfile.name}'")
         MG4Hardware.whenKatman1Ready {
-            ProfileApplier.apply(profile) { ok ->
-                AppLogger.i(TAG, "IGNITION → profil '${profile.name}' appliqué — ok=$ok")
+            ProfileApplier.apply(defaultProfile) { ok ->
+                AppLogger.i(TAG, "IGNITION → profil '${defaultProfile.name}' appliqué — ok=$ok")
             }
         }
+    }
+
+    // ── Receiver sync thème launcher (SWI69 / SWI131 / SWI132) ─────────────
+
+    /**
+     * Écoute le broadcast "com.saicmotor.changeSkin" émis par le launcher MG
+     * lorsque l'utilisateur change de thème (sombre ↔ clair).
+     * Ne fait rien si le firmware n'expose pas SKIN_THEME_CONFIG ou si
+     * l'utilisateur a choisi un thème manuel (mode ≠ "auto").
+     */
+    private fun registerSkinChangeReceiver() {
+        if (!ThemeHelper.hasSkinThemeConfig(this)) {
+            // SWI133/68 : MODE_NIGHT_FOLLOW_SYSTEM gère la sync automatiquement
+            AppLogger.i(TAG, "[THEME] SKIN_THEME_CONFIG absent — FOLLOW_SYSTEM actif, broadcast non requis")
+            return
+        }
+        skinChangeReceiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context, intent: Intent) {
+                val prefs = getSharedPreferences("mg4_settings", MODE_PRIVATE)
+                if (prefs.getString(ThemeHelper.PREF_THEME_MODE, "dark") != "auto") return
+
+                val nightMode = ThemeHelper.getLauncherNightMode(ctx)
+                Handler(Looper.getMainLooper()).post {
+                    androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(nightMode)
+                    ThemeHelper.notifyThemeChanged()
+                }
+                AppLogger.i(TAG, "[THEME] changeSkin reçu → nightMode=$nightMode")
+            }
+        }
+        registerReceiver(skinChangeReceiver, IntentFilter(ThemeHelper.ACTION_SKIN_CHANGE))
+        AppLogger.i(TAG, "[THEME] SkinChangeReceiver enregistré")
     }
 
     private fun buildNotification(): Notification {

@@ -171,6 +171,9 @@ id btn_steer_on_d
 id btn_swi68_acc
 id btn_swi68_off
 id btn_swi68_tja
+id btn_theme_auto
+id btn_theme_dark
+id btn_theme_light
 id btn_update_auto
 id btn_update_later
 id btn_update_manual
@@ -230,6 +233,7 @@ id sc_fallback_medium
 id sc_fallback_off
 id section_aeb
 id section_bottom_row
+id section_bt_profile
 id section_regen
 id section_regen_dialog
 id section_seats_dialog
@@ -241,6 +245,7 @@ id section_tsr_dialog
 id settingsFragment
 id shortcutsFragment
 id shortcuts_content
+id spinner_bt_device
 id spinner_btn1_long
 id spinner_btn1_single
 id spinner_btn2_long
@@ -329,6 +334,11 @@ string aeb_sensitivity_high
 string aeb_sensitivity_low
 string aeb_sensitivity_standard
 string app_name
+string bt_no_device
+string bt_no_paired_devices
+string bt_pick_device_title
+string bt_profile_applied
+string bt_section_title
 string btn_check_update
 string btn_clean_apk
 string btn_diagnostic
@@ -397,6 +407,9 @@ string profile_add
 string profile_applied
 string profile_apply_now
 string profile_auto_applied
+string profile_bt_applied
+string profile_bt_device_label
+string profile_bt_none
 string profile_cancel
 string profile_default_badge
 string profile_delete
@@ -431,6 +444,11 @@ string settings_language_it
 string settings_language_pick_msg
 string settings_language_pick_title
 string settings_language_pt
+string settings_theme
+string settings_theme_auto
+string settings_theme_dark
+string settings_theme_desc
+string settings_theme_light
 string shortcuts_action_adas
 string shortcuts_action_aeb
 string shortcuts_action_apply_profile

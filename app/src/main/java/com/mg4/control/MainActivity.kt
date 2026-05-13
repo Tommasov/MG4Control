@@ -18,6 +18,7 @@ import com.mg4.control.update.UpdateChecker
 import com.mg4.control.update.UpdateDialogManager
 import com.mg4.control.util.FirmwareInfo
 import com.mg4.control.util.LocaleHelper
+import com.mg4.control.util.ThemeHelper
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +34,9 @@ class MainActivity : AppCompatActivity() {
         // Init firmware EN PREMIER — avant toute inflation de fragment
         // Charge le mode forcé éventuel depuis les prefs
         FirmwareInfo.initWithContext(this)
+
+        // [THEME-AUTO] Recrée l'activité quand le launcher MG change de thème en mode "auto"
+        ThemeHelper.onThemeChanged = { recreate() }
 
         // Premier lancement : choix de la langue avant tout
         if (LocaleHelper.isFirstLaunch(this)) {

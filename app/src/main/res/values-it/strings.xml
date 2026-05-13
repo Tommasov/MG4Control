@@ -106,6 +106,9 @@
     <string name="profile_applied">Profilo applicato: %s</string>
     <string name="profile_max_reached">Massimo %d profili raggiunto</string>
     <string name="profile_auto_applied">Profilo predefinito applicato all\'avvio</string>
+    <string name="profile_bt_device_label">Dispositivo Bluetooth</string>
+    <string name="profile_bt_none">Nessuno</string>
+    <string name="profile_bt_applied">Profilo BT applicato: %s</string>
 
     <!-- ADAS -->
     <string name="adas_section_sounds">Avvisi sonori</string>
@@ -221,6 +224,11 @@
     <string name="settings_default_screen_dashboard">Dashboard</string>
     <string name="settings_auto_apply">Applica profilo all\'avvio</string>
     <string name="settings_auto_apply_desc">Il profilo predefinito viene applicato automaticamente all\'avvio</string>
+    <string name="settings_theme">Aspetto</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_theme_dark">Modalità scura</string>
+    <string name="settings_theme_light">Modalità chiara</string>
+    <string name="settings_theme_desc">Passa dal tema scuro al tema chiaro</string>
     <string name="settings_language">Lingua</string>
     <string name="settings_language_fr">Français</string>
     <string name="settings_language_en">English</string>

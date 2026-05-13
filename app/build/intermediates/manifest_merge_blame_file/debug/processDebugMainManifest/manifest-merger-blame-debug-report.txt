@@ -35,215 +35,223 @@
 21    <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
 21-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:14:5-82
 21-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:14:22-79
-22    <!-- Mise à jour automatique -->
-23    <uses-permission android:name="android.permission.INTERNET" />
-23-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:16:5-67
-23-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:16:22-64
-24    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-24-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:17:5-79
-24-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:17:22-76
-25    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
-25-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:18:5-75
-25-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:18:22-72
-26
-27    <permission
-27-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
-28        android:name="com.mg4.control.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-28-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
-29        android:protectionLevel="signature" />
-29-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
+22    <!-- [BT-PROFILES] Bluetooth — lecture des appareils appairés et suivi connexions -->
+23    <uses-permission android:name="android.permission.BLUETOOTH" />
+23-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:16:5-68
+23-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:16:22-65
+24    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+24-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:17:5-76
+24-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:17:22-73
+25
+26    <!-- Mise à jour automatique -->
+27    <uses-permission android:name="android.permission.INTERNET" />
+27-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:20:5-67
+27-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:20:22-64
+28    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+28-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:21:5-79
+28-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:21:22-76
+29    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+29-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:22:5-75
+29-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:22:22-72
 30
-31    <uses-permission android:name="com.mg4.control.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-31-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
-31-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
-32
-33    <application
-33-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:20:5-77:19
-34        android:name="com.mg4.control.MG4App"
-34-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:21:9-31
-35        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-35-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
-36        android:debuggable="true"
-37        android:extractNativeLibs="false"
-38        android:icon="@mipmap/ic_launcher"
-38-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:23:9-43
-39        android:label="@string/app_name"
-39-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:22:9-41
-40        android:roundIcon="@mipmap/ic_launcher_round"
-40-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:24:9-54
-41        android:supportsRtl="true"
-41-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:26:9-35
-42        android:theme="@style/Theme.MG4Control" >
-42-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:25:9-48
-43        <activity
-43-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:28:9-37:20
-44            android:name="com.mg4.control.MainActivity"
-44-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:29:13-41
-45            android:exported="true"
-45-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:30:13-36
-46            android:screenOrientation="landscape"
-46-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:31:13-50
-47            android:windowSoftInputMode="adjustPan" >
-47-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:32:13-52
-48            <intent-filter>
-48-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:33:13-36:29
-49                <action android:name="android.intent.action.MAIN" />
-49-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:34:17-69
-49-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:34:25-66
-50
-51                <category android:name="android.intent.category.LAUNCHER" />
-51-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:35:17-77
-51-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:35:27-74
-52            </intent-filter>
-53        </activity>
+31    <permission
+31-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
+32        android:name="com.mg4.control.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+32-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
+33        android:protectionLevel="signature" />
+33-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
+34
+35    <uses-permission android:name="com.mg4.control.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+35-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
+35-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
+36
+37    <application
+37-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:24:5-81:19
+38        android:name="com.mg4.control.MG4App"
+38-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:25:9-31
+39        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+39-->[androidx.core:core:1.13.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0ce487e8221e59d02f8b86b39a222437\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
+40        android:debuggable="true"
+41        android:extractNativeLibs="false"
+42        android:icon="@mipmap/ic_launcher"
+42-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:27:9-43
+43        android:label="@string/app_name"
+43-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:26:9-41
+44        android:roundIcon="@mipmap/ic_launcher_round"
+44-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:28:9-54
+45        android:supportsRtl="true"
+45-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:30:9-35
+46        android:theme="@style/Theme.MG4Control" >
+46-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:29:9-48
+47        <activity
+47-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:32:9-41:20
+48            android:name="com.mg4.control.MainActivity"
+48-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:33:13-41
+49            android:exported="true"
+49-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:34:13-36
+50            android:screenOrientation="landscape"
+50-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:35:13-50
+51            android:windowSoftInputMode="adjustPan" >
+51-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:36:13-52
+52            <intent-filter>
+52-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:37:13-40:29
+53                <action android:name="android.intent.action.MAIN" />
+53-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:38:17-69
+53-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:38:25-66
 54
-55        <service
-55-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:39:9-42:46
-56            android:name="com.mg4.control.service.MG4ControlService"
-56-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:40:13-54
-57            android:directBootAware="true"
-57-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:42:13-43
-58            android:exported="false" />
-58-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:41:13-37
-59
-60        <!-- FileProvider pour ouvrir l'APK dans le gestionnaire de fichiers AAOS -->
-61        <provider
-61-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:45:9-53:20
-62            android:name="androidx.core.content.FileProvider"
-62-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:46:13-62
-63            android:authorities="com.mg4.control.fileprovider"
-63-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:47:13-63
-64            android:exported="false"
-64-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:48:13-37
-65            android:grantUriPermissions="true" >
-65-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:49:13-47
-66            <meta-data
-66-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:50:13-52:63
-67                android:name="android.support.FILE_PROVIDER_PATHS"
-67-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:51:17-67
-68                android:resource="@xml/file_provider_paths" />
-68-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:52:17-60
-69        </provider>
-70
-71        <!-- Récepteur résultat d'installation silencieuse -->
-72        <receiver
-72-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:56:9-62:20
-73            android:name="com.mg4.control.update.InstallReceiver"
-73-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:57:13-51
-74            android:exported="false" >
-74-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:58:13-37
-75            <intent-filter>
-75-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:59:13-61:29
-76                <action android:name="com.mg4.control.ACTION_INSTALL_STATUS" />
-76-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:60:17-80
-76-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:60:25-77
-77            </intent-filter>
-78        </receiver>
-79        <receiver
-79-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:64:9-75:20
-80            android:name="com.mg4.control.receiver.BootReceiver"
-80-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:65:13-50
-81            android:directBootAware="true"
-81-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:67:13-43
-82            android:exported="true"
-82-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:66:13-36
-83            android:priority="1000" >
-83-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:68:13-36
-84            <intent-filter>
-84-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:69:13-74:29
-85                <action android:name="android.intent.action.BOOT_COMPLETED" />
-85-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:70:17-79
-85-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:70:25-76
-86                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-86-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:71:17-86
-86-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:71:25-83
-87                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-87-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:72:17-82
-87-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:72:25-79
-88                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-88-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:73:17-82
-88-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:73:25-79
-89            </intent-filter>
-90        </receiver>
-91
-92        <provider
-92-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
-93            android:name="androidx.startup.InitializationProvider"
-93-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:25:13-67
-94            android:authorities="com.mg4.control.androidx-startup"
-94-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:26:13-68
-95            android:exported="false" >
-95-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:27:13-37
-96            <meta-data
-96-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
-97                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-97-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:30:17-75
-98                android:value="androidx.startup" />
-98-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
-99            <meta-data
-99-->[androidx.lifecycle:lifecycle-process:2.8.6] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\2d8c78b46d8d1e1ea0cee04ae55150b4\transformed\jetified-lifecycle-process-2.8.6\AndroidManifest.xml:29:13-31:52
-100                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-100-->[androidx.lifecycle:lifecycle-process:2.8.6] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\2d8c78b46d8d1e1ea0cee04ae55150b4\transformed\jetified-lifecycle-process-2.8.6\AndroidManifest.xml:30:17-78
-101                android:value="androidx.startup" />
-101-->[androidx.lifecycle:lifecycle-process:2.8.6] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\2d8c78b46d8d1e1ea0cee04ae55150b4\transformed\jetified-lifecycle-process-2.8.6\AndroidManifest.xml:31:17-49
-102            <meta-data
-102-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
-103                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
-103-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
-104                android:value="androidx.startup" />
-104-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
-105        </provider>
-106
-107        <uses-library
-107-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:25:9-27:40
-108            android:name="androidx.window.extensions"
-108-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:26:13-54
-109            android:required="false" />
-109-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:27:13-37
-110        <uses-library
-110-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:28:9-30:40
-111            android:name="androidx.window.sidecar"
-111-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:29:13-51
-112            android:required="false" />
-112-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:30:13-37
-113
-114        <receiver
-114-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
-115            android:name="androidx.profileinstaller.ProfileInstallReceiver"
-115-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
-116            android:directBootAware="false"
-116-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
-117            android:enabled="true"
-117-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
-118            android:exported="true"
-118-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
-119            android:permission="android.permission.DUMP" >
-119-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
-120            <intent-filter>
-120-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
-121                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
-121-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
-121-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
-122            </intent-filter>
-123            <intent-filter>
-123-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
-124                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
-124-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
-124-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
-125            </intent-filter>
-126            <intent-filter>
-126-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
-127                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
-127-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
-127-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
-128            </intent-filter>
-129            <intent-filter>
-129-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
-130                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
-130-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
-130-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
-131            </intent-filter>
-132        </receiver>
-133    </application>
-134
-135</manifest>
+55                <category android:name="android.intent.category.LAUNCHER" />
+55-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:39:17-77
+55-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:39:27-74
+56            </intent-filter>
+57        </activity>
+58
+59        <service
+59-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:43:9-46:46
+60            android:name="com.mg4.control.service.MG4ControlService"
+60-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:44:13-54
+61            android:directBootAware="true"
+61-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:46:13-43
+62            android:exported="false" />
+62-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:45:13-37
+63
+64        <!-- FileProvider pour ouvrir l'APK dans le gestionnaire de fichiers AAOS -->
+65        <provider
+65-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:49:9-57:20
+66            android:name="androidx.core.content.FileProvider"
+66-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:50:13-62
+67            android:authorities="com.mg4.control.fileprovider"
+67-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:51:13-63
+68            android:exported="false"
+68-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:52:13-37
+69            android:grantUriPermissions="true" >
+69-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:53:13-47
+70            <meta-data
+70-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:54:13-56:63
+71                android:name="android.support.FILE_PROVIDER_PATHS"
+71-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:55:17-67
+72                android:resource="@xml/file_provider_paths" />
+72-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:56:17-60
+73        </provider>
+74
+75        <!-- Récepteur résultat d'installation silencieuse -->
+76        <receiver
+76-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:60:9-66:20
+77            android:name="com.mg4.control.update.InstallReceiver"
+77-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:61:13-51
+78            android:exported="false" >
+78-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:62:13-37
+79            <intent-filter>
+79-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:63:13-65:29
+80                <action android:name="com.mg4.control.ACTION_INSTALL_STATUS" />
+80-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:64:17-80
+80-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:64:25-77
+81            </intent-filter>
+82        </receiver>
+83        <receiver
+83-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:68:9-79:20
+84            android:name="com.mg4.control.receiver.BootReceiver"
+84-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:69:13-50
+85            android:directBootAware="true"
+85-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:71:13-43
+86            android:exported="true"
+86-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:70:13-36
+87            android:priority="1000" >
+87-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:72:13-36
+88            <intent-filter>
+88-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:73:13-78:29
+89                <action android:name="android.intent.action.BOOT_COMPLETED" />
+89-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:74:17-79
+89-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:74:25-76
+90                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+90-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:75:17-86
+90-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:75:25-83
+91                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+91-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:76:17-82
+91-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:76:25-79
+92                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+92-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:77:17-82
+92-->C:\Users\SliDS\Documents\MG4 Project\MG4Control\app\src\main\AndroidManifest.xml:77:25-79
+93            </intent-filter>
+94        </receiver>
+95
+96        <provider
+96-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+97            android:name="androidx.startup.InitializationProvider"
+97-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:25:13-67
+98            android:authorities="com.mg4.control.androidx-startup"
+98-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:26:13-68
+99            android:exported="false" >
+99-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:27:13-37
+100            <meta-data
+100-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+101                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+101-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:30:17-75
+102                android:value="androidx.startup" />
+102-->[androidx.emoji2:emoji2:1.3.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\9b293c9c73f2291df0392b92edcde5c4\transformed\jetified-emoji2-1.3.0\AndroidManifest.xml:31:17-49
+103            <meta-data
+103-->[androidx.lifecycle:lifecycle-process:2.8.6] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\2d8c78b46d8d1e1ea0cee04ae55150b4\transformed\jetified-lifecycle-process-2.8.6\AndroidManifest.xml:29:13-31:52
+104                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+104-->[androidx.lifecycle:lifecycle-process:2.8.6] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\2d8c78b46d8d1e1ea0cee04ae55150b4\transformed\jetified-lifecycle-process-2.8.6\AndroidManifest.xml:30:17-78
+105                android:value="androidx.startup" />
+105-->[androidx.lifecycle:lifecycle-process:2.8.6] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\2d8c78b46d8d1e1ea0cee04ae55150b4\transformed\jetified-lifecycle-process-2.8.6\AndroidManifest.xml:31:17-49
+106            <meta-data
+106-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+107                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+107-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+108                android:value="androidx.startup" />
+108-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+109        </provider>
+110
+111        <uses-library
+111-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:25:9-27:40
+112            android:name="androidx.window.extensions"
+112-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:26:13-54
+113            android:required="false" />
+113-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:27:13-37
+114        <uses-library
+114-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:28:9-30:40
+115            android:name="androidx.window.sidecar"
+115-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:29:13-51
+116            android:required="false" />
+116-->[androidx.window:window:1.0.0] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\0089ec66a86229ea9039792f27c8d141\transformed\jetified-window-1.0.0\AndroidManifest.xml:30:13-37
+117
+118        <receiver
+118-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+119            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+119-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+120            android:directBootAware="false"
+120-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+121            android:enabled="true"
+121-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+122            android:exported="true"
+122-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+123            android:permission="android.permission.DUMP" >
+123-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+124            <intent-filter>
+124-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+125                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+126            </intent-filter>
+127            <intent-filter>
+127-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+128                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+128-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+128-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+129            </intent-filter>
+130            <intent-filter>
+130-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+131                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+131-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+131-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+132            </intent-filter>
+133            <intent-filter>
+133-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+134                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+134-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+134-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\SliDS\.gradle\caches\9.0.0\transforms\dd567882e728e1ae6c1fff5964f876c7\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+135            </intent-filter>
+136        </receiver>
+137    </application>
+138
+139</manifest>

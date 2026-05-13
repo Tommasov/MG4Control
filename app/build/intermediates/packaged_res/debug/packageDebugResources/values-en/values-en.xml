@@ -28,6 +28,11 @@
     <string name="aeb_sensitivity_low">Low</string>
     <string name="aeb_sensitivity_standard">Standard</string>
     <string name="app_name">MG4 Control</string>
+    <string name="bt_no_device">None</string>
+    <string name="bt_no_paired_devices">No paired devices</string>
+    <string name="bt_pick_device_title">Bluetooth device</string>
+    <string name="bt_profile_applied">Profile applied via Bluetooth: %s</string>
+    <string name="bt_section_title">Bluetooth</string>
     <string name="btn_check_update">Check for updates</string>
     <string name="btn_clean_apk">Clean APK</string>
     <string name="btn_diagnostic">Diagnostic</string>
@@ -96,6 +101,9 @@
     <string name="profile_applied">Profile applied: %s</string>
     <string name="profile_apply_now">Apply now</string>
     <string name="profile_auto_applied">Default profile applied at startup</string>
+    <string name="profile_bt_applied">BT profile applied: %s</string>
+    <string name="profile_bt_device_label">Bluetooth device</string>
+    <string name="profile_bt_none">None</string>
     <string name="profile_cancel">Cancel</string>
     <string name="profile_default_badge">DEFAULT</string>
     <string name="profile_delete">Delete</string>
@@ -130,6 +138,11 @@
     <string name="settings_language_pick_msg">This can be changed later in Settings.</string>
     <string name="settings_language_pick_title">Choose your language</string>
     <string name="settings_language_pt">Português</string>
+    <string name="settings_theme">Appearance</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_theme_dark">Dark mode</string>
+    <string name="settings_theme_desc">Switch between dark and light theme</string>
+    <string name="settings_theme_light">Light mode</string>
     <string name="shortcuts_action_adas">ADAS</string>
     <string name="shortcuts_action_aeb">Anticollision system</string>
     <string name="shortcuts_action_apply_profile">Launch a profile</string>

@@ -6,6 +6,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import androidx.appcompat.app.AppCompatDelegate
+import com.mg4.control.util.ThemeHelper
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
@@ -112,6 +114,39 @@ class SettingsFragment : Fragment() {
                 updateDefaultScreenButtons(key)
             }
         }
+
+        // ── Thème : Auto / Sombre / Clair ───────────────────────────────────
+        val btnThemeAuto  = view.findViewById<MaterialButton>(R.id.btn_theme_auto)
+        val btnThemeDark  = view.findViewById<MaterialButton>(R.id.btn_theme_dark)
+        val btnThemeLight = view.findViewById<MaterialButton>(R.id.btn_theme_light)
+
+        val themeBtns = listOf("auto" to btnThemeAuto, "dark" to btnThemeDark, "light" to btnThemeLight)
+
+        fun updateThemeButtons(mode: String) {
+            themeBtns.forEach { (key, btn) ->
+                val active = key == mode
+                btn.backgroundTintList = ColorStateList.valueOf(if (active) accentDim else inactiveColor)
+                btn.setTextColor(if (active) textActive else textInactive)
+                btn.strokeColor = ColorStateList.valueOf(
+                    if (active) accentColor else requireContext().getColor(R.color.dash_border)
+                )
+            }
+        }
+
+        val currentMode = prefs.getString(ThemeHelper.PREF_THEME_MODE, "auto") ?: "auto"
+        updateThemeButtons(currentMode)
+
+        fun applyThemeMode(mode: String) {
+            if (prefs.getString(ThemeHelper.PREF_THEME_MODE, null) == mode) return
+            prefs.edit().putString(ThemeHelper.PREF_THEME_MODE, mode).apply()
+            updateThemeButtons(mode)
+            AppCompatDelegate.setDefaultNightMode(ThemeHelper.resolveNightMode(requireContext()))
+            requireActivity().recreate()
+        }
+
+        btnThemeAuto.setOnClickListener  { applyThemeMode("auto")  }
+        btnThemeDark.setOnClickListener  { applyThemeMode("dark")  }
+        btnThemeLight.setOnClickListener { applyThemeMode("light") }
 
         // ── Auto-apply ───────────────────────────────────────────────────────
         val switchAutoApply = view.findViewById<Switch>(R.id.switch_auto_apply)
