@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:text="@string/aeb_card_title"
             android:textColor="@color/dash_text_lo"
-            android:textSize="9sp"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
             android:textAllCaps="true"
@@ -69,7 +69,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/elk_section_toggle"
                     android:textColor="@color/dash_text_lo"
-                    android:textSize="9sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.12"
                     android:textAllCaps="true"
@@ -112,7 +112,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/elk_section_mode"
                     android:textColor="@color/dash_text_lo"
-                    android:textSize="9sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.12"
                     android:textAllCaps="true"
@@ -133,7 +133,7 @@
                     android:text="@string/adas_aeb_alarm"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
                 <Button
@@ -144,7 +144,7 @@
                     android:text="@string/adas_aeb_alarm_brake"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
             </LinearLayout>
@@ -164,7 +164,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/aeb_section_sensitivity"
                     android:textColor="@color/dash_text_lo"
-                    android:textSize="9sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.12"
                     android:textAllCaps="true"
@@ -185,7 +185,7 @@
                     android:text="@string/aeb_sensitivity_low"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
                 <Button
@@ -197,7 +197,7 @@
                     android:text="@string/aeb_sensitivity_standard"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
                 <Button
@@ -208,7 +208,7 @@
                     android:text="@string/aeb_sensitivity_high"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
             </LinearLayout>
@@ -233,7 +233,7 @@
             android:layout_height="wrap_content"
             android:text="@string/elk_card_title"
             android:textColor="@color/dash_text_lo"
-            android:textSize="9sp"
+            android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
             android:textAllCaps="true"
@@ -270,7 +270,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/elk_section_toggle"
                     android:textColor="@color/dash_text_lo"
-                    android:textSize="9sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.12"
                     android:textAllCaps="true"
@@ -313,7 +313,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/elk_section_mode"
                     android:textColor="@color/dash_text_lo"
-                    android:textSize="9sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.12"
                     android:textAllCaps="true"
@@ -334,7 +334,7 @@
                     android:text="@string/elk_mode_alert"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
                 <Button
@@ -346,7 +346,7 @@
                     android:text="@string/elk_mode_assist"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
                 <Button
@@ -357,7 +357,7 @@
                     android:text="@string/elk_mode_emergency"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
             </LinearLayout>
@@ -377,7 +377,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/elk_section_sensitivity"
                     android:textColor="@color/dash_text_lo"
-                    android:textSize="9sp"
+                    android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.12"
                     android:textAllCaps="true"
@@ -398,7 +398,7 @@
                     android:text="@string/elk_sensitivity_low"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
                 <Button
@@ -410,7 +410,7 @@
                     android:text="@string/elk_sensitivity_standard"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
                 <Button
@@ -421,7 +421,7 @@
                     android:text="@string/elk_sensitivity_high"
                     android:textColor="@color/text_secondary"
                     android:backgroundTint="@color/dash_btn"
-                    android:textSize="10sp"
+                    android:textSize="16sp"
                     android:textAllCaps="true" />
 
             </LinearLayout>
