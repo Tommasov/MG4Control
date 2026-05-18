@@ -85,7 +85,7 @@ class ProfileFragment : Fragment() {
 
         // ── Bouton Fermer ─────────────────────────────────────────────────────
         view.findViewById<MaterialButton>(R.id.btn_close_profiles).setOnClickListener {
-            findNavController().popBackStack()
+            findNavController().popBackStack(R.id.dashboardFragment, false)
         }
 
         view.findViewById<View>(R.id.btn_add_profile).setOnClickListener {
@@ -118,7 +118,9 @@ class ProfileFragment : Fragment() {
             val isSWI132 = FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI132
             val prefill = if (FirmwareInfo.isVsmBased()) {
                 // SWI68/SWI69/SWI131/SWI132/SWI165 : ADAS ACC/TJA — sièges/volant uniquement sur SWI68/SWI165
-                val elkMode = MG4Hardware.getElkMode().let { if (it < 1) ElkMode.EMERGENCY else it }
+                val elkMode = MG4Hardware.getElkMode().let {
+                    if (it < 1) (if (isSWI132) ElkMode.ALERT else ElkMode.EMERGENCY) else it
+                }
                 val elkSen  = MG4Hardware.getElkSensitivity().let { if (it < 1) ElkSensitivity.STANDARD else it }
                 DrivingProfile(
                     name          = "",
@@ -137,6 +139,8 @@ class ProfileFragment : Fragment() {
                     aebSensitivity = MG4Hardware.getAebSensitivity().let { if (it < 1) AebSensitivity.STANDARD else it },
                     elkMode        = elkMode,
                     elkSensitivity = elkSen,
+                    lasAudibleWarning    = if (isSWI132) (MG4Hardware.getLasWarningSound() == 1) else true,
+                    lasVibrationReminder = if (isSWI132) (MG4Hardware.getLasWarningVibration() == 1) else true,
                     energySaving   = MG4Hardware.isEnergySavingOn(),
                     tsrEnabled     = MG4Hardware.isTsrOn()
                 )
@@ -217,6 +221,8 @@ class ProfileFragment : Fragment() {
         var elkEnabledSel   = elkModeSel != ElkMode.OFF
         /** Dernier mode ELK actif pour restauration après toggle ON */
         var lastActiveElkModeD = if (elkModeSel != ElkMode.OFF) elkModeSel else ElkMode.EMERGENCY
+        var lasAudibleWarningSel   = data.lasAudibleWarning
+        var lasVibrationReminderSel = data.lasVibrationReminder
         var energySavingSel = data.energySaving
         var tsrEnabledSel   = data.tsrEnabled
 
@@ -365,6 +371,7 @@ class ProfileFragment : Fragment() {
         val sectionElk = dialogView.findViewById<View>(R.id.elk_section_dialog)
         if (gen != FirmwareInfo.Gen.UNKNOWN) {
             sectionElk.visibility = View.VISIBLE
+            val isSWI132elk = gen == FirmwareInfo.Gen.SWI132
 
             val swElk           = dialogView.findViewById<Switch>(R.id.sw_elk_enabled)
             val btnElkAlertD    = dialogView.findViewById<MaterialButton>(R.id.btn_elk_alert_d)
@@ -374,30 +381,63 @@ class ProfileFragment : Fragment() {
             val btnElkSenStdD   = dialogView.findViewById<MaterialButton>(R.id.btn_elk_sen_standard_d)
             val btnElkSenHighD  = dialogView.findViewById<MaterialButton>(R.id.btn_elk_sen_high_d)
 
-            val elkModeBtns = listOf(btnElkAlertD, btnElkAssistD, btnElkEmergD)
+            // SWI132 : pas de mode Emergency + 2 switches supplémentaires
+            if (isSWI132elk) {
+                btnElkEmergD?.visibility = View.GONE
+                dialogView.findViewById<View>(R.id.elk_sound_row_d)?.visibility = View.VISIBLE
+                dialogView.findViewById<View>(R.id.elk_vibration_row_d)?.visibility = View.VISIBLE
+                if (elkModeSel == ElkMode.EMERGENCY) {
+                    elkModeSel = ElkMode.ALERT
+                    lastActiveElkModeD = ElkMode.ALERT
+                    elkEnabledSel = true
+                }
+            }
+
+            val elkModeBtns = if (isSWI132elk)
+                listOf(btnElkAlertD, btnElkAssistD)
+            else
+                listOf(btnElkAlertD, btnElkAssistD, btnElkEmergD)
             val elkSenBtns  = listOf(btnElkSenLowD, btnElkSenStdD, btnElkSenHighD)
+
+            val swElkSound    = dialogView.findViewById<Switch?>(R.id.sw_elk_sound_d)
+            val swElkVibration= dialogView.findViewById<Switch?>(R.id.sw_elk_vibration_d)
 
             fun setElkButtonsEnabled(enabled: Boolean) {
                 (elkModeBtns + elkSenBtns).forEach { btn ->
-                    btn.isEnabled = enabled
-                    btn.alpha     = if (enabled) 1f else 0.35f
+                    btn?.isEnabled = enabled
+                    btn?.alpha     = if (enabled) 1f else 0.35f
+                }
+                if (isSWI132elk) {
+                    swElkSound?.isEnabled = enabled
+                    swElkSound?.alpha     = if (enabled) 1f else 0.35f
+                    swElkVibration?.isEnabled = enabled
+                    swElkVibration?.alpha     = if (enabled) 1f else 0.35f
                 }
             }
 
             swElk.isChecked = elkEnabledSel
             setElkButtonsEnabled(elkEnabledSel)
+
+            if (isSWI132elk) {
+                swElkSound?.isChecked    = lasAudibleWarningSel
+                swElkVibration?.isChecked= lasVibrationReminderSel
+                swElkSound?.setOnCheckedChangeListener { _, checked -> lasAudibleWarningSel = checked }
+                swElkVibration?.setOnCheckedChangeListener { _, checked -> lasVibrationReminderSel = checked }
+            }
+
             swElk.setOnCheckedChangeListener { _, checked ->
                 elkEnabledSel = checked
                 elkModeSel = if (checked) lastActiveElkModeD else ElkMode.OFF
                 setElkButtonsEnabled(checked)
             }
 
-            val elkModePairs = listOf(
-                btnElkAlertD  to ElkMode.ALERT,
-                btnElkAssistD to ElkMode.ASSIST,
-                btnElkEmergD  to ElkMode.EMERGENCY
-            )
-            bindGroup(elkModePairs, if (elkEnabledSel) elkModeSel else ElkMode.EMERGENCY) { mode ->
+            val initialElkMode = if (isSWI132elk && elkModeSel == ElkMode.EMERGENCY) ElkMode.ALERT
+                                  else if (elkEnabledSel) elkModeSel else ElkMode.ALERT
+            val elkModePairs = if (isSWI132elk)
+                listOf(btnElkAlertD to ElkMode.ALERT, btnElkAssistD to ElkMode.ASSIST)
+            else
+                listOf(btnElkAlertD to ElkMode.ALERT, btnElkAssistD to ElkMode.ASSIST, btnElkEmergD to ElkMode.EMERGENCY)
+            bindGroup(elkModePairs, initialElkMode) { mode ->
                 elkModeSel = mode
                 lastActiveElkModeD = mode
             }
@@ -585,6 +625,8 @@ class ProfileFragment : Fragment() {
                 aebSensitivity = aebSenSel,
                 elkMode        = elkModeSel,
                 elkSensitivity = elkSenSel,
+                lasAudibleWarning    = lasAudibleWarningSel,
+                lasVibrationReminder = lasVibrationReminderSel,
                 energySaving   = energySavingSel,
                 tsrEnabled     = tsrEnabledSel,
                 btDeviceMac    = selectedBtMac   // [BT-PROFILES]

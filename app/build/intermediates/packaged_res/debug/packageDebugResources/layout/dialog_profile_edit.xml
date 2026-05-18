@@ -1184,6 +1184,52 @@
                             android:layout_width="wrap_content" android:layout_height="wrap_content" />
                     </LinearLayout>
 
+                        <!-- SWI132 : Alerte sonore (visibility=gone par défaut) -->
+                        <LinearLayout
+                            android:id="@+id/elk_sound_row_d"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingTop="6dp"
+                            android:visibility="gone">
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/elk_sound_warning"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp"
+                                android:textAllCaps="false" />
+                            <Switch
+                                android:id="@+id/sw_elk_sound_d"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <!-- SWI132 : Vibration (visibility=gone par défaut) -->
+                        <LinearLayout
+                            android:id="@+id/elk_vibration_row_d"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingTop="6dp"
+                            android:visibility="gone">
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/elk_vibration_reminder"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp"
+                                android:textAllCaps="false" />
+                            <Switch
+                                android:id="@+id/sw_elk_vibration_d"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
                     <!-- Mode : Alerte / Aider / Maintien d'urgence -->
                     <LinearLayout
                         android:layout_width="match_parent"

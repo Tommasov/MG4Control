@@ -168,6 +168,12 @@ public final class DialogProfileEditBinding implements ViewBinding {
   public final LinearLayout elkSectionDialog;
 
   @NonNull
+  public final LinearLayout elkSoundRowD;
+
+  @NonNull
+  public final LinearLayout elkVibrationRowD;
+
+  @NonNull
   public final TextInputEditText etProfileName;
 
   @NonNull
@@ -202,6 +208,12 @@ public final class DialogProfileEditBinding implements ViewBinding {
 
   @NonNull
   public final Switch swElkEnabled;
+
+  @NonNull
+  public final Switch swElkSoundD;
+
+  @NonNull
+  public final Switch swElkVibrationD;
 
   @NonNull
   public final Switch swOverspeedAlarm;
@@ -252,12 +264,14 @@ public final class DialogProfileEditBinding implements ViewBinding {
       @NonNull MaterialButton btnSr1D, @NonNull MaterialButton btnSr2D,
       @NonNull MaterialButton btnSr3D, @NonNull MaterialButton btnSteerOffD,
       @NonNull MaterialButton btnSteerOnD, @NonNull LinearLayout elkSectionDialog,
+      @NonNull LinearLayout elkSoundRowD, @NonNull LinearLayout elkVibrationRowD,
       @NonNull TextInputEditText etProfileName, @NonNull LinearLayout rowOverspeedD,
       @NonNull LinearLayout rowSoundWarningD, @NonNull LinearLayout rowSpeedToneD,
       @NonNull LinearLayout sectionBtProfile, @NonNull LinearLayout sectionRegenDialog,
       @NonNull LinearLayout sectionSeatsDialog, @NonNull LinearLayout sectionSteeringDialog,
       @NonNull LinearLayout sectionTsrDialog, @NonNull Spinner spinnerBtDevice,
-      @NonNull Switch swAebEnabled, @NonNull Switch swElkEnabled, @NonNull Switch swOverspeedAlarm,
+      @NonNull Switch swAebEnabled, @NonNull Switch swElkEnabled, @NonNull Switch swElkSoundD,
+      @NonNull Switch swElkVibrationD, @NonNull Switch swOverspeedAlarm,
       @NonNull Switch swOverspeedAlarmD, @NonNull Switch swSetDefault,
       @NonNull Switch swSoundWarning, @NonNull Switch swSpeedLimitTone,
       @NonNull Switch swSpeedLimitToneD, @NonNull Switch swTsrD, @NonNull TextView tvDialogTitle) {
@@ -310,6 +324,8 @@ public final class DialogProfileEditBinding implements ViewBinding {
     this.btnSteerOffD = btnSteerOffD;
     this.btnSteerOnD = btnSteerOnD;
     this.elkSectionDialog = elkSectionDialog;
+    this.elkSoundRowD = elkSoundRowD;
+    this.elkVibrationRowD = elkVibrationRowD;
     this.etProfileName = etProfileName;
     this.rowOverspeedD = rowOverspeedD;
     this.rowSoundWarningD = rowSoundWarningD;
@@ -322,6 +338,8 @@ public final class DialogProfileEditBinding implements ViewBinding {
     this.spinnerBtDevice = spinnerBtDevice;
     this.swAebEnabled = swAebEnabled;
     this.swElkEnabled = swElkEnabled;
+    this.swElkSoundD = swElkSoundD;
+    this.swElkVibrationD = swElkVibrationD;
     this.swOverspeedAlarm = swOverspeedAlarm;
     this.swOverspeedAlarmD = swOverspeedAlarmD;
     this.swSetDefault = swSetDefault;
@@ -647,6 +665,18 @@ public final class DialogProfileEditBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.elk_sound_row_d;
+      LinearLayout elkSoundRowD = ViewBindings.findChildViewById(rootView, id);
+      if (elkSoundRowD == null) {
+        break missingId;
+      }
+
+      id = R.id.elk_vibration_row_d;
+      LinearLayout elkVibrationRowD = ViewBindings.findChildViewById(rootView, id);
+      if (elkVibrationRowD == null) {
+        break missingId;
+      }
+
       id = R.id.et_profile_name;
       TextInputEditText etProfileName = ViewBindings.findChildViewById(rootView, id);
       if (etProfileName == null) {
@@ -719,6 +749,18 @@ public final class DialogProfileEditBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.sw_elk_sound_d;
+      Switch swElkSoundD = ViewBindings.findChildViewById(rootView, id);
+      if (swElkSoundD == null) {
+        break missingId;
+      }
+
+      id = R.id.sw_elk_vibration_d;
+      Switch swElkVibrationD = ViewBindings.findChildViewById(rootView, id);
+      if (swElkVibrationD == null) {
+        break missingId;
+      }
+
       id = R.id.sw_overspeed_alarm;
       Switch swOverspeedAlarm = ViewBindings.findChildViewById(rootView, id);
       if (swOverspeedAlarm == null) {
@@ -776,9 +818,10 @@ public final class DialogProfileEditBinding implements ViewBinding {
           btnElkEmergencyD, btnElkSenHighD, btnElkSenLowD, btnElkSenStandardD, btnEnergySavingD,
           btnRegenAdaptiveD, btnRegenHighD, btnRegenLowD, btnRegenMediumD, btnRegenOffD,
           btnRegenOnePedalD, btnSl0D, btnSl1D, btnSl2D, btnSl3D, btnSr0D, btnSr1D, btnSr2D, btnSr3D,
-          btnSteerOffD, btnSteerOnD, elkSectionDialog, etProfileName, rowOverspeedD,
-          rowSoundWarningD, rowSpeedToneD, sectionBtProfile, sectionRegenDialog, sectionSeatsDialog,
-          sectionSteeringDialog, sectionTsrDialog, spinnerBtDevice, swAebEnabled, swElkEnabled,
+          btnSteerOffD, btnSteerOnD, elkSectionDialog, elkSoundRowD, elkVibrationRowD,
+          etProfileName, rowOverspeedD, rowSoundWarningD, rowSpeedToneD, sectionBtProfile,
+          sectionRegenDialog, sectionSeatsDialog, sectionSteeringDialog, sectionTsrDialog,
+          spinnerBtDevice, swAebEnabled, swElkEnabled, swElkSoundD, swElkVibrationD,
           swOverspeedAlarm, swOverspeedAlarmD, swSetDefault, swSoundWarning, swSpeedLimitTone,
           swSpeedLimitToneD, swTsrD, tvDialogTitle);
     }

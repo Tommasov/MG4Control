@@ -74,6 +74,7 @@ object UpdateChecker {
 
                 if (isNewer(versionName, currentVersion)) {
                     if (versionName == skippedVersion) {
+                        AppLogger.i(TAG, "Mise à jour $versionName ignorée (utilisateur)")
                         withContext(Dispatchers.Main) { onNoUpdate?.invoke() }
                         return@launch
                     }
@@ -84,6 +85,7 @@ object UpdateChecker {
                     )
                     withContext(Dispatchers.Main) { onUpdateAvailable(info) }
                 } else {
+                    AppLogger.i(TAG, "Version actuelle ($currentVersion) à jour — pas de mise à jour")
                     withContext(Dispatchers.Main) { onNoUpdate?.invoke() }
                 }
 
@@ -159,14 +161,19 @@ object UpdateChecker {
             val notes   = json.optString("description", "").take(400)
 
             // Structure GitLab : assets.links[] (contrairement à assets[] sur GitHub)
+            // Le champ "name" est un libellé libre (ex: "MG4Control v1.2.0") — pas forcément
+            // le nom de fichier. On vérifie donc aussi l'URL elle-même en fallback.
             val links  = json.optJSONObject("assets")?.optJSONArray("links") ?: return null
             var apkUrl = ""
             for (i in 0 until links.length()) {
-                val link = links.getJSONObject(i)
-                if (link.getString("name").endsWith(".apk")) {
-                    apkUrl = link.optString("direct_asset_url").ifEmpty {
-                        link.optString("url")
-                    }
+                val link      = links.getJSONObject(i)
+                val linkName  = link.optString("name")
+                val linkUrl   = link.optString("direct_asset_url").ifEmpty {
+                    link.optString("url")
+                }
+                if (linkName.endsWith(".apk", ignoreCase = true)
+                    || linkUrl.contains(".apk", ignoreCase = true)) {
+                    apkUrl = linkUrl
                     break
                 }
             }

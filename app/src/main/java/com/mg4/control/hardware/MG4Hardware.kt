@@ -1609,6 +1609,42 @@ object MG4Hardware {
     }
 
     /**
+     * SWI132 — Alerte sonore (LAS Warning Sound) : 0=OFF, 1=ON.
+     * Retourne -1 si erreur ou firmware non SWI132.
+     */
+    fun getLasWarningSound(): Int {
+        if (FirmwareInfo.getGeneration() != FirmwareInfo.Gen.SWI132) return -1
+        return (callVsm("getLasWarningSound") as? Int)?.also {
+            AppLogger.d(TAG, "  LAS GET sound=$it via VSM ✓")
+        } ?: -1
+    }
+
+    fun setLasWarningSound(enabled: Boolean): Boolean {
+        if (FirmwareInfo.getGeneration() != FirmwareInfo.Gen.SWI132) return false
+        AppLogger.i(TAG, "  LAS SET sound=${if (enabled) "ON" else "OFF"} via VSM")
+        callVsm("setLasWarningSound", if (enabled) 1 else 0)
+        return true
+    }
+
+    /**
+     * SWI132 — Rappel par vibration (LAS Warning Vibration) : 0=OFF, 1=ON.
+     * Retourne -1 si erreur ou firmware non SWI132.
+     */
+    fun getLasWarningVibration(): Int {
+        if (FirmwareInfo.getGeneration() != FirmwareInfo.Gen.SWI132) return -1
+        return (callVsm("getLasWarningVibration") as? Int)?.also {
+            AppLogger.d(TAG, "  LAS GET vibration=$it via VSM ✓")
+        } ?: -1
+    }
+
+    fun setLasWarningVibration(enabled: Boolean): Boolean {
+        if (FirmwareInfo.getGeneration() != FirmwareInfo.Gen.SWI132) return false
+        AppLogger.i(TAG, "  LAS SET vibration=${if (enabled) "ON" else "OFF"} via VSM")
+        callVsm("setLasWarningVibration", if (enabled) 1 else 0)
+        return true
+    }
+
+    /**
      * GET via IVehicleSettingService binder — layout smali :
      *   data : [writeInterfaceToken]
      *   transact(code, data, reply, 0)

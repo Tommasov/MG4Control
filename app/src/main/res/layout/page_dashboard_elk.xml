@@ -282,7 +282,9 @@
                     android:background="@color/dash_border"
                     android:layout_marginBottom="5dp" />
 
+                <!-- Non-SWI132 : switch centré (layout par défaut) -->
                 <LinearLayout
+                    android:id="@+id/elk_activation_simple"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
@@ -292,6 +294,81 @@
                         android:id="@+id/switch_elk"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+                <!-- SWI132 : 3 lignes labelisées — visibility=gone par défaut (affiché par code) -->
+                <LinearLayout
+                    android:id="@+id/elk_activation_swi132"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical"
+                    android:visibility="gone">
+
+                    <!-- Ligne ACTIVER -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/elk_label_enable"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:textAllCaps="false" />
+                        <Switch
+                            android:id="@+id/switch_elk_s132"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <!-- Ligne ALERTE SONORE -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/elk_sound_warning"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:textAllCaps="false" />
+                        <Switch
+                            android:id="@+id/switch_elk_sound"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <!-- Ligne VIBRATION -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/elk_vibration_reminder"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:textAllCaps="false" />
+                        <Switch
+                            android:id="@+id/switch_elk_vibration"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
 
                 </LinearLayout>
 

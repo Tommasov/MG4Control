@@ -76,6 +76,10 @@
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\xml\\file_provider_paths.xml"
     },
     {
+        "merged": "com.mg4.control.app-debug-48:/layout_page_dashboard_elk.xml.flat",
+        "source": "com.mg4.control.app-main-50:/layout/page_dashboard_elk.xml"
+    },
+    {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-48:\\layout_dialog_update.xml.flat",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\dialog_update.xml"
     },
@@ -128,16 +132,16 @@
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\mipmap-xxxhdpi\\ic_launcher_foreground.webp"
     },
     {
+        "merged": "com.mg4.control.app-debug-48:/layout_dialog_profile_edit.xml.flat",
+        "source": "com.mg4.control.app-main-50:/layout/dialog_profile_edit.xml"
+    },
+    {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-48:\\layout_page_dashboard_elk.xml.flat",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\page_dashboard_elk.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-48:\\layout_fragment_drive_regen.xml.flat",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_drive_regen.xml"
-    },
-    {
-        "merged": "com.mg4.control.app-debug-48:/layout_overlay_profile_picker.xml.flat",
-        "source": "com.mg4.control.app-main-50:/layout/overlay_profile_picker.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-debug-48:\\layout_dialog_profile_edit.xml.flat",

@@ -142,6 +142,9 @@
     <string name="elk_sensitivity_low">Faible</string>
     <string name="elk_sensitivity_standard">Standard</string>
     <string name="elk_sensitivity_high">Élevé</string>
+    <string name="elk_sound_warning">Alerte sonore</string>
+    <string name="elk_vibration_reminder">Vibration</string>
+    <string name="elk_label_enable">Activer</string>
     <string name="elk_profile_label">Sortie de voie</string>
     <!-- AEB — Système anti-collision avant (commun SWI133 + SWI68) -->
     <string name="aeb_card_title">Anticollision avant</string>

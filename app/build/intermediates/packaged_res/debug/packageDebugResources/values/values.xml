@@ -98,6 +98,7 @@
     <string name="drive_snow">SNOW</string>
     <string name="drive_sport">SPORT</string>
     <string name="elk_card_title">Assistant de sortie de voie</string>
+    <string name="elk_label_enable">Activer</string>
     <string name="elk_mode_alert">Alerte</string>
     <string name="elk_mode_assist">Aider</string>
     <string name="elk_mode_emergency">Maintien d\'urgence</string>
@@ -108,6 +109,8 @@
     <string name="elk_sensitivity_high">Élevé</string>
     <string name="elk_sensitivity_low">Faible</string>
     <string name="elk_sensitivity_standard">Standard</string>
+    <string name="elk_sound_warning">Alerte sonore</string>
+    <string name="elk_vibration_reminder">Vibration</string>
     <string name="fw_unknown_body">Ce firmware n\'est pas encore pris en charge nativement par MG4 Control.\n\nVous pouvez continuer en sélectionnant manuellement un mode de compatibilité, mais certaines fonctions peuvent ne pas fonctionner correctement.</string>
     <string name="fw_unknown_btn_close">Fermer l\'app</string>
     <string name="fw_unknown_btn_continue">Continuer</string>

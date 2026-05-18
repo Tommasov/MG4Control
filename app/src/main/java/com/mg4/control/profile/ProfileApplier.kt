@@ -141,7 +141,7 @@ object ProfileApplier {
                     }
                 }
                 // ELK — commun à tous les firmwares connus
-                applyElk(profile.elkMode, profile.elkSensitivity)
+                applyElk(profile.elkMode, profile.elkSensitivity, profile.lasAudibleWarning, profile.lasVibrationReminder)
             }
         }
     }
@@ -151,7 +151,7 @@ object ProfileApplier {
      * Si elkMode=0 (valeur par défaut — profil créé avant l'ajout de l'ELK),
      * on ne touche pas aux réglages ELK pour éviter une modification involontaire.
      */
-    private fun applyElk(elkMode: Int, elkSensitivity: Int) {
+    private fun applyElk(elkMode: Int, elkSensitivity: Int, lasAudibleWarning: Boolean = true, lasVibrationReminder: Boolean = true) {
         if (elkMode == 0) {
             AppLogger.i(TAG, "  ELK — valeurs par défaut, skip (évite modification involontaire)")
             return
@@ -161,6 +161,16 @@ object ProfileApplier {
         if (elkMode != MG4Hardware.ElkMode.OFF && elkSensitivity > 0) {
             val senOk = MG4Hardware.setElkSensitivity(elkSensitivity)
             AppLogger.i(TAG, "  ElkSensitivity=$elkSensitivity → $senOk")
+        }
+        // SWI132 : Alerte sonore + Vibration appliquées après délai
+        // Le firmware peut réinitialiser ces valeurs lors du changement de mode ELK.
+        // 300ms garantit que le firmware a terminé sa réinitialisation interne.
+        if (FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI132 && elkMode != MG4Hardware.ElkMode.OFF) {
+            try { Thread.sleep(300) } catch (_: InterruptedException) {}
+            val soundOk = MG4Hardware.setLasWarningSound(lasAudibleWarning)
+            AppLogger.i(TAG, "  LasAudibleWarning=$lasAudibleWarning → $soundOk")
+            val vibrOk = MG4Hardware.setLasWarningVibration(lasVibrationReminder)
+            AppLogger.i(TAG, "  LasVibrationReminder=$lasVibrationReminder → $vibrOk")
         }
     }
 

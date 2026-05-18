@@ -224,21 +224,21 @@ class MainActivity : AppCompatActivity() {
 
         btnShortcuts.setOnClickListener {
             when (navController.currentDestination?.id) {
-                R.id.shortcutsFragment -> navController.popBackStack()
+                R.id.shortcutsFragment -> navController.popBackStack(R.id.dashboardFragment, false)
                 else                   -> navController.navigate(R.id.shortcutsFragment)
             }
         }
 
         btnProfiles.setOnClickListener {
             when (navController.currentDestination?.id) {
-                R.id.profileFragment -> navController.popBackStack()
+                R.id.profileFragment -> navController.popBackStack(R.id.dashboardFragment, false)
                 else                 -> navController.navigate(R.id.profileFragment)
             }
         }
 
         btnSettings.setOnClickListener {
             when (navController.currentDestination?.id) {
-                R.id.settingsFragment -> navController.popBackStack()
+                R.id.settingsFragment -> navController.popBackStack(R.id.dashboardFragment, false)
                 else                  -> navController.navigate(R.id.settingsFragment)
             }
         }

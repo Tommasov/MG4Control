@@ -195,7 +195,11 @@ id console_text
 id dashboardFragment
 id dashboard_pager
 id driveRegenFragment
+id elk_activation_simple
+id elk_activation_swi132
 id elk_section_dialog
+id elk_sound_row_d
+id elk_vibration_row_d
 id et_profile_name
 id group_info
 id group_manual
@@ -257,6 +261,8 @@ id spinner_btn2_long
 id spinner_btn2_single
 id sw_aeb_enabled
 id sw_elk_enabled
+id sw_elk_sound_d
+id sw_elk_vibration_d
 id sw_overspeed_alarm
 id sw_overspeed_alarm_d
 id sw_set_default
@@ -268,6 +274,9 @@ id switch_aeb
 id switch_aeb_p2
 id switch_auto_apply
 id switch_elk
+id switch_elk_s132
+id switch_elk_sound
+id switch_elk_vibration
 id switch_overspeed
 id switch_shortcuts_enabled
 id switch_sound_warning
@@ -379,6 +388,7 @@ string drive_section_regen
 string drive_snow
 string drive_sport
 string elk_card_title
+string elk_label_enable
 string elk_mode_alert
 string elk_mode_assist
 string elk_mode_emergency
@@ -389,6 +399,8 @@ string elk_section_toggle
 string elk_sensitivity_high
 string elk_sensitivity_low
 string elk_sensitivity_standard
+string elk_sound_warning
+string elk_vibration_reminder
 string fw_unknown_body
 string fw_unknown_btn_close
 string fw_unknown_btn_continue

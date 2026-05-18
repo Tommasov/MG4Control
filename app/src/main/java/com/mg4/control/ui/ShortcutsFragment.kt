@@ -107,7 +107,7 @@ class ShortcutsFragment : Fragment() {
 
         // ── Bouton Fermer ─────────────────────────────────────────────
         view.findViewById<MaterialButton>(R.id.btn_shortcuts_close)?.setOnClickListener {
-            findNavController().navigateUp()
+            findNavController().popBackStack(R.id.dashboardFragment, false)
         }
 
         setupSpinners(view)

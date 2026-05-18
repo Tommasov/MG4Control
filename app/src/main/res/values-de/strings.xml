@@ -140,6 +140,9 @@
     <string name="elk_sensitivity_low">Niedrig</string>
     <string name="elk_sensitivity_standard">Standard</string>
     <string name="elk_sensitivity_high">Hoch</string>
+    <string name="elk_sound_warning">Akustische Warnung</string>
+    <string name="elk_vibration_reminder">Vibrationserinnerung</string>
+    <string name="elk_label_enable">Aktivieren</string>
     <string name="elk_profile_label">Spurverlassen</string>
     <!-- AEB — Vorwärtskollisionsassistent -->
     <string name="aeb_card_title">Frontalaufprall-Assistenzsystem</string>

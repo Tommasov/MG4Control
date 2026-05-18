@@ -94,6 +94,9 @@ class DashboardFragment : Fragment() {
     private var btnElkSenLow: Button? = null
     private var btnElkSenStandard: Button? = null
     private var btnElkSenHigh: Button? = null
+    // SWI132 ELK extra
+    private var switchElkSound: Switch? = null
+    private var switchElkVibration: Switch? = null
     private val elkModeMap: Map<Int, Button?>
         get() = mapOf(ElkMode.ALERT to btnElkAlert, ElkMode.ASSIST to btnElkAssist, ElkMode.EMERGENCY to btnElkEmergency)
     private val elkSenMap: Map<Int, Button?>
@@ -414,15 +417,13 @@ class DashboardFragment : Fragment() {
                                         }
                                     }
                                     FirmwareInfo.Gen.SWI132 -> {
-                                        // SWI132 : le TSR ne réinitialise pas overspeed/speedTone.
-                                        // La lecture VSM (CarVehicleSettingClient) est fiable sans latence.
-                                        val overspeed = MG4Hardware.isOverspeedAlarmOn()
-                                        val speedTone = MG4Hardware.isSpeedLimitToneOn()
+                                        // SWI132 : activer le TSR réinitialise overspeed/speedTone à ON
+                                        // dans la voiture. Forcer les toggles à ON dans l'UI directement.
                                         withContext(Dispatchers.Main) {
                                             if (!isAdded) return@withContext
                                             isRefreshing = true
-                                            switchOverspeed?.isChecked = overspeed
-                                            switchSpeedTone?.isChecked = speedTone
+                                            switchOverspeed?.isChecked = true
+                                            switchSpeedTone?.isChecked = true
                                             isRefreshing = false
                                         }
                                     }
@@ -454,11 +455,26 @@ class DashboardFragment : Fragment() {
     // ═════════════════════════════════════════════════════════════════════════
 
     private fun bindElkPage(view: View) {
-        // ELK
-        switchElk         = view.findViewById(R.id.switch_elk)
+        val isSWI132elk = FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI132
+        // ELK — switch principal : IDs différents selon le firmware
+        if (isSWI132elk) {
+            // SWI132 : layout multi-lignes dans elk_activation_swi132
+            view.findViewById<View>(R.id.elk_activation_simple).visibility = View.GONE
+            view.findViewById<View>(R.id.elk_activation_swi132).visibility = View.VISIBLE
+            switchElk         = view.findViewById(R.id.switch_elk_s132)
+            switchElkSound    = view.findViewById(R.id.switch_elk_sound)
+            switchElkVibration= view.findViewById(R.id.switch_elk_vibration)
+            // SWI132 : pas de mode Emergency — masqué
+            btnElkEmergency   = view.findViewById(R.id.btn_elk_emergency)
+            btnElkEmergency?.visibility = View.GONE
+            // Défaut SWI132 : Alerte (mode 2), pas Emergency
+            lastActiveElkMode = ElkMode.ALERT
+        } else {
+            switchElk         = view.findViewById(R.id.switch_elk)
+            btnElkEmergency   = view.findViewById(R.id.btn_elk_emergency)
+        }
         btnElkAlert       = view.findViewById(R.id.btn_elk_alert)
         btnElkAssist      = view.findViewById(R.id.btn_elk_assist)
-        btnElkEmergency   = view.findViewById(R.id.btn_elk_emergency)
         btnElkSenLow      = view.findViewById(R.id.btn_elk_sen_low)
         btnElkSenStandard = view.findViewById(R.id.btn_elk_sen_standard)
         btnElkSenHigh     = view.findViewById(R.id.btn_elk_sen_high)
@@ -482,10 +498,13 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupElkListeners() {
+        val isSWI132elk = FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI132
         // Toggle ON/OFF
         switchElk?.setOnCheckedChangeListener { _, checked ->
             if (!isRefreshing) {
                 val mode = if (checked) lastActiveElkMode else ElkMode.OFF
+                // SWI132 : grise les 2 switches supplémentaires si désactivé
+                if (isSWI132elk) applyElkSoundVibEnabled(checked)
                 CoroutineScope(Dispatchers.IO).launch {
                     MG4Hardware.setElkMode(mode)
                     withContext(Dispatchers.Main) {
@@ -495,6 +514,18 @@ class DashboardFragment : Fragment() {
                         }
                     }
                 }
+            }
+        }
+
+        // SWI132 — Alerte sonore
+        if (isSWI132elk) {
+            switchElkSound?.setOnCheckedChangeListener { _, checked ->
+                if (!isRefreshing)
+                    CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setLasWarningSound(checked) }
+            }
+            switchElkVibration?.setOnCheckedChangeListener { _, checked ->
+                if (!isRefreshing)
+                    CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setLasWarningVibration(checked) }
             }
         }
 
@@ -754,18 +785,26 @@ class DashboardFragment : Fragment() {
 
     private fun refreshElk() {
         if (switchElk == null) return  // page pas encore créée
+        val isSWI132elk = FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI132
         CoroutineScope(Dispatchers.IO).launch {
-            val mode = MG4Hardware.getElkMode()
-            val sen  = MG4Hardware.getElkSensitivity()
+            val mode  = MG4Hardware.getElkMode()
+            val sen   = MG4Hardware.getElkSensitivity()
+            val sound = if (isSWI132elk) MG4Hardware.getLasWarningSound() else -1
+            val vibr  = if (isSWI132elk) MG4Hardware.getLasWarningVibration() else -1
             withContext(Dispatchers.Main) {
                 if (!isAdded) return@withContext
                 val enabled = mode > 0 && mode != ElkMode.OFF
                 if (enabled) lastActiveElkMode = mode
                 isRefreshing = true
                 switchElk?.isChecked = enabled
+                if (isSWI132elk) {
+                    if (sound >= 0) switchElkSound?.isChecked = sound == 1
+                    if (vibr  >= 0) switchElkVibration?.isChecked = vibr == 1
+                }
                 isRefreshing = false
                 applyElkModeUI(mode)
                 applyElkButtonsEnabled(enabled)
+                applyElkSoundVibEnabled(enabled)
                 if (sen > 0) applyElkSensitivityUI(sen)
             }
         }
@@ -902,5 +941,12 @@ class DashboardFragment : Fragment() {
             btn?.isEnabled = enabled
             btn?.alpha = if (enabled) 1f else 0.35f
         }
+    }
+
+    private fun applyElkSoundVibEnabled(enabled: Boolean) {
+        switchElkSound?.isEnabled = enabled
+        switchElkSound?.alpha = if (enabled) 1f else 0.35f
+        switchElkVibration?.isEnabled = enabled
+        switchElkVibration?.alpha = if (enabled) 1f else 0.35f
     }
 }
