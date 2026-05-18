@@ -46,6 +46,9 @@ class SettingsFragment : Fragment() {
 
     private val githubUrl = "https://github.com/SliDeeN/MG4Control"
 
+    // Compteur pour débloquer le bouton Diagnostic (5 clics sur "Vérifier les mises à jour")
+    private var updateClickCount = 0
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_settings, container, false)
@@ -158,10 +161,18 @@ class SettingsFragment : Fragment() {
         }
 
         // ── Bouton Vérifier mise à jour ──────────────────────────────────────
-        val btnUpdate = view.findViewById<MaterialButton>(R.id.btn_check_update)
+        val btnUpdate     = view.findViewById<MaterialButton>(R.id.btn_check_update)
+        val btnDiagnostic = view.findViewById<MaterialButton>(R.id.btn_diagnostic)
         val originalUpdateText = getString(R.string.btn_check_update)
 
         btnUpdate.setOnClickListener {
+            // Easter egg : 5 clics d'affilé → débloque le bouton Diagnostic
+            updateClickCount++
+            if (updateClickCount >= 5) {
+                updateClickCount = 0
+                btnDiagnostic.visibility = View.VISIBLE
+            }
+
             btnUpdate.isEnabled = false
 
             UpdateChecker.check(
@@ -223,8 +234,8 @@ class SettingsFragment : Fragment() {
             }, 3_000)
         }
 
-        // ── Bouton Diagnostic ────────────────────────────────────────────────
-        view.findViewById<MaterialButton>(R.id.btn_diagnostic).setOnClickListener {
+        // ── Bouton Diagnostic (caché par défaut — débloqué par 5 clics sur MAJ) ──
+        btnDiagnostic.setOnClickListener {
             showDiagnosticDialog()
         }
 
