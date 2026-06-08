@@ -132,6 +132,7 @@
                 android:textAllCaps="true"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Rangée 1 : Off / Lim. Manuel / Lim. Auto -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -143,10 +144,40 @@
                     android:layout_weight="1"
                     android:layout_height="64dp"
                     android:layout_margin="4dp"
-                    android:text="@string/adas_desactiver"
+                    android:text="@string/adas_off"
                     android:textColor="@color/text_primary"
                     android:backgroundTint="@color/bg_button"
-                    android:textSize="16sp" />
+                    android:textSize="15sp" />
+
+                <Button
+                    android:id="@+id/btn_swi68_lim"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="64dp"
+                    android:layout_margin="4dp"
+                    android:text="@string/adas_limiteur_short"
+                    android:textColor="@color/text_primary"
+                    android:backgroundTint="@color/bg_button"
+                    android:textSize="14sp" />
+
+                <Button
+                    android:id="@+id/btn_swi68_auto"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="64dp"
+                    android:layout_margin="4dp"
+                    android:text="@string/adas_auto"
+                    android:textColor="@color/text_primary"
+                    android:backgroundTint="@color/bg_button"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <!-- Rangée 2 : ACC / TJA -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btn_swi68_acc"
@@ -169,6 +200,12 @@
                     android:textColor="@color/text_primary"
                     android:backgroundTint="@color/bg_button"
                     android:textSize="16sp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="64dp"
+                    android:layout_margin="4dp" />
 
             </LinearLayout>
 

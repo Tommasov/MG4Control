@@ -54,6 +54,12 @@ public final class DialogProfileEditBinding implements ViewBinding {
   public final MaterialButton btnAdasSwi68AccD;
 
   @NonNull
+  public final MaterialButton btnAdasSwi68AutoD;
+
+  @NonNull
+  public final MaterialButton btnAdasSwi68LimD;
+
+  @NonNull
   public final MaterialButton btnAdasSwi68OffD;
 
   @NonNull
@@ -245,6 +251,7 @@ public final class DialogProfileEditBinding implements ViewBinding {
       @NonNull MaterialButton btnAdasAccD, @NonNull MaterialButton btnAdasAutoD,
       @NonNull MaterialButton btnAdasIcaD, @NonNull MaterialButton btnAdasLimD,
       @NonNull MaterialButton btnAdasOffD, @NonNull MaterialButton btnAdasSwi68AccD,
+      @NonNull MaterialButton btnAdasSwi68AutoD, @NonNull MaterialButton btnAdasSwi68LimD,
       @NonNull MaterialButton btnAdasSwi68OffD, @NonNull MaterialButton btnAdasSwi68TjaD,
       @NonNull MaterialButton btnAebAlarmBrakeD, @NonNull MaterialButton btnAebAlarmD,
       @NonNull MaterialButton btnAebSenHighD, @NonNull MaterialButton btnAebSenLowD,
@@ -286,6 +293,8 @@ public final class DialogProfileEditBinding implements ViewBinding {
     this.btnAdasLimD = btnAdasLimD;
     this.btnAdasOffD = btnAdasOffD;
     this.btnAdasSwi68AccD = btnAdasSwi68AccD;
+    this.btnAdasSwi68AutoD = btnAdasSwi68AutoD;
+    this.btnAdasSwi68LimD = btnAdasSwi68LimD;
     this.btnAdasSwi68OffD = btnAdasSwi68OffD;
     this.btnAdasSwi68TjaD = btnAdasSwi68TjaD;
     this.btnAebAlarmBrakeD = btnAebAlarmBrakeD;
@@ -434,6 +443,18 @@ public final class DialogProfileEditBinding implements ViewBinding {
       id = R.id.btn_adas_swi68_acc_d;
       MaterialButton btnAdasSwi68AccD = ViewBindings.findChildViewById(rootView, id);
       if (btnAdasSwi68AccD == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_adas_swi68_auto_d;
+      MaterialButton btnAdasSwi68AutoD = ViewBindings.findChildViewById(rootView, id);
+      if (btnAdasSwi68AutoD == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_adas_swi68_lim_d;
+      MaterialButton btnAdasSwi68LimD = ViewBindings.findChildViewById(rootView, id);
+      if (btnAdasSwi68LimD == null) {
         break missingId;
       }
 
@@ -811,19 +832,19 @@ public final class DialogProfileEditBinding implements ViewBinding {
 
       return new DialogProfileEditBinding((LinearLayout) rootView, adasSectionAeb,
           adasSectionSwi133, adasSectionSwi68, aebSenSectionD, btnAdasAccD, btnAdasAutoD,
-          btnAdasIcaD, btnAdasLimD, btnAdasOffD, btnAdasSwi68AccD, btnAdasSwi68OffD,
-          btnAdasSwi68TjaD, btnAebAlarmBrakeD, btnAebAlarmD, btnAebSenHighD, btnAebSenLowD,
-          btnAebSenStandardD, btnDialogCancel, btnDialogSave, btnDriveCustomD, btnDriveEcoD,
-          btnDriveNormalD, btnDriveSnowD, btnDriveSportD, btnElkAlertD, btnElkAssistD,
-          btnElkEmergencyD, btnElkSenHighD, btnElkSenLowD, btnElkSenStandardD, btnEnergySavingD,
-          btnRegenAdaptiveD, btnRegenHighD, btnRegenLowD, btnRegenMediumD, btnRegenOffD,
-          btnRegenOnePedalD, btnSl0D, btnSl1D, btnSl2D, btnSl3D, btnSr0D, btnSr1D, btnSr2D, btnSr3D,
-          btnSteerOffD, btnSteerOnD, elkSectionDialog, elkSoundRowD, elkVibrationRowD,
-          etProfileName, rowOverspeedD, rowSoundWarningD, rowSpeedToneD, sectionBtProfile,
-          sectionRegenDialog, sectionSeatsDialog, sectionSteeringDialog, sectionTsrDialog,
-          spinnerBtDevice, swAebEnabled, swElkEnabled, swElkSoundD, swElkVibrationD,
-          swOverspeedAlarm, swOverspeedAlarmD, swSetDefault, swSoundWarning, swSpeedLimitTone,
-          swSpeedLimitToneD, swTsrD, tvDialogTitle);
+          btnAdasIcaD, btnAdasLimD, btnAdasOffD, btnAdasSwi68AccD, btnAdasSwi68AutoD,
+          btnAdasSwi68LimD, btnAdasSwi68OffD, btnAdasSwi68TjaD, btnAebAlarmBrakeD, btnAebAlarmD,
+          btnAebSenHighD, btnAebSenLowD, btnAebSenStandardD, btnDialogCancel, btnDialogSave,
+          btnDriveCustomD, btnDriveEcoD, btnDriveNormalD, btnDriveSnowD, btnDriveSportD,
+          btnElkAlertD, btnElkAssistD, btnElkEmergencyD, btnElkSenHighD, btnElkSenLowD,
+          btnElkSenStandardD, btnEnergySavingD, btnRegenAdaptiveD, btnRegenHighD, btnRegenLowD,
+          btnRegenMediumD, btnRegenOffD, btnRegenOnePedalD, btnSl0D, btnSl1D, btnSl2D, btnSl3D,
+          btnSr0D, btnSr1D, btnSr2D, btnSr3D, btnSteerOffD, btnSteerOnD, elkSectionDialog,
+          elkSoundRowD, elkVibrationRowD, etProfileName, rowOverspeedD, rowSoundWarningD,
+          rowSpeedToneD, sectionBtProfile, sectionRegenDialog, sectionSeatsDialog,
+          sectionSteeringDialog, sectionTsrDialog, spinnerBtDevice, swAebEnabled, swElkEnabled,
+          swElkSoundD, swElkVibrationD, swOverspeedAlarm, swOverspeedAlarmD, swSetDefault,
+          swSoundWarning, swSpeedLimitTone, swSpeedLimitToneD, swTsrD, tvDialogTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

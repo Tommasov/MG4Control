@@ -120,8 +120,8 @@
     <string name="adas_section_drive">Fahrassistenz</string>
     <string name="adas_off">Aus</string>
     <string name="adas_limiteur">Begrenzer</string>
-    <string name="adas_limiteur_short">Begr.</string>
-    <string name="adas_auto">Auto</string>
+    <string name="adas_limiteur_short">Begr. Manuell</string>
+    <string name="adas_auto">Begr. Auto</string>
     <string name="adas_acc">ACC</string>
     <string name="adas_ica">ICA</string>
     <!-- ADAS SWI68 -->

@@ -337,61 +337,76 @@
                     android:background="@color/dash_border"
                     android:layout_marginBottom="5dp" />
 
-                <!-- SWI133 : OFF / LIMITEUR / ACC / ICA  (2×2) -->
+                <!-- SWI133/SWI132 : OFF / LIM.MANUEL / LIM.AUTO / ACC / ICA  (2 rangées) -->
                 <LinearLayout
                     android:id="@+id/adas_group_swi133"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:visibility="gone">
 
+                    <!-- Rangée 1 : Off / Lim. Manuel / Lim. Auto -->
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginEnd="3dp">
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="3dp">
 
                         <Button
                             android:id="@+id/btn_adas_off"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:layout_marginBottom="3dp"
+                            android:layout_marginEnd="3dp"
                             android:text="@string/adas_off"
                             android:textColor="@color/text_secondary"
                             android:backgroundTint="@color/dash_btn"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textAllCaps="true" />
 
                         <Button
-                            android:id="@+id/btn_adas_acc"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
+                            android:id="@+id/btn_adas_limiteur"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="@string/adas_acc"
+                            android:layout_marginStart="3dp"
+                            android:layout_marginEnd="3dp"
+                            android:text="@string/adas_limiteur_short"
                             android:textColor="@color/text_secondary"
                             android:backgroundTint="@color/dash_btn"
-                            android:textSize="18sp"
+                            android:textSize="13sp"
+                            android:textAllCaps="true" />
+
+                        <Button
+                            android:id="@+id/btn_adas_auto"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:text="@string/adas_auto"
+                            android:textColor="@color/text_secondary"
+                            android:backgroundTint="@color/dash_btn"
+                            android:textSize="13sp"
                             android:textAllCaps="true" />
 
                     </LinearLayout>
 
+                    <!-- Rangée 2 : ACC / ICA -->
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="3dp">
+                        android:orientation="horizontal">
 
                         <Button
-                            android:id="@+id/btn_adas_limiteur"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
+                            android:id="@+id/btn_adas_acc"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:layout_marginBottom="3dp"
-                            android:text="@string/adas_limiteur_short"
+                            android:layout_marginEnd="3dp"
+                            android:text="@string/adas_acc"
                             android:textColor="@color/text_secondary"
                             android:backgroundTint="@color/dash_btn"
                             android:textSize="18sp"
@@ -399,20 +414,29 @@
 
                         <Button
                             android:id="@+id/btn_adas_ica"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:layout_marginEnd="3dp"
                             android:text="@string/adas_ica"
                             android:textColor="@color/text_secondary"
                             android:backgroundTint="@color/dash_btn"
                             android:textSize="18sp"
                             android:textAllCaps="true" />
 
+                        <!-- Spacer pour aligner sur 3 colonnes -->
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp" />
+
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- SWI68 : Désactiver / ACC / TJA  (colonne) -->
+                <!-- SWI68/69/131/165 : OFF / LIM.MANUEL / LIM.AUTO / ACC / TJA  (2 rangées) -->
                 <LinearLayout
                     android:id="@+id/adas_group_swi68"
                     android:layout_width="match_parent"
@@ -421,40 +445,92 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <Button
-                        android:id="@+id/btn_swi68_off"
+                    <!-- Rangée 1 : Off / Lim. Manuel / Lim. Auto -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:layout_marginBottom="3dp"
-                        android:text="@string/adas_desactiver"
-                        android:textColor="@color/text_secondary"
-                        android:backgroundTint="@color/dash_btn"
-                        android:textSize="18sp"
-                        android:textAllCaps="true" />
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="3dp">
 
-                    <Button
-                        android:id="@+id/btn_swi68_acc"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:layout_marginBottom="3dp"
-                        android:text="@string/adas_acc"
-                        android:textColor="@color/text_secondary"
-                        android:backgroundTint="@color/dash_btn"
-                        android:textSize="18sp"
-                        android:textAllCaps="true" />
+                        <Button
+                            android:id="@+id/btn_swi68_off"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:text="@string/adas_off"
+                            android:textColor="@color/text_secondary"
+                            android:backgroundTint="@color/dash_btn"
+                            android:textSize="15sp"
+                            android:textAllCaps="true" />
 
-                    <Button
-                        android:id="@+id/btn_swi68_tja"
+                        <Button
+                            android:id="@+id/btn_swi68_lim"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:layout_marginEnd="3dp"
+                            android:text="@string/adas_limiteur_short"
+                            android:textColor="@color/text_secondary"
+                            android:backgroundTint="@color/dash_btn"
+                            android:textSize="13sp"
+                            android:textAllCaps="true" />
+
+                        <Button
+                            android:id="@+id/btn_swi68_auto"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:text="@string/adas_auto"
+                            android:textColor="@color/text_secondary"
+                            android:backgroundTint="@color/dash_btn"
+                            android:textSize="13sp"
+                            android:textAllCaps="true" />
+
+                    </LinearLayout>
+
+                    <!-- Rangée 2 : ACC / TJA -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:text="@string/adas_tja"
-                        android:textColor="@color/text_secondary"
-                        android:backgroundTint="@color/dash_btn"
-                        android:textSize="18sp"
-                        android:textAllCaps="true" />
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btn_swi68_acc"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:text="@string/adas_acc"
+                            android:textColor="@color/text_secondary"
+                            android:backgroundTint="@color/dash_btn"
+                            android:textSize="18sp"
+                            android:textAllCaps="true" />
+
+                        <Button
+                            android:id="@+id/btn_swi68_tja"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:layout_marginEnd="3dp"
+                            android:text="@string/adas_tja"
+                            android:textColor="@color/text_secondary"
+                            android:backgroundTint="@color/dash_btn"
+                            android:textSize="18sp"
+                            android:textAllCaps="true" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 

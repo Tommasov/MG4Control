@@ -226,14 +226,24 @@ class MG4ControlService : Service() {
                 ShortcutAction.OVERSPEED_ALARM  -> MG4Hardware.setOverspeedAlarm(newState)
                 ShortcutAction.SPEED_LIMIT_TONE -> MG4Hardware.setSpeedLimitTone(newState)
                 ShortcutAction.ADAS_CYCLE -> {
-                    val isVsmBased = FirmwareInfo.isVsmBased()
-                    val modeA = prefs.getInt("shortcut_adas_mode_a",
-                        if (isVsmBased) Swi68Mode.ACC else 3)
-                    val modeB = prefs.getInt("shortcut_adas_mode_b",
-                        if (isVsmBased) Swi68Mode.OFF else 0)
+                    // Tous les firmwares connus stockent des indices 0-4 (Off/Lim.Manuel/Lim.Auto/ACC/ICA|TJA)
+                    val modeA = prefs.getInt("shortcut_adas_mode_a", 3)
+                    val modeB = prefs.getInt("shortcut_adas_mode_b", 0)
                     val mode  = if (newState) modeA else modeB
-                    if (isVsmBased) MG4Hardware.setAccTjaMode(mode)
-                    else            MG4Hardware.setMixedIntelligentDrive(mode)
+                    if (FirmwareInfo.isVsmBased()) {
+                        // VSM (SWI68/69/131/132/165) : index → mode ACC/TJA (setAccTjaMode)
+                        // + limiteur de vitesse (setSpeedLimiterMode), réglages exclusifs.
+                        when (mode) {
+                            1 -> { MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.MANUEL);      MG4Hardware.setAccTjaMode(Swi68Mode.OFF) }
+                            2 -> { MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.INTELLIGENT); MG4Hardware.setAccTjaMode(Swi68Mode.OFF) }
+                            3 -> { MG4Hardware.setAccTjaMode(Swi68Mode.ACC); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+                            4 -> { MG4Hardware.setAccTjaMode(Swi68Mode.TJA); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+                            else -> { MG4Hardware.setAccTjaMode(Swi68Mode.OFF); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+                        }
+                    } else {
+                        // SWI133 : VPM direct (l'index est aussi la valeur mixedIntelligentDrive)
+                        MG4Hardware.setMixedIntelligentDrive(mode)
+                    }
                 }
                 ShortcutAction.ENERGY_SAVING_TOGGLE -> MG4Hardware.setEnergySavingMode(newState)
                 ShortcutAction.TSR_TOGGLE           -> MG4Hardware.setTsrMode(newState)

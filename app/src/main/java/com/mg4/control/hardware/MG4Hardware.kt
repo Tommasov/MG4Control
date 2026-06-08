@@ -156,6 +156,18 @@ object MG4Hardware {
         const val CRANK     = 0x3   // Démarrage
     }
 
+    /**
+     * Limiteur de vitesse (Speed Assist System / SAS) — réglage INDÉPENDANT du mode ACC/TJA.
+     * Sur SWI132 il est piloté par setSasMode (et NON par setAccTjaState/SHWA, qui ne l'active pas).
+     * Valeurs confirmées dans le smali SWI132 (SasModel / sas_modes) :
+     *   0 = Désactivé, 2 = Manuel, 3 = Intelligent  (1 = avert. vitesse, modèles TW uniquement)
+     */
+    object SasMode {
+        const val OFF         = 0
+        const val MANUEL      = 2
+        const val INTELLIGENT = 3
+    }
+
     /** Valeurs de mode ADAS pour firmware SWI68/SWI132 (CarAccTja constants). */
     object Swi68Mode {
         const val OFF  = 0x4   // Désactiver
@@ -1337,6 +1349,31 @@ object MG4Hardware {
         val method = if (useNewApi) "setAccTjaState" else "setAccTjaMode"
         if (logEnabled) AppLogger.i(TAG, "$method → 0x${mode.toString(16)}")
         return callVsmVoid(method, mode)   // void method — callVsmVoid évite le faux-négatif
+    }
+
+    /**
+     * Limiteur de vitesse — API unifiée pour tous les firmwares VSM.
+     * Le limiteur est un réglage INDÉPENDANT du mode ACC/TJA, avec les mêmes valeurs partout
+     * (0=Désactivé, 2=Manuel, 3=Intelligent — vérifié dans le smali de chaque firmware),
+     * seul le nom de méthode binder diffère :
+     *   SWI132/SWI131/SWI69 : getSasMode/setSasMode        (CarVehicleSettingClient)
+     *   SWI68/SWI165        : getSpeedAsstMode/setSpeedAsstMode (VehicleSettingManager)
+     */
+    private fun useSasApi(): Boolean =
+        FirmwareInfo.isNewGenVsm() || FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI132
+
+    /** Lit le mode du limiteur de vitesse. Retourne 0/2/3, ou -1 si indisponible. */
+    fun getSpeedLimiterMode(): Int {
+        val method = if (useSasApi()) "getSasMode" else "getSpeedAsstMode"
+        if (logEnabled) AppLogger.i(TAG, "$method →")
+        return (callVsm(method) as? Int) ?: -1
+    }
+
+    /** Configure le mode du limiteur de vitesse. 0=Désactivé, 2=Manuel, 3=Intelligent. */
+    fun setSpeedLimiterMode(mode: Int): Boolean {
+        val method = if (useSasApi()) "setSasMode" else "setSpeedAsstMode"
+        if (logEnabled) AppLogger.i(TAG, "$method → $mode")
+        return callVsmVoid(method, mode)
     }
 
     /**

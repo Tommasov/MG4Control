@@ -968,26 +968,56 @@
                             android:layout_width="wrap_content" android:layout_height="wrap_content" />
                     </LinearLayout>
 
+                    <!-- Rangée 1 : Off / Lim. Manuel / Lim. Auto -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="38dp"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="3dp">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_adas_swi68_off_d"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:layout_width="0dp" android:layout_height="match_parent"
                             android:layout_weight="1" android:layout_marginEnd="2dp"
-                            android:text="@string/adas_desactiver"
+                            android:text="@string/adas_off"
                             android:textColor="@color/text_secondary" android:textSize="10sp"
                             android:textAllCaps="true" android:backgroundTint="@color/dash_btn"
                             app:strokeColor="@color/dash_border" app:strokeWidth="1dp" app:cornerRadius="6dp" />
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_adas_swi68_acc_d"
+                            android:id="@+id/btn_adas_swi68_lim_d"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:layout_width="0dp" android:layout_height="match_parent"
                             android:layout_weight="1" android:layout_marginStart="2dp" android:layout_marginEnd="2dp"
+                            android:text="@string/adas_limiteur_short"
+                            android:textColor="@color/text_secondary" android:textSize="10sp"
+                            android:textAllCaps="true" android:backgroundTint="@color/dash_btn"
+                            app:strokeColor="@color/dash_border" app:strokeWidth="1dp" app:cornerRadius="6dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_adas_swi68_auto_d"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp" android:layout_height="match_parent"
+                            android:layout_weight="1" android:layout_marginStart="2dp"
+                            android:text="@string/adas_auto"
+                            android:textColor="@color/text_secondary" android:textSize="10sp"
+                            android:textAllCaps="true" android:backgroundTint="@color/dash_btn"
+                            app:strokeColor="@color/dash_border" app:strokeWidth="1dp" app:cornerRadius="6dp" />
+
+                    </LinearLayout>
+
+                    <!-- Rangée 2 : ACC / TJA -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="38dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_adas_swi68_acc_d"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp" android:layout_height="match_parent"
+                            android:layout_weight="1" android:layout_marginEnd="2dp"
                             android:text="@string/adas_acc"
                             android:textColor="@color/text_secondary" android:textSize="10sp"
                             android:textAllCaps="true" android:backgroundTint="@color/dash_btn"
@@ -997,11 +1027,14 @@
                             android:id="@+id/btn_adas_swi68_tja_d"
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:layout_width="0dp" android:layout_height="match_parent"
-                            android:layout_weight="1" android:layout_marginStart="2dp"
+                            android:layout_weight="1" android:layout_marginStart="2dp" android:layout_marginEnd="2dp"
                             android:text="@string/adas_tja"
                             android:textColor="@color/text_secondary" android:textSize="10sp"
                             android:textAllCaps="true" android:backgroundTint="@color/dash_btn"
                             app:strokeColor="@color/dash_border" app:strokeWidth="1dp" app:cornerRadius="6dp" />
+
+                        <View android:layout_width="0dp" android:layout_height="match_parent"
+                            android:layout_weight="1" android:layout_marginStart="2dp" />
 
                     </LinearLayout>
 

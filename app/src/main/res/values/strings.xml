@@ -122,8 +122,8 @@
     <string name="adas_section_drive">Assistance à la conduite</string>
     <string name="adas_off">Off</string>
     <string name="adas_limiteur">Limiteur</string>
-    <string name="adas_limiteur_short">Lim.</string>
-    <string name="adas_auto">Auto</string>
+    <string name="adas_limiteur_short">Lim. Manuel</string>
+    <string name="adas_auto">Lim. Auto</string>
     <string name="adas_acc">ACC</string>
     <string name="adas_ica">ICA</string>
     <!-- ADAS SWI68 -->

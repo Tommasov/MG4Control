@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.button.MaterialButton
 import com.mg4.control.R
-import com.mg4.control.hardware.MG4Hardware.Swi68Mode
 import com.mg4.control.model.RegenLevel
 import com.mg4.control.profile.ProfileManager
 import com.mg4.control.shortcut.ShortcutAction
@@ -101,9 +100,10 @@ class ShortcutsFragment : Fragment() {
         }
 
         // ── Affichage des sections de config selon firmware ───────────────
-        view.findViewById<View>(R.id.config_adas_section)?.visibility = if (isKnown)    View.VISIBLE else View.GONE
-        view.findViewById<View>(R.id.config_adas_swi133)?.visibility  = if (!isVsmBased && isKnown) View.VISIBLE else View.GONE
-        view.findViewById<View>(R.id.config_adas_swi68)?.visibility   = if (isVsmBased) View.VISIBLE else View.GONE
+        // Tous les firmwares connus utilisent la config 5 modes (Off/Lim.Manuel/Lim.Auto/ACC/ICA|TJA).
+        view.findViewById<View>(R.id.config_adas_section)?.visibility = if (isKnown) View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.config_adas_swi133)?.visibility  = if (isKnown) View.VISIBLE else View.GONE
+        view.findViewById<View>(R.id.config_adas_swi68)?.visibility   = View.GONE
 
         // ── Bouton Fermer ─────────────────────────────────────────────
         view.findViewById<MaterialButton>(R.id.btn_shortcuts_close)?.setOnClickListener {
@@ -111,7 +111,7 @@ class ShortcutsFragment : Fragment() {
         }
 
         setupSpinners(view)
-        setupConfigListeners(view, isVsmBased)
+        setupConfigListeners(view)
         restoreState()
     }
 
@@ -304,7 +304,7 @@ class ShortcutsFragment : Fragment() {
 
     // ── Config buttons (1 Pédale / AEB / ADAS) ───────────────────────────
 
-    private fun setupConfigListeners(view: View, isVsmBased: Boolean) {
+    private fun setupConfigListeners(view: View) {
         switchEnabled?.setOnCheckedChangeListener { _, checked ->
             if (switchEnabled?.isPressed == true) {
                 saveBoolean("shortcut_enabled", checked)
@@ -322,28 +322,16 @@ class ShortcutsFragment : Fragment() {
             R.id.sc_fallback_adaptive to RegenLevel.ADAPTIVE.value
         )
 
-        // ADAS — modes A et B selon firmware
-        if (!isVsmBased) {
-            setupConfigRow("shortcut_adas_mode_a", 0, view,
-                R.id.sc_adas_a_0 to 0, R.id.sc_adas_a_1 to 1,
-                R.id.sc_adas_a_3 to 3, R.id.sc_adas_a_4 to 4
-            )
-            setupConfigRow("shortcut_adas_mode_b", 3, view,
-                R.id.sc_adas_b_0 to 0, R.id.sc_adas_b_1 to 1,
-                R.id.sc_adas_b_3 to 3, R.id.sc_adas_b_4 to 4
-            )
-        } else {
-            setupConfigRow("shortcut_adas_mode_a", Swi68Mode.ACC, view,
-                R.id.sc_adas_a_s68_off to Swi68Mode.OFF,
-                R.id.sc_adas_a_s68_acc to Swi68Mode.ACC,
-                R.id.sc_adas_a_s68_tja to Swi68Mode.TJA
-            )
-            setupConfigRow("shortcut_adas_mode_b", Swi68Mode.OFF, view,
-                R.id.sc_adas_b_s68_off to Swi68Mode.OFF,
-                R.id.sc_adas_b_s68_acc to Swi68Mode.ACC,
-                R.id.sc_adas_b_s68_tja to Swi68Mode.TJA
-            )
-        }
+        // ADAS — modes A et B : tous les firmwares connus utilisent les indices 0-4
+        // (Off/Lim.Manuel/Lim.Auto/ACC/ICA|TJA). La conversion index→hardware est faite dans le service.
+        setupConfigRow("shortcut_adas_mode_a", 0, view,
+            R.id.sc_adas_a_0 to 0, R.id.sc_adas_a_1 to 1, R.id.sc_adas_a_2 to 2,
+            R.id.sc_adas_a_3 to 3, R.id.sc_adas_a_4 to 4
+        )
+        setupConfigRow("shortcut_adas_mode_b", 3, view,
+            R.id.sc_adas_b_0 to 0, R.id.sc_adas_b_1 to 1, R.id.sc_adas_b_2 to 2,
+            R.id.sc_adas_b_3 to 3, R.id.sc_adas_b_4 to 4
+        )
     }
 
     private fun setupConfigRow(

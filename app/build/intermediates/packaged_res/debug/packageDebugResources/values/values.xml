@@ -39,11 +39,11 @@
     <string name="adas_aeb_alarm">Alerte</string>
     <string name="adas_aeb_alarm_brake">Al. + Freinage auto</string>
     <string name="adas_aeb_switch">Anticollision avant</string>
-    <string name="adas_auto">Auto</string>
+    <string name="adas_auto">Lim. Auto</string>
     <string name="adas_desactiver">Désactiver</string>
     <string name="adas_ica">ICA</string>
     <string name="adas_limiteur">Limiteur</string>
-    <string name="adas_limiteur_short">Lim.</string>
+    <string name="adas_limiteur_short">Lim. Manuel</string>
     <string name="adas_off">Off</string>
     <string name="adas_overspeed_alarm">Alerte excès de vitesse</string>
     <string name="adas_section_aeb">Sécurité active</string>

@@ -26,9 +26,11 @@ class AdasFragment : Fragment() {
     private var btnAdasAcc: Button? = null
     private var btnAdasIca: Button? = null
 
-    // SWI68 views
+    // SWI68/69/131/165 views — 5 boutons (index 0-4) : Off / Lim.Manuel / Lim.Auto / ACC / TJA
     private var switchSoundWarning: Switch? = null
     private var btnSwi68Off: Button? = null
+    private var btnSwi68Lim: Button? = null
+    private var btnSwi68Auto: Button? = null
     private var btnSwi68Acc: Button? = null
     private var btnSwi68Tja: Button? = null
 
@@ -41,11 +43,13 @@ class AdasFragment : Fragment() {
         btnAdasOff, btnAdasLimiteur, btnAdasAuto, btnAdasAcc, btnAdasIca
     )
 
-    // SWI68 mode value → button
+    // index 0-4 → button (Off / Lim.Manuel / Lim.Auto / ACC / TJA)
     private val swi68Buttons: Map<Int, Button?> get() = mapOf(
-        Swi68Mode.OFF to btnSwi68Off,
-        Swi68Mode.ACC to btnSwi68Acc,
-        Swi68Mode.TJA to btnSwi68Tja
+        0 to btnSwi68Off,
+        1 to btnSwi68Lim,
+        2 to btnSwi68Auto,
+        3 to btnSwi68Acc,
+        4 to btnSwi68Tja
     )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -62,6 +66,8 @@ class AdasFragment : Fragment() {
         btnAdasIca        = view.findViewById(R.id.btn_adas_ica)
         switchSoundWarning = view.findViewById(R.id.switch_sound_warning)
         btnSwi68Off       = view.findViewById(R.id.btn_swi68_off)
+        btnSwi68Lim       = view.findViewById(R.id.btn_swi68_lim)
+        btnSwi68Auto      = view.findViewById(R.id.btn_swi68_auto)
         btnSwi68Acc       = view.findViewById(R.id.btn_swi68_acc)
         btnSwi68Tja       = view.findViewById(R.id.btn_swi68_tja)
         switchAeb         = view.findViewById(R.id.switch_aeb)
@@ -110,7 +116,10 @@ class AdasFragment : Fragment() {
             }
         }
 
-        // ── Listeners SWI132 — alertes + ADAS 4 modes (Off/Lim/ACC/ICA) ────────
+        // ── Listeners SWI132 — alertes + ADAS 5 modes ─────────────────────────
+        // Off / Lim.Manuel / Lim.Auto(Intelligent) / ACC / ICA.
+        // Le mode ACC/TJA (setAccTjaMode) et le limiteur de vitesse (setSasMode) sont deux
+        // réglages indépendants : le sélecteur unique impose l'exclusivité.
         if (isSWI132) {
             switchOverspeed?.setOnCheckedChangeListener { _, checked ->
                 if (switchOverspeed?.isPressed == true)
@@ -120,19 +129,12 @@ class AdasFragment : Fragment() {
                 if (switchSpeedTone?.isPressed == true)
                     CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSpeedLimitTone(checked) }
             }
-            // Masquer le bouton Auto (non disponible sur SWI132)
-            btnAdasAuto?.visibility = View.GONE
-            // ADAS SWI132 : boutons Off/Lim/ACC/ICA → setAccTjaMode avec valeurs CarAccTja
-            val swi132AdasMap = mapOf(
-                0 to Swi68Mode.OFF,   // Off  → 0x4
-                1 to Swi68Mode.SHWA,  // Lim  → 0x3
-                3 to Swi68Mode.ACC,   // ACC  → 0x1
-                4 to Swi68Mode.TJA    // ICA  → 0x2
-            )
-            swi132AdasMap.forEach { (btnIndex, hwValue) ->
-                swi133Buttons.getOrNull(btnIndex)?.setOnClickListener {
+            // Le bouton Auto est disponible sur SWI132 : il sélectionne le limiteur Intelligent.
+            btnAdasAuto?.visibility = View.VISIBLE
+            swi133Buttons.forEachIndexed { btnIndex, btn ->
+                btn.setOnClickListener {
                     CoroutineScope(Dispatchers.IO).launch {
-                        MG4Hardware.setAccTjaMode(hwValue)
+                        applyVsmAdasMode(btnIndex)
                         withContext(Dispatchers.Main) { if (isAdded) applySwi133ModeUI(btnIndex) }
                     }
                 }
@@ -163,22 +165,19 @@ class AdasFragment : Fragment() {
             }
         }
 
-        // ── Listeners SWI68 / SWI69 / SWI131 (mêmes boutons, API adaptée dans MG4Hardware) ─
-        if (isVsmBased) {
+        // ── Listeners SWI68 / SWI69 / SWI131 / SWI165 — sélecteur 5 modes (index 0-4) ─
+        // Off / Lim.Manuel / Lim.Auto / ACC / TJA. Mode ACC/TJA + limiteur indépendants,
+        // exclusivité via le sélecteur unique (même logique que SWI132).
+        if (isVsmBased && !isSWI132) {
             switchSoundWarning?.setOnCheckedChangeListener { _, checked ->
                 if (switchSoundWarning?.isPressed == true)
                     CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setSoundWarning(checked) }
             }
-            val swi68BtnList = listOf(
-                Swi68Mode.OFF to btnSwi68Off,
-                Swi68Mode.ACC to btnSwi68Acc,
-                Swi68Mode.TJA to btnSwi68Tja
-            )
-            swi68BtnList.forEach { (modeValue, btn) ->
+            swi68Buttons.forEach { (btnIndex, btn) ->
                 btn?.setOnClickListener {
                     CoroutineScope(Dispatchers.IO).launch {
-                        MG4Hardware.setAccTjaMode(modeValue)
-                        withContext(Dispatchers.Main) { if (isAdded) applySwi68ModeUI(modeValue) }
+                        applyVsmAdasMode(btnIndex)
+                        withContext(Dispatchers.Main) { if (isAdded) applySwi68ModeUI(btnIndex) }
                     }
                 }
             }
@@ -192,13 +191,29 @@ class AdasFragment : Fragment() {
         }
     }
 
-    /** SWI132 : CarAccTja value (0x1-0x4) → swi133 button index (0/1/3/4) */
-    private fun swi132ValueToSwi133Index(value: Int): Int = when (value) {
-        Swi68Mode.OFF  -> 0
-        Swi68Mode.SHWA -> 1
-        Swi68Mode.ACC  -> 3
-        Swi68Mode.TJA  -> 4
-        else           -> 0
+    /**
+     * SWI132 : applique l'index du sélecteur ADAS (0-4) en distinguant le mode ACC/TJA
+     * (setAccTjaMode) du limiteur de vitesse (setSasMode). Le sélecteur unique impose
+     * l'exclusivité : choisir un mode désactive l'autre sous-système.
+     *   0=Off, 1=Lim.Manuel(SAS 2), 2=Lim.Auto/Intelligent(SAS 3), 3=ACC, 4=ICA
+     */
+    private fun applyVsmAdasMode(index: Int) {
+        when (index) {
+            1 -> { MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.MANUEL);      MG4Hardware.setAccTjaMode(Swi68Mode.OFF) }
+            2 -> { MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.INTELLIGENT); MG4Hardware.setAccTjaMode(Swi68Mode.OFF) }
+            3 -> { MG4Hardware.setAccTjaMode(Swi68Mode.ACC); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+            4 -> { MG4Hardware.setAccTjaMode(Swi68Mode.TJA); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+            else -> { MG4Hardware.setAccTjaMode(Swi68Mode.OFF); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+        }
+    }
+
+    /** SWI132 : état lu (mode ACC/TJA + limiteur SAS) → index de bouton (0-4). */
+    private fun vsmStateToIndex(accTja: Int, sas: Int): Int = when {
+        sas == MG4Hardware.SasMode.MANUEL      -> 1
+        sas == MG4Hardware.SasMode.INTELLIGENT -> 2
+        accTja == Swi68Mode.ACC                -> 3
+        accTja == Swi68Mode.TJA                -> 4
+        else                                   -> 0
     }
 
     private fun refreshState() {
@@ -217,6 +232,7 @@ class AdasFragment : Fragment() {
      */
     private suspend fun refreshSwi132() {
         val mode      = MG4Hardware.getAccTjaMode()
+        val sas       = MG4Hardware.getSpeedLimiterMode()   // limiteur : 0=Off, 2=Manuel, 3=Intelligent
         val overspeed = MG4Hardware.isOverspeedAlarmOn()
         val speedTone = MG4Hardware.isSpeedLimitToneOn()
         val aebOn     = MG4Hardware.isAebEnabled()
@@ -227,8 +243,8 @@ class AdasFragment : Fragment() {
                 view?.postDelayed({ if (isAdded) refreshState() }, 2_000)
                 return@withContext
             }
-            // SWI132 : valeur CarAccTja (0x1-0x4) → index bouton swi133 (0/1/3/4)
-            applySwi133ModeUI(swi132ValueToSwi133Index(mode))
+            // SWI132 : mode ACC/TJA + limiteur SAS → index bouton (0-4)
+            applySwi133ModeUI(vsmStateToIndex(mode, sas))
             switchOverspeed?.isChecked = overspeed
             switchSpeedTone?.isChecked = speedTone
             switchAeb?.isChecked = aebOn
@@ -260,6 +276,7 @@ class AdasFragment : Fragment() {
 
     private suspend fun refreshSwi68() {
         val mode    = MG4Hardware.getAccTjaMode()
+        val sas     = MG4Hardware.getSpeedLimiterMode()   // limiteur : 0=Off, 2=Manuel, 3=Intelligent
         val sound   = MG4Hardware.isSoundWarningOn()
         val aebOn   = MG4Hardware.isAebEnabled()
         val aebMode = MG4Hardware.getAebMode()
@@ -270,7 +287,7 @@ class AdasFragment : Fragment() {
                 return@withContext
             }
             switchSoundWarning?.isChecked = sound
-            applySwi68ModeUI(mode)
+            applySwi68ModeUI(vsmStateToIndex(mode, sas))
             switchAeb?.isChecked = aebOn
             applyAebModeButtonsEnabled(aebOn)
             if (aebMode > 0) applyAebModeUI(aebMode)

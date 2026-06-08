@@ -46,17 +46,21 @@ class DashboardFragment : Fragment() {
     // ── Page 0 — ADAS SWI133 ────────────────────────────────────────────────
     private var btnAdasOff: Button?     = null
     private var btnAdasLimiteur: Button? = null
+    private var btnAdasAuto: Button?    = null
     private var btnAdasAcc: Button?     = null
     private var btnAdasIca: Button?     = null
     private val swi133AdasMap: Map<Int, Button?>
-        get() = mapOf(0 to btnAdasOff, 1 to btnAdasLimiteur, 3 to btnAdasAcc, 4 to btnAdasIca)
+        get() = mapOf(0 to btnAdasOff, 1 to btnAdasLimiteur, 2 to btnAdasAuto, 3 to btnAdasAcc, 4 to btnAdasIca)
 
-    // ── Page 0 — ADAS SWI68 ─────────────────────────────────────────────────
+    // ── Page 0 — ADAS SWI68/69/131/165 (5 boutons index 0-4) ────────────────
+    // Off / Lim.Manuel / Lim.Auto / ACC / TJA
     private var btnSwi68Off: Button? = null
+    private var btnSwi68Lim: Button? = null
+    private var btnSwi68Auto: Button? = null
     private var btnSwi68Acc: Button? = null
     private var btnSwi68Tja: Button? = null
     private val swi68AdasMap: Map<Int, Button?>
-        get() = mapOf(Swi68Mode.OFF to btnSwi68Off, Swi68Mode.ACC to btnSwi68Acc, Swi68Mode.TJA to btnSwi68Tja)
+        get() = mapOf(0 to btnSwi68Off, 1 to btnSwi68Lim, 2 to btnSwi68Auto, 3 to btnSwi68Acc, 4 to btnSwi68Tja)
 
     // ── Page 0 — Climat ─────────────────────────────────────────────────────
     private var switchSteering: Switch? = null
@@ -239,13 +243,16 @@ class DashboardFragment : Fragment() {
         // ADAS SWI133
         btnAdasOff      = view.findViewById(R.id.btn_adas_off)
         btnAdasLimiteur = view.findViewById(R.id.btn_adas_limiteur)
+        btnAdasAuto     = view.findViewById(R.id.btn_adas_auto)
         btnAdasAcc      = view.findViewById(R.id.btn_adas_acc)
         btnAdasIca      = view.findViewById(R.id.btn_adas_ica)
 
         // ADAS SWI68
-        btnSwi68Off = view.findViewById(R.id.btn_swi68_off)
-        btnSwi68Acc = view.findViewById(R.id.btn_swi68_acc)
-        btnSwi68Tja = view.findViewById(R.id.btn_swi68_tja)
+        btnSwi68Off  = view.findViewById(R.id.btn_swi68_off)
+        btnSwi68Lim  = view.findViewById(R.id.btn_swi68_lim)
+        btnSwi68Auto = view.findViewById(R.id.btn_swi68_auto)
+        btnSwi68Acc  = view.findViewById(R.id.btn_swi68_acc)
+        btnSwi68Tja  = view.findViewById(R.id.btn_swi68_tja)
 
         // Climat
         switchSteering   = view.findViewById(R.id.switch_steering_heat)
@@ -324,7 +331,9 @@ class DashboardFragment : Fragment() {
                 btn?.setOnClickListener {
                     CoroutineScope(Dispatchers.IO).launch {
                         if (isSWI132) {
-                            MG4Hardware.setAccTjaMode(swi133IndexToSwi132Value(modeIndex))
+                            // SWI132 : mode ACC/TJA (setAccTjaMode) et limiteur de vitesse (setSasMode)
+                            // sont deux réglages indépendants ; le sélecteur unique impose l'exclusivité.
+                            applyVsmAdasMode(modeIndex)
                         } else {
                             MG4Hardware.setMixedIntelligentDrive(modeIndex)
                         }
@@ -333,11 +342,13 @@ class DashboardFragment : Fragment() {
                 }
             }
         } else {
-            swi68AdasMap.forEach { (modeValue, btn) ->
+            // SWI68/SWI69/SWI131/SWI165 : sélecteur 5 modes (index 0-4), même logique que SWI132
+            // (mode ACC/TJA + limiteur de vitesse indépendants, exclusivité via le sélecteur unique).
+            swi68AdasMap.forEach { (modeIndex, btn) ->
                 btn?.setOnClickListener {
                     CoroutineScope(Dispatchers.IO).launch {
-                        MG4Hardware.setAccTjaMode(modeValue)
-                        withContext(Dispatchers.Main) { if (isAdded) applySwi68AdasUI(modeValue) }
+                        applyVsmAdasMode(modeIndex)
+                        withContext(Dispatchers.Main) { if (isAdded) applySwi68AdasUI(modeIndex) }
                     }
                 }
             }
@@ -608,27 +619,31 @@ class DashboardFragment : Fragment() {
     // ═════════════════════════════════════════════════════════════════════════
 
     /**
-     * SWI132 : convertit une valeur CarAccTja (0x1-0x4) en index de bouton swi133 (0/1/3/4).
-     * Off(0x4)→0, Lim/SHWA(0x3)→1, ACC(0x1)→3, ICA/TJA(0x2)→4
+     * SWI132 : applique l'index du sélecteur ADAS en distinguant le mode ACC/TJA (setAccTjaMode)
+     * du limiteur de vitesse (setSasMode), deux réglages indépendants sur la voiture. Le sélecteur
+     * unique impose l'exclusivité : choisir un mode désactive l'autre sous-système.
+     *   0=Off, 1=Lim.Manuel(SAS 2), 2=Lim.Auto/Intelligent(SAS 3), 3=ACC, 4=ICA
      */
-    private fun swi132ValueToSwi133Index(value: Int): Int = when (value) {
-        Swi68Mode.OFF  -> 0
-        Swi68Mode.SHWA -> 1
-        Swi68Mode.ACC  -> 3
-        Swi68Mode.TJA  -> 4
-        else           -> 0
+    private fun applyVsmAdasMode(index: Int) {
+        when (index) {
+            1 -> { MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.MANUEL);      MG4Hardware.setAccTjaMode(Swi68Mode.OFF) }
+            2 -> { MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.INTELLIGENT); MG4Hardware.setAccTjaMode(Swi68Mode.OFF) }
+            3 -> { MG4Hardware.setAccTjaMode(Swi68Mode.ACC); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+            4 -> { MG4Hardware.setAccTjaMode(Swi68Mode.TJA); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+            else -> { MG4Hardware.setAccTjaMode(Swi68Mode.OFF); MG4Hardware.setSpeedLimiterMode(MG4Hardware.SasMode.OFF) }
+        }
     }
 
     /**
-     * SWI132 : convertit un index de bouton swi133 (0/1/3/4) en valeur CarAccTja (0x1-0x4).
-     * 0→Off(0x4), 1→Lim/SHWA(0x3), 3→ACC(0x1), 4→ICA/TJA(0x2)
+     * SWI132 : convertit l'état lu (mode ACC/TJA + limiteur SAS) en index de bouton (0-4).
+     * Manuel→1 (Lim.Manuel), Intelligent→2 (Lim.Auto), ACC→3, TJA→4, sinon Off→0.
      */
-    private fun swi133IndexToSwi132Value(index: Int): Int = when (index) {
-        0 -> Swi68Mode.OFF
-        1 -> Swi68Mode.SHWA
-        3 -> Swi68Mode.ACC
-        4 -> Swi68Mode.TJA
-        else -> Swi68Mode.OFF
+    private fun vsmStateToIndex(accTja: Int, sas: Int): Int = when {
+        sas == MG4Hardware.SasMode.MANUEL      -> 1
+        sas == MG4Hardware.SasMode.INTELLIGENT -> 2
+        accTja == Swi68Mode.ACC                -> 3
+        accTja == Swi68Mode.TJA                -> 4
+        else                                   -> 0
     }
 
     /**
@@ -732,6 +747,7 @@ class DashboardFragment : Fragment() {
      */
     private suspend fun refreshSwi132Adas() {
         val mode         = MG4Hardware.getAccTjaMode()
+        val sas          = MG4Hardware.getSpeedLimiterMode()   // limiteur : 0=Off, 2=Manuel, 3=Intelligent
         val overspeed    = MG4Hardware.isOverspeedAlarmOn()
         val speedTone    = MG4Hardware.isSpeedLimitToneOn()
         val aebOn        = MG4Hardware.isAebEnabled()
@@ -752,7 +768,7 @@ class DashboardFragment : Fragment() {
             applyEnergySavingUI(energySaving)
             isRefreshing = false
             setAlertsSwi133Enabled(tsrOn)   // grise les alertes si TSR est OFF
-            applySwi133AdasUI(swi132ValueToSwi133Index(mode))  // SWI132 : Off/Lim/ACC/ICA
+            applySwi133AdasUI(vsmStateToIndex(mode, sas))  // SWI132 : Off/Limiteur/ACC/ICA
             applyAebModeButtonsEnabled(aebOn)
             if (aebMode > 0) applyAebModeUI(aebMode)
         }
@@ -760,6 +776,7 @@ class DashboardFragment : Fragment() {
 
     private suspend fun refreshSwi68Adas() {
         val mode         = MG4Hardware.getAccTjaMode()
+        val sas          = MG4Hardware.getSpeedLimiterMode()   // limiteur : 0=Off, 2=Manuel, 3=Intelligent
         val sound        = MG4Hardware.isSoundWarningOn()
         val aebOn        = MG4Hardware.isAebEnabled()
         val aebMode      = MG4Hardware.getAebMode()
@@ -777,7 +794,7 @@ class DashboardFragment : Fragment() {
             switchTsr?.isChecked          = tsrOn
             applyEnergySavingUI(energySaving)
             isRefreshing = false
-            applySwi68AdasUI(mode)
+            applySwi68AdasUI(vsmStateToIndex(mode, sas))
             applyAebModeButtonsEnabled(aebOn)
             if (aebMode > 0) applyAebModeUI(aebMode)
         }

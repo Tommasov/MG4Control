@@ -3300,6 +3300,8 @@ id btn_adas_limiteur
 id btn_adas_off
 id btn_adas_off_d
 id btn_adas_swi68_acc_d
+id btn_adas_swi68_auto_d
+id btn_adas_swi68_lim_d
 id btn_adas_swi68_off_d
 id btn_adas_swi68_tja_d
 id btn_add_profile
@@ -3407,6 +3409,8 @@ id btn_sr_3_d
 id btn_steer_off_d
 id btn_steer_on_d
 id btn_swi68_acc
+id btn_swi68_auto
+id btn_swi68_lim
 id btn_swi68_off
 id btn_swi68_tja
 id btn_theme_auto
@@ -3741,6 +3745,7 @@ id save_overlay_view
 id sawtooth
 id sc_adas_a_0
 id sc_adas_a_1
+id sc_adas_a_2
 id sc_adas_a_3
 id sc_adas_a_4
 id sc_adas_a_s68_acc
@@ -3748,6 +3753,7 @@ id sc_adas_a_s68_off
 id sc_adas_a_s68_tja
 id sc_adas_b_0
 id sc_adas_b_1
+id sc_adas_b_2
 id sc_adas_b_3
 id sc_adas_b_4
 id sc_adas_b_s68_acc

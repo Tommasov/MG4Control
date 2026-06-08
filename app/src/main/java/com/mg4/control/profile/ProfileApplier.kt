@@ -2,6 +2,7 @@ package com.mg4.control.profile
 
 import com.mg4.control.debug.AppLogger
 import com.mg4.control.hardware.MG4Hardware
+import com.mg4.control.hardware.MG4Hardware.Swi68Mode
 import com.mg4.control.model.DrivingProfile
 import com.mg4.control.util.FirmwareInfo
 import kotlinx.coroutines.Dispatchers
@@ -80,9 +81,18 @@ object ProfileApplier {
                     val stOk = MG4Hardware.setSpeedLimitTone(profile.speedLimitTone)
                     AppLogger.i(TAG, "  SpeedLimitTone=${profile.speedLimitTone} → $stOk")
 
-                    // Mode ADAS via CarVehicleSettingClient (setAccTjaState)
-                    val adOk = MG4Hardware.setAccTjaMode(profile.swi68AdasMode)
-                    AppLogger.i(TAG, "  AdasMode=0x${profile.swi68AdasMode.toString(16)} → $adOk")
+                    // Mode ACC/TJA via CarVehicleSettingClient (setAccTjaState).
+                    // SHWA (ancien codage limiteur) n'est plus un mode ACC/TJA → ramené à Off ;
+                    // le limiteur est géré séparément via setSasMode ci-dessous.
+                    val cruiseMode = if (profile.swi68AdasMode == Swi68Mode.SHWA) Swi68Mode.OFF else profile.swi68AdasMode
+                    val adOk = MG4Hardware.setAccTjaMode(cruiseMode)
+                    AppLogger.i(TAG, "  AdasMode=0x${cruiseMode.toString(16)} → $adOk")
+                    // Limiteur de vitesse (SAS) — appliqué uniquement si le profil l'a configuré.
+                    // Profils créés avant cette fonction (swi132LimiterConfigured=false) → non touché.
+                    if (profile.swi132LimiterConfigured) {
+                        MG4Hardware.setSpeedLimiterMode(profile.swi132SasMode)
+                        AppLogger.i(TAG, "  SasMode=${profile.swi132SasMode} (0=Off 2=Manuel 3=Intelligent)")
+                    }
                     applyAeb(profile.aebEnabled, profile.aebMode, profile.aebSensitivity)
 
                     // Économie d'énergie — via CarVehicleSettingClient (setEnduranceMode), même path que SWI69
@@ -102,8 +112,16 @@ object ProfileApplier {
                     val swOk = MG4Hardware.setSoundWarning(profile.soundWarning)
                     AppLogger.i(TAG, "  SoundWarning=${profile.soundWarning} → $swOk")
 
-                    val adOk = MG4Hardware.setAccTjaMode(profile.swi68AdasMode)
-                    AppLogger.i(TAG, "  AdasMode=0x${profile.swi68AdasMode.toString(16)} → $adOk")
+                    // Mode ACC/TJA — SHWA (ancien codage limiteur) ramené à Off (limiteur géré à part)
+                    val cruiseMode = if (profile.swi68AdasMode == Swi68Mode.SHWA) Swi68Mode.OFF else profile.swi68AdasMode
+                    val adOk = MG4Hardware.setAccTjaMode(cruiseMode)
+                    AppLogger.i(TAG, "  AdasMode=0x${cruiseMode.toString(16)} → $adOk")
+                    // Limiteur de vitesse — appliqué uniquement si le profil l'a configuré.
+                    // (SWI69/SWI131 → setSasMode ; SWI68/SWI165 → setSpeedAsstMode, dispatch interne)
+                    if (profile.swi132LimiterConfigured) {
+                        MG4Hardware.setSpeedLimiterMode(profile.swi132SasMode)
+                        AppLogger.i(TAG, "  LimiterMode=${profile.swi132SasMode} (0=Off 2=Manuel 3=Intelligent)")
+                    }
                     applyAeb(profile.aebEnabled, profile.aebMode, profile.aebSensitivity)
 
                     // Économie d'énergie — firmwares VSM hors SWI132 (SWI68/SWI69/SWI131/SWI165)

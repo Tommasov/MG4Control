@@ -133,7 +133,13 @@ class ProfileFragment : Fragment() {
                     overspeedAlarm = if (isSWI132) MG4Hardware.isOverspeedAlarmOn() else false,
                     speedLimitTone = if (isSWI132) MG4Hardware.isSpeedLimitToneOn() else false,
                     soundWarning   = if (!isSWI132) MG4Hardware.isSoundWarningOn() else false,
-                    swi68AdasMode  = MG4Hardware.getAccTjaMode().let { if (it < 0) Swi68Mode.OFF else it },
+                    // Mode ACC/TJA — SHWA (ancien codage limiteur) ramené à Off (limiteur géré à part)
+                    swi68AdasMode  = MG4Hardware.getAccTjaMode().let {
+                        if (it < 0 || it == Swi68Mode.SHWA) Swi68Mode.OFF else it
+                    },
+                    // Limiteur de vitesse — capturé pour tous les firmwares VSM (SWI68/69/131/132/165)
+                    swi132LimiterConfigured = true,
+                    swi132SasMode  = MG4Hardware.getSpeedLimiterMode().let { if (it < 0) 0 else it },
                     aebEnabled     = MG4Hardware.isAebEnabled(),
                     aebMode        = MG4Hardware.getAebMode().let { if (it < 1) AebMode.ALARM else it },
                     aebSensitivity = MG4Hardware.getAebSensitivity().let { if (it < 1) AebSensitivity.STANDARD else it },
@@ -213,6 +219,8 @@ class ProfileFragment : Fragment() {
         var seatRight       = data.seatHeatRight
         var adasMode        = data.adasMode
         var swi68Mode       = data.swi68AdasMode
+        var swi132SasMode   = data.swi132SasMode                       // 0=Off, 2=Manuel, 3=Intelligent
+        var swi132LimiterConfigured = data.swi132LimiterConfigured
         var aebEnabledSel   = data.aebEnabled
         var aebModeSel      = data.aebMode
         var aebSenSel       = data.aebSensitivity.let { if (it == 0) AebSensitivity.STANDARD else it }
@@ -457,36 +465,69 @@ class ProfileFragment : Fragment() {
 
         when {
             isSWI132Profile -> {
-                // SWI132 : 4 boutons ADAS Off/Lim/ACC/ICA (même section que SWI133, bouton Auto masqué)
-                // + alertes séparées (survitesse + ton) comme SWI133
+                // SWI132 : 5 boutons ADAS Off/Lim.Manuel/Lim.Auto/ACC/ICA + alertes séparées.
+                // Le mode ACC/TJA (swi68Mode) et le limiteur de vitesse (swi132SasMode) sont
+                // deux réglages indépendants ; le sélecteur unique impose l'exclusivité.
                 sectionSwi133.visibility = View.VISIBLE
                 sectionSwi68.visibility  = View.GONE
-                // Masquer le bouton Auto (non disponible sur SWI132)
-                dialogView.findViewById<View>(R.id.btn_adas_auto_d)?.visibility = View.GONE
-                // Alertes séparées — mêmes switches que SWI133 (sw_overspeed_alarm / sw_speed_limit_tone)
+                dialogView.findViewById<View>(R.id.btn_adas_auto_d)?.visibility = View.VISIBLE
                 dialogView.findViewById<Switch>(R.id.sw_overspeed_alarm).isChecked  = data.overspeedAlarm
                 dialogView.findViewById<Switch>(R.id.sw_speed_limit_tone).isChecked = data.speedLimitTone
-                // ADAS SWI132 : boutons Off/Lim/ACC/ICA → valeurs CarAccTja stockées dans swi68AdasMode
+                val initialIdx = when {
+                    data.swi132SasMode == MG4Hardware.SasMode.MANUEL      -> 1
+                    data.swi132SasMode == MG4Hardware.SasMode.INTELLIGENT -> 2
+                    data.swi68AdasMode == Swi68Mode.ACC                   -> 3
+                    data.swi68AdasMode == Swi68Mode.TJA                   -> 4
+                    else                                                  -> 0
+                }
                 val adasSwi132Pairs = listOf(
-                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_off_d) to Swi68Mode.OFF,
-                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_lim_d) to Swi68Mode.SHWA,
-                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_acc_d) to Swi68Mode.ACC,
-                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_ica_d) to Swi68Mode.TJA
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_off_d)  to 0,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_lim_d)  to 1,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_auto_d) to 2,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_acc_d)  to 3,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_ica_d)  to 4
                 )
-                bindGroup(adasSwi132Pairs, swi68Mode) { swi68Mode = it }
+                bindGroup(adasSwi132Pairs, initialIdx) { idx ->
+                    swi132LimiterConfigured = true
+                    when (idx) {
+                        1 -> { swi68Mode = Swi68Mode.OFF; swi132SasMode = MG4Hardware.SasMode.MANUEL }
+                        2 -> { swi68Mode = Swi68Mode.OFF; swi132SasMode = MG4Hardware.SasMode.INTELLIGENT }
+                        3 -> { swi68Mode = Swi68Mode.ACC; swi132SasMode = MG4Hardware.SasMode.OFF }
+                        4 -> { swi68Mode = Swi68Mode.TJA; swi132SasMode = MG4Hardware.SasMode.OFF }
+                        else -> { swi68Mode = Swi68Mode.OFF; swi132SasMode = MG4Hardware.SasMode.OFF }
+                    }
+                }
             }
             FirmwareInfo.isVsmBased() -> {
-                // SWI68/SWI69/SWI131/SWI165 : section SWI68 (ACC/TJA/Off + alerte sonore)
+                // SWI68/SWI69/SWI131/SWI165 : section SWI68 (5 boutons + alerte sonore).
+                // Off / Lim.Manuel / Lim.Auto / ACC / TJA — mode ACC/TJA + limiteur indépendants.
                 sectionSwi68.visibility  = View.VISIBLE
                 sectionSwi133.visibility = View.GONE
-                val swSoundWarning = dialogView.findViewById<Switch>(R.id.sw_sound_warning)
-                swSoundWarning.isChecked = data.soundWarning
+                dialogView.findViewById<Switch>(R.id.sw_sound_warning).isChecked = data.soundWarning
+                val initialIdx = when {
+                    data.swi132SasMode == MG4Hardware.SasMode.MANUEL      -> 1
+                    data.swi132SasMode == MG4Hardware.SasMode.INTELLIGENT -> 2
+                    data.swi68AdasMode == Swi68Mode.ACC                   -> 3
+                    data.swi68AdasMode == Swi68Mode.TJA                   -> 4
+                    else                                                  -> 0
+                }
                 val adasSwi68Pairs = listOf(
-                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_off_d) to Swi68Mode.OFF,
-                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_acc_d) to Swi68Mode.ACC,
-                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_tja_d) to Swi68Mode.TJA
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_off_d)  to 0,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_lim_d)  to 1,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_auto_d) to 2,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_acc_d)  to 3,
+                    dialogView.findViewById<MaterialButton>(R.id.btn_adas_swi68_tja_d)  to 4
                 )
-                bindGroup(adasSwi68Pairs, swi68Mode) { swi68Mode = it }
+                bindGroup(adasSwi68Pairs, initialIdx) { idx ->
+                    swi132LimiterConfigured = true
+                    when (idx) {
+                        1 -> { swi68Mode = Swi68Mode.OFF; swi132SasMode = MG4Hardware.SasMode.MANUEL }
+                        2 -> { swi68Mode = Swi68Mode.OFF; swi132SasMode = MG4Hardware.SasMode.INTELLIGENT }
+                        3 -> { swi68Mode = Swi68Mode.ACC; swi132SasMode = MG4Hardware.SasMode.OFF }
+                        4 -> { swi68Mode = Swi68Mode.TJA; swi132SasMode = MG4Hardware.SasMode.OFF }
+                        else -> { swi68Mode = Swi68Mode.OFF; swi132SasMode = MG4Hardware.SasMode.OFF }
+                    }
+                }
             }
             else -> {
                 // SWI133/UNKNOWN : section SWI133 (overspeed + speedTone + 5 boutons ADAS)
@@ -620,6 +661,8 @@ class ProfileFragment : Fragment() {
                 adasMode       = adasMode,
                 soundWarning   = soundWarning,
                 swi68AdasMode  = swi68Mode,
+                swi132LimiterConfigured = swi132LimiterConfigured,
+                swi132SasMode  = swi132SasMode,
                 aebEnabled     = aebEnabledSel,
                 aebMode        = aebModeSel,
                 aebSensitivity = aebSenSel,
