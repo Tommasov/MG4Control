@@ -37,7 +37,11 @@
     <string name="shortcuts_action_tsr">Sinais (TSR)</string>
     <string name="shortcuts_action_apply_profile">Iniciar um perfil</string>
     <string name="shortcuts_action_profile_picker">Seletor de perfil (popup)</string>
-    <string name="overlay_profile_title">Perfis de condução</string>
+        <string name="overlay_brightness_title">Brilho</string>
+    <string name="overlay_brightness_night">Noite</string>
+    <string name="overlay_brightness_mid">Médio</string>
+    <string name="overlay_brightness_day">Dia</string>
+<string name="overlay_profile_title">Perfis de condução</string>
     <string name="overlay_countdown">Fechar em %1$ds</string>
     <string name="shortcuts_profile_prefix">Iniciar perfil</string>
     <string name="shortcuts_pick_profile_title">Escolher um perfil</string>

@@ -134,6 +134,10 @@
     <string name="nav_profiles">Profils</string>
     <string name="nav_settings">Réglages</string>
     <string name="nav_shortcuts">Raccourcis</string>
+    <string name="overlay_brightness_day">Jour</string>
+    <string name="overlay_brightness_mid">Moyen</string>
+    <string name="overlay_brightness_night">Nuit</string>
+    <string name="overlay_brightness_title">Luminosité</string>
     <string name="overlay_countdown">Fermeture dans %1$ds</string>
     <string name="overlay_profile_title">Profils de conduite</string>
     <string name="profile_add">Nouveau profil</string>

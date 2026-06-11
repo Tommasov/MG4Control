@@ -14,8 +14,10 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.slider.Slider
 import com.mg4.control.R
 import com.mg4.control.debug.AppLogger
+import com.mg4.control.hardware.MG4Hardware
 import com.mg4.control.model.DrivingProfile
 import com.mg4.control.profile.ProfileApplier
 import com.mg4.control.profile.ProfileManager
@@ -209,6 +211,69 @@ object ProfilePickerOverlay {
         }
         dismissRunnable = dr
         handler.postDelayed(dr, AUTO_DISMISS_MS)
+
+        // Ré-arme les deux timers (appelé à chaque interaction luminosité pour
+        // ne pas fermer le popup pendant le réglage).
+        fun resetTimers() {
+            handler.removeCallbacks(dr)
+            handler.postDelayed(dr, AUTO_DISMISS_MS)
+            countdownRunnable?.let { handler.removeCallbacks(it) }
+            remaining = (AUTO_DISMISS_MS / 1_000L).toInt()
+            handler.post(tick)
+        }
+
+        // ── Bloc luminosité (ancien SDK SWI133/68/165 ; A9 = phase 2) ─────
+        val briSection = view.findViewById<View>(R.id.overlay_brightness_section)
+        if (!MG4Hardware.hasBrightnessControl()) {
+            briSection?.visibility = View.GONE
+        } else {
+            val slider   = view.findViewById<Slider>(R.id.overlay_bri_slider)
+            val briValue = view.findViewById<TextView>(R.id.overlay_bri_value)
+
+            fun applyBrightnessAsync(pct: Int) {
+                CoroutineScope(Dispatchers.IO).launch { MG4Hardware.setScreenBrightnessPercent(pct) }
+            }
+            // Debounce des écritures pendant le glissement (évite de spammer le binder)
+            val pendingApply = Runnable { slider?.let { applyBrightnessAsync(it.value.toInt()) } }
+
+            slider?.addOnChangeListener { _, value, fromUser ->
+                briValue?.text = "${value.toInt()}%"
+                if (fromUser) {
+                    resetTimers()
+                    handler.removeCallbacks(pendingApply)
+                    handler.postDelayed(pendingApply, 60L)
+                }
+            }
+            slider?.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+                override fun onStartTrackingTouch(s: Slider) { resetTimers() }
+                override fun onStopTrackingTouch(s: Slider) {
+                    handler.removeCallbacks(pendingApply)
+                    applyBrightnessAsync(s.value.toInt())   // application finale
+                    resetTimers()
+                }
+            })
+
+            // Presets — déplacent le curseur (met à jour le label via le listener) puis appliquent
+            fun preset(pct: Int) {
+                slider?.value = pct.toFloat()
+                applyBrightnessAsync(pct)
+                resetTimers()
+            }
+            view.findViewById<View>(R.id.overlay_bri_night)?.setOnClickListener { preset(15) }
+            view.findViewById<View>(R.id.overlay_bri_mid)?.setOnClickListener   { preset(50) }
+            view.findViewById<View>(R.id.overlay_bri_day)?.setOnClickListener   { preset(100) }
+
+            // Initialisation depuis la valeur courante (lecture binder en arrière-plan)
+            briValue?.text = "…"
+            CoroutineScope(Dispatchers.IO).launch {
+                val cur = MG4Hardware.getScreenBrightnessPercent()
+                handler.post {
+                    if (overlayView == null) return@post
+                    if (cur >= 0) slider?.value = cur.coerceIn(5, 100).toFloat()  // label via le listener
+                    else briValue?.text = "--%"
+                }
+            }
+        }
     }
 
     private fun dismissOnMainThread(context: Context, fireAutoDismiss: Boolean = false) {

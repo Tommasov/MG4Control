@@ -114,6 +114,13 @@ object MG4Hardware {
     private const val VSM_CLASS      = "com.saicmotor.sdk.vehiclesettings.manager.VehicleSettingManager"
     private const val LAUNCHER68_PKG = "com.saicmotor.hmi.launcher"
 
+    // Luminosité écran — ancien SDK (SWI133/68/165) : GeneralManager.setBrightness(Int)/getBrightness().
+    // Plage native 0..255 (constantes DARKEST_VALUE=0x0 / BRIGHTEST_VALUE=0xff confirmées dans le smali).
+    // A9 (SWI132/131/69) = phase 2 (setScreenBrightness(III), params non décodables sans SystemUI).
+    private const val GENERAL_MANAGER_CLASS = "com.saicmotor.sdk.systemsettings.GeneralManager"
+    private const val BRIGHTNESS_NATIVE_MAX = 255
+    private const val BRIGHTNESS_MIN_PERCENT = 5   // plancher de sécurité : ne jamais éteindre l'écran
+
     // SWI69/SWI131 : accès via CarAdapterClient → queryClient(0x8) → CarVehicleSettingClient
     // Architecture réelle : CarAdapterClient se connecte à com.saicmotor.caradapter.CarAdapterService,
     // puis queryClient(code) retourne l'IBinder pour chaque service.
@@ -199,6 +206,8 @@ object MG4Hardware {
     @Volatile private var sVsm: Any? = null          // VehicleSettingManager instance (SWI68, Katman4)
     @Volatile private var sVsmService: Any? = null   // mVehicleSettingService field value (SWI68)
     @Volatile private var sVsm133: Any? = null       // VehicleSettingManager instance (SWI133, pour ELK)
+    @Volatile private var sGeneral: Any? = null      // GeneralManager instance (SWI133/68/165, luminosité)
+    @Volatile private var sCarGeneral: Any? = null   // CarGeneralClient instance (A9 SWI132/131/69, luminosité)
     @Volatile private var sInitialized = false
     @Volatile private var sCarBindAttempted = false
     @Volatile var logEnabled = true
@@ -559,12 +568,16 @@ object MG4Hardware {
         // 3) VehicleSettingManager pour SWI133 (ELK) — même singleton que SWI68
         tryInitVsm133(launcherCtx, context)
 
+        // 3b) GeneralManager pour SWI133 (luminosité écran)
+        tryInitGeneralManager(launcherCtx, context)
+
         // 4) Retries pour récupérer mIVehiclePropertyService et VSM133 une fois le service connecté
         val h = Handler(Looper.getMainLooper())
         listOf(2_000L, 5_000L, 10_000L, 15_000L, 20_000L, 30_000L, 45_000L, 60_000L).forEach { delay ->
             h.postDelayed({
                 if (sVpmService == null) tryGetVpmService(sVpm ?: return@postDelayed)
                 if (sVsm133 == null) tryInitVsm133(launcherCtx, context)
+                if (sGeneral == null) tryInitGeneralManager(launcherCtx, context)
             }, delay)
         }
 
@@ -732,6 +745,154 @@ object MG4Hardware {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Luminosité écran — GeneralManager (ancien SDK SWI133/68/165)
+    // GeneralManager.init(Context, ISettingsServiceListener) — singleton sInstance.
+    // Même pattern que tryInitVsm133 ; chargé depuis le launcher com.saicmotor.hmi.launcher.
+    // -------------------------------------------------------------------------
+
+    private fun tryInitGeneralManager(launcherCtx: Context, appCtx: Context) {
+        if (sGeneral != null) return
+        try {
+            val cls = launcherCtx.classLoader.loadClass(GENERAL_MANAGER_CLASS)
+
+            // Tentative 1 : singleton déjà initialisé
+            val f = cls.getDeclaredField("sInstance")
+            f.isAccessible = true
+            f.get(null)?.let {
+                sGeneral = it
+                AppLogger.i(TAG, "  GeneralManager singleton ✓")
+                return
+            }
+
+            // Tentative 2 : init(Context, ISettingsServiceListener) — proxy dynamique
+            val initMethod = cls.methods.firstOrNull { m ->
+                m.name == "init" && m.parameterCount == 2 &&
+                Context::class.java.isAssignableFrom(m.parameterTypes[0])
+            } ?: run {
+                AppLogger.w(TAG, "  GeneralManager init() non trouvé")
+                return
+            }
+            val listenerType = initMethod.parameterTypes[1]
+            val listener = if (listenerType.isInterface) {
+                java.lang.reflect.Proxy.newProxyInstance(listenerType.classLoader, arrayOf(listenerType)) { _, method, _ ->
+                    if (method.name == "onServiceConnected") {
+                        try {
+                            f.get(null)?.let { sGeneral = it }
+                            AppLogger.i(TAG, "  GeneralManager onServiceConnected — sGeneral=${if (sGeneral != null) "OK ✓" else "null"}")
+                        } catch (_: Exception) {}
+                    }
+                    null
+                }
+            } else null
+            initMethod.invoke(null, appCtx, listener)
+            // init() crée sInstance immédiatement (service connecté de façon asynchrone ensuite)
+            f.get(null)?.let { sGeneral = it }
+            AppLogger.i(TAG, "  GeneralManager.init() called — sGeneral=${if (sGeneral != null) "OK ✓" else "null"}")
+        } catch (e: Exception) {
+            AppLogger.d(TAG, "  tryInitGeneralManager exc: ${e.message}")
+        }
+    }
+
+    /** A9 (SWI132/131/69) : luminosité via CarGeneralClient.setScreenBrightness(mode,day,night). */
+    private fun isA9Brightness(): Boolean =
+        FirmwareInfo.isNewGenVsm() || FirmwareInfo.getGeneration() == FirmwareInfo.Gen.SWI132
+
+    /** Luminosité écran disponible : ancien SDK (133/68/165) ou A9 (132/131/69). */
+    fun hasBrightnessControl(): Boolean = FirmwareInfo.getGeneration() != FirmwareInfo.Gen.UNKNOWN
+
+    /** Lit la luminosité écran en % (0–100), ou -1 si indisponible. */
+    fun getScreenBrightnessPercent(): Int =
+        if (isA9Brightness()) getBrightnessA9() else getBrightnessOldSdk()
+
+    /**
+     * Règle la luminosité écran en % (0–100). Plancher de sécurité à BRIGHTNESS_MIN_PERCENT
+     * pour ne jamais éteindre l'écran.
+     */
+    fun setScreenBrightnessPercent(pct: Int): Boolean {
+        val clamped = pct.coerceIn(BRIGHTNESS_MIN_PERCENT, 100)
+        return if (isA9Brightness()) setBrightnessA9(clamped) else setBrightnessOldSdk(clamped)
+    }
+
+    // ── Ancien SDK (SWI133/68/165) — GeneralManager.setBrightness(Int), plage native 0..255 ──
+
+    private fun getBrightnessOldSdk(): Int {
+        val g = sGeneral ?: return -1
+        return try {
+            val native = (g.javaClass.getMethod("getBrightness").invoke(g) as? Int) ?: return -1
+            if (native < 0) return -1
+            val pct = (native * 100 / BRIGHTNESS_NATIVE_MAX).coerceIn(0, 100)
+            AppLogger.d(TAG, "  getBrightness native=$native → $pct%")
+            pct
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  getBrightness exc: ${e.message}")
+            -1
+        }
+    }
+
+    private fun setBrightnessOldSdk(clampedPct: Int): Boolean {
+        val g = sGeneral ?: return false
+        val native = (clampedPct * BRIGHTNESS_NATIVE_MAX / 100).coerceIn(0, BRIGHTNESS_NATIVE_MAX)
+        if (logEnabled) AppLogger.i(TAG, "setBrightness → $clampedPct% (native=$native/255)")
+        return try {
+            g.javaClass.getMethod("setBrightness", Int::class.javaPrimitiveType).invoke(g, native)
+            true
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  setBrightness exc: ${e.message}")
+            false
+        }
+    }
+
+    // ── A9 (SWI132/131/69) — CarGeneralClient (plage déjà 0–100) ──
+    //   setScreenBrightness(mode, day, night)  mode: 0=JOUR, 1=NUIT, 2=AUTO
+    //   getCurrentBrightnessValue(mode) → valeur du mode ; getUIBrightnessMode() → mode courant
+    //   (décodé dans com.saicmotor.settings : DisplayService / DisplayModel)
+
+    private fun carGeneralInt(method: String, vararg intArgs: Int): Int? {
+        val cg = sCarGeneral ?: return null
+        return try {
+            val types = Array(intArgs.size) { Int::class.javaPrimitiveType!! }
+            (cg.javaClass.getMethod(method, *types).invoke(cg, *intArgs.toTypedArray()) as? Int)
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  CarGeneral.$method exc: ${e.message}")
+            null
+        }
+    }
+
+    private fun getBrightnessA9(): Int {
+        sCarGeneral ?: return -1
+        val mode = carGeneralInt("getUIBrightnessMode") ?: 0   // 0=jour, 1=nuit, 2=auto
+        val idx = if (mode == 1) 1 else 0                       // auto → lit la valeur jour
+        val v = carGeneralInt("getCurrentBrightnessValue", idx) ?: return -1
+        if (v < 0) return -1
+        val pct = v.coerceIn(0, 100)
+        AppLogger.d(TAG, "  A9 brightness mode=$mode value=$v → $pct%")
+        return pct
+    }
+
+    private fun setBrightnessA9(clampedPct: Int): Boolean {
+        val cg = sCarGeneral ?: return false
+        val mode = carGeneralInt("getUIBrightnessMode") ?: 0
+        // Lit les deux valeurs courantes pour ne modifier que celle du mode actif
+        val day   = carGeneralInt("getCurrentBrightnessValue", 0) ?: clampedPct
+        val night = carGeneralInt("getCurrentBrightnessValue", 1) ?: clampedPct
+        // Mode NUIT → on change la valeur nuit ; sinon (JOUR/AUTO) → la valeur jour
+        val newMode = if (mode == 1) 1 else 0
+        val newDay   = if (newMode == 0) clampedPct else day
+        val newNight = if (newMode == 1) clampedPct else night
+        if (logEnabled) AppLogger.i(TAG, "A9 setScreenBrightness(mode=$newMode, day=$newDay, night=$newNight) [$clampedPct%]")
+        return try {
+            cg.javaClass.getMethod(
+                "setScreenBrightness",
+                Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType
+            ).invoke(cg, newMode, newDay, newNight)
+            true
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "  A9 setScreenBrightness exc: ${e.message}")
+            false
+        }
+    }
+
     /**
      * Appelle une méthode sur sVsm133 par réflexion.
      * Retourne la valeur (Int pour getters, null pour setters void) ou null si erreur.
@@ -811,6 +972,9 @@ object MG4Hardware {
 
         sVsm?.let { tryGetVsmService(it, vsmClass) }
 
+        // GeneralManager pour SWI68/SWI165 (luminosité écran) — même launcher context
+        tryInitGeneralManager(launcherCtx, context)
+
         // Retries pour récupérer mVehicleSettingService et le singleton si pas encore prêt
         val h = Handler(Looper.getMainLooper())
         listOf(1_000L, 3_000L, 5_000L, 10_000L, 15_000L, 20_000L, 30_000L).forEach { delay ->
@@ -824,6 +988,7 @@ object MG4Hardware {
                     } catch (_: Exception) {}
                 }
                 sVsm?.let { if (sVsmService == null) tryGetVsmService(it, vsmClass) }
+                if (sGeneral == null) tryInitGeneralManager(launcherCtx, context)
             }, delay)
         }
     }
@@ -2089,6 +2254,7 @@ object MG4Hardware {
                 AppLogger.w(TAG, "  Katman5 SWI69: CarGeneralClient ctor error: ${e.message}")
                 return false
             }
+            sCarGeneral = client   // conservé pour la luminosité écran A9 (setScreenBrightness)
 
             val registMethod = generalClientClass.methods.firstOrNull {
                 it.name == "registListener" && it.parameterCount == 1

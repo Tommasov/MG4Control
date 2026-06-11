@@ -24,10 +24,6 @@
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_drive_regen.xml"
     },
     {
-        "merged": "com.mg4.control.app-mergeDebugResources-47:/layout/dialog_profile_edit.xml",
-        "source": "com.mg4.control.app-main-50:/layout/dialog_profile_edit.xml"
-    },
-    {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\fragment_profile.xml",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_profile.xml"
     },
@@ -58,6 +54,10 @@
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\fragment_console.xml",
         "source": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-main-50:\\layout\\fragment_console.xml"
+    },
+    {
+        "merged": "com.mg4.control.app-mergeDebugResources-47:/layout/overlay_profile_picker.xml",
+        "source": "com.mg4.control.app-main-50:/layout/overlay_profile_picker.xml"
     },
     {
         "merged": "C:\\Users\\SliDS\\.gradle\\daemon\\9.0.0\\com.mg4.control.app-mergeDebugResources-47:\\layout\\overlay_profile_picker.xml",

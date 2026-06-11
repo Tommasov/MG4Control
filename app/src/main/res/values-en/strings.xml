@@ -37,7 +37,11 @@
     <string name="shortcuts_action_tsr">Signs (TSR)</string>
     <string name="shortcuts_action_apply_profile">Launch a profile</string>
     <string name="shortcuts_action_profile_picker">Profile picker (popup)</string>
-    <string name="overlay_profile_title">Driving profiles</string>
+        <string name="overlay_brightness_title">Brightness</string>
+    <string name="overlay_brightness_night">Night</string>
+    <string name="overlay_brightness_mid">Medium</string>
+    <string name="overlay_brightness_day">Day</string>
+<string name="overlay_profile_title">Driving profiles</string>
     <string name="overlay_countdown">Closing in %1$ds</string>
     <string name="shortcuts_profile_prefix">Launch profile</string>
     <string name="shortcuts_pick_profile_title">Choose a profile</string>

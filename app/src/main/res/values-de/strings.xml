@@ -37,7 +37,11 @@
     <string name="shortcuts_action_tsr">Schilder (TSR)</string>
     <string name="shortcuts_action_apply_profile">Profil starten</string>
     <string name="shortcuts_action_profile_picker">Profilauswahl (Popup)</string>
-    <string name="overlay_profile_title">Fahrprofile</string>
+        <string name="overlay_brightness_title">Helligkeit</string>
+    <string name="overlay_brightness_night">Nacht</string>
+    <string name="overlay_brightness_mid">Mittel</string>
+    <string name="overlay_brightness_day">Tag</string>
+<string name="overlay_profile_title">Fahrprofile</string>
     <string name="overlay_countdown">Schließt in %1$ds</string>
     <string name="shortcuts_profile_prefix">Profil starten:</string>
     <string name="shortcuts_pick_profile_title">Profil auswählen</string>

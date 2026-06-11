@@ -19,10 +19,10 @@
     <LinearLayout
         android:id="@+id/overlay_card"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_marginHorizontal="60dp"
-        android:layout_marginVertical="40dp"
+        android:layout_marginVertical="16dp"
         android:orientation="vertical"
         android:background="@drawable/bg_card_rounded"
         android:paddingHorizontal="24dp"
@@ -41,19 +41,129 @@
             android:textStyle="bold"
             android:layout_marginBottom="18dp" />
 
-        <!-- Conteneur grille 2 colonnes (rempli dynamiquement) -->
+        <!-- ☀ Luminosité (en haut) — masqué si le firmware ne supporte pas le contrôle -->
         <LinearLayout
-            android:id="@+id/overlay_profiles_container"
+            android:id="@+id/overlay_brightness_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:layout_marginBottom="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/overlay_brightness_title"
+                android:textColor="@color/dash_text_lo"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:textAllCaps="true"
+                android:layout_marginBottom="12dp" />
+
+            <!-- 3 presets : Nuit / Moyen / Jour (gros boutons, faciles à viser) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/overlay_bri_night"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp" android:layout_height="74dp" android:layout_weight="1"
+                    android:layout_marginEnd="5dp"
+                    android:text="@string/overlay_brightness_night"
+                    android:textColor="@color/text_secondary" android:textSize="18sp" android:textAllCaps="true"
+                    app:backgroundTint="@color/dash_btn" app:strokeColor="@color/dash_border" app:strokeWidth="1dp" app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/overlay_bri_mid"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp" android:layout_height="74dp" android:layout_weight="1"
+                    android:layout_marginStart="5dp" android:layout_marginEnd="5dp"
+                    android:text="@string/overlay_brightness_mid"
+                    android:textColor="@color/text_secondary" android:textSize="18sp" android:textAllCaps="true"
+                    app:backgroundTint="@color/dash_btn" app:strokeColor="@color/dash_border" app:strokeWidth="1dp" app:cornerRadius="10dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/overlay_bri_day"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp" android:layout_height="74dp" android:layout_weight="1"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/overlay_brightness_day"
+                    android:textColor="@color/text_secondary" android:textSize="18sp" android:textAllCaps="true"
+                    app:backgroundTint="@color/dash_btn" app:strokeColor="@color/dash_border" app:strokeWidth="1dp" app:cornerRadius="10dp" />
+
+            </LinearLayout>
+
+            <!-- Curseur (gros pouce + piste épaisse, réglable en conduisant) + % -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/overlay_bri_slider"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:valueFrom="5"
+                    android:valueTo="100"
+                    android:value="50"
+                    android:stepSize="1"
+                    app:labelBehavior="gone"
+                    app:thumbRadius="16dp"
+                    app:trackHeight="12dp"
+                    app:thumbColor="@color/dash_accent"
+                    app:trackColorActive="@color/dash_accent"
+                    app:trackColorInactive="@color/dash_border" />
+
+                <TextView
+                    android:id="@+id/overlay_bri_value"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:gravity="end"
+                    android:text="--%"
+                    android:textColor="@color/text_primary"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Séparateur -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/dash_border"
+                android:layout_marginTop="14dp" />
+
+        </LinearLayout>
+
+        <!-- Liste de profils défilante (prend l'espace restant entre luminosité et bas) -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="false"
+            android:scrollbars="vertical">
+
+            <!-- Conteneur grille 2 colonnes (rempli dynamiquement) -->
+            <LinearLayout
+                android:id="@+id/overlay_profiles_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </ScrollView>
 
         <!-- Séparateur -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/dash_border"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="14dp"
             android:layout_marginBottom="12dp" />
 
         <!-- Ligne bas : bouton Fermer + compte à rebours -->

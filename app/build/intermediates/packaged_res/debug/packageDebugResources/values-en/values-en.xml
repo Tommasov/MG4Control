@@ -103,6 +103,10 @@
     <string name="nav_profiles">Profiles</string>
     <string name="nav_settings">Settings</string>
     <string name="nav_shortcuts">Shortcuts</string>
+    <string name="overlay_brightness_day">Day</string>
+    <string name="overlay_brightness_mid">Medium</string>
+    <string name="overlay_brightness_night">Night</string>
+    <string name="overlay_brightness_title">Brightness</string>
     <string name="overlay_countdown">Closing in %1$ds</string>
     <string name="overlay_profile_title">Driving profiles</string>
     <string name="profile_add">New profile</string>

@@ -3697,6 +3697,12 @@ id open_search_view_toolbar_container
 id outline
 id outward
 id overlay_backdrop
+id overlay_bri_day
+id overlay_bri_mid
+id overlay_bri_night
+id overlay_bri_slider
+id overlay_bri_value
+id overlay_brightness_section
 id overlay_btn_close
 id overlay_card
 id overlay_countdown
@@ -4434,6 +4440,10 @@ string nav_drive
 string nav_profiles
 string nav_settings
 string nav_shortcuts
+string overlay_brightness_day
+string overlay_brightness_mid
+string overlay_brightness_night
+string overlay_brightness_title
 string overlay_countdown
 string overlay_profile_title
 string password_toggle_content_description

@@ -37,7 +37,11 @@
     <string name="shortcuts_action_tsr">Segnali (TSR)</string>
     <string name="shortcuts_action_apply_profile">Avvia un profilo</string>
     <string name="shortcuts_action_profile_picker">Selettore profilo (popup)</string>
-    <string name="overlay_profile_title">Profili di guida</string>
+        <string name="overlay_brightness_title">Luminosità</string>
+    <string name="overlay_brightness_night">Notte</string>
+    <string name="overlay_brightness_mid">Medio</string>
+    <string name="overlay_brightness_day">Giorno</string>
+<string name="overlay_profile_title">Profili di guida</string>
     <string name="overlay_countdown">Chiusura tra %1$ds</string>
     <string name="shortcuts_profile_prefix">Avvia profilo</string>
     <string name="shortcuts_pick_profile_title">Scegli un profilo</string>
