@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Stili tipografici e widget centralizzati — MG4Control
+    Font: Roboto di sistema (nativo AAOS), nessun carattere custom.
+    Le dimensioni provengono da dimens.xml.
+-->
+<resources>
+
+    <!-- ============================ TESTO ============================ -->
+
+    <!-- Intestazione di sezione: MAIUSCOLO, grassetto, colore tenue -->
+    <style name="TextAppearance.MG4.Overline" parent="TextAppearance.MaterialComponents.Overline">
+        <item name="android:textSize">@dimen/text_overline</item>
+        <item name="android:textColor">@color/dash_text_lo</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Testo secondario / etichette piccole -->
+    <style name="TextAppearance.MG4.Caption" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- Testo standard -->
+    <style name="TextAppearance.MG4.Body" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- Etichetta enfatizzata (es. label degli switch): MAIUSCOLO, grassetto -->
+    <style name="TextAppearance.MG4.Label" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">@dimen/text_subtitle</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.03</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Titolo carta/schermata -->
+    <style name="TextAppearance.MG4.Title" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Valore/numero grande -->
+    <style name="TextAppearance.MG4.Display" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="android:textSize">@dimen/text_display</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- ============================ PULSANTI ============================ -->
+
+    <!--
+        Pulsante della dashboard: il testo si auto-dimensiona per riempire la
+        casella (altezza fissata dai weight nel layout 480px). Garantisce il
+        testo più grande possibile senza tagli.
+    -->
+    <style name="Widget.MG4.DashButton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:backgroundTint">@color/dash_btn</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:padding">2dp</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMinTextSize">@dimen/btn_autosize_min</item>
+        <item name="autoSizeMaxTextSize">@dimen/btn_autosize_max</item>
+        <item name="autoSizeStepGranularity">@dimen/btn_autosize_step</item>
+    </style>
+
+</resources>

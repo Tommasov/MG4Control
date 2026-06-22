@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Scala tipografica centralizzata — MG4Control
+    Schermo unico 1280×480 (Android Automotive), letto a distanza di braccio.
+    Tutta la leggibilità si regola da qui: cambiare un valore aggiorna l'intera app.
+
+    Mappatura dai vecchi textSize hardcoded:
+      9/10/11sp  → text_overline   (intestazioni di sezione, MAIUSCOLO)
+      12/13sp    → text_caption    (testo secondario / etichette piccole)
+      14/15/16sp → text_body       (testo standard)
+      18/19/20sp → text_subtitle   (testo enfatizzato, etichette switch)
+      22sp       → text_title      (titoli carta/schermata)
+      28sp       → text_display    (numeri/valori grandi)
+-->
+<resources>
+    <!-- Scala testo (in-car, massima leggibilità) -->
+    <dimen name="text_overline">16sp</dimen>
+    <dimen name="text_caption">18sp</dimen>
+    <dimen name="text_body">22sp</dimen>
+    <dimen name="text_subtitle">26sp</dimen>
+    <dimen name="text_title">30sp</dimen>
+    <dimen name="text_display">40sp</dimen>
+
+    <!-- Limiti autosize per i pulsanti (riempiono la loro casella) -->
+    <dimen name="btn_autosize_min">16sp</dimen>
+    <dimen name="btn_autosize_max">30sp</dimen>
+    <dimen name="btn_autosize_step">2sp</dimen>
+</resources>
