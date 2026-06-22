@@ -1,15 +1,409 @@
 ![image info](mg4control_github_banner.svg)
 
+> App Android Automotive per il controllo avanzato dei parametri di guida della MG4 elettrica.
 > Application Android Automotive pour le contrôle avancé des paramètres de conduite du MG4 électrique.
 > Android Automotive app for advanced driving settings control on the MG4 electric vehicle.
 
-> Vous appréciez MG4Control et souhaitez soutenir son développement ?  
+> Ti piace MG4Control e vuoi sostenerne lo sviluppo ?  
+Vous appréciez MG4Control et souhaitez soutenir son développement ?  
 You enjoy MG4Control and want to support its development ?  
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://www.paypal.com/paypalme/pfauquembergue)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/slideen)
 ---
 
 <details open>
+<summary><strong>🇮🇹 Italiano</strong></summary>
+
+## Indice
+1. [Presentazione](#presentazione)
+2. [Funzionalità](#funzionalità)
+3. [Compatibilità](#compatibilità)
+4. [Architettura](#architettura)
+5. [Struttura del progetto](#struttura-del-progetto)
+6. [Livelli hardware](#livelli-hardware)
+7. [Sistema di profili](#sistema-di-profili)
+8. [Interfaccia utente](#interfaccia-utente)
+9. [Compilazione e installazione](#compilazione-e-installazione)
+10. [Permessi richiesti](#permessi-richiesti)
+
+---
+
+## Presentazione
+
+**MG4Control** è un'applicazione di sistema progettata per Android Automotive OS, destinata a funzionare sui display di bordo dei veicoli MG4 equipaggiati con il SoC **SAIC MT2712**. Offre un accesso diretto e unificato alle impostazioni di guida che non sono accessibili — o difficilmente accessibili — tramite l'interfaccia del costruttore.
+
+L'applicazione comunica con il veicolo tramite l'SDK proprietario SAIC, accedendo ai servizi Android Automotive (`CarPropertyManager`, `CarHvacManager`) nonché ai servizi di basso livello esposti dal firmware del veicolo.
+
+> **Importante:** Questa applicazione richiede privilegi di sistema (`sharedUserId="android.uid.system"`) e deve essere firmata con la chiave della ROM. Non può funzionare su un dispositivo standard sbloccato.
+
+> [!WARNING]
+> **MG4Control è un progetto comunitario indipendente. Non è in alcun modo affiliato, approvato o supportato da MG Motor, SAIC Motor o una delle loro filiali.**
+> L'utilizzo di questa applicazione avviene interamente a proprio rischio. Impostazioni errate possono influenzare il comportamento del veicolo. Procedere con cautela.
+
+---
+
+## Funzionalità
+
+### Impostazioni di guida
+- **Modalità di guida**: ECO / NORMAL / SPORT / SNOW / CUSTOM
+- **Rigenerazione**: Off / Bassa / Media / Alta / Adattiva / 1 Pedale
+
+### Climatizzazione
+- **Volante riscaldato**: On / Off
+- **Sedili riscaldati sinistro e destro**: Off / Livello 1 / 2 / 3
+
+### ADAS (Assistenza alla guida)
+- **SWI133**: Off / Limitatore / Auto / ACC / ICA + avvisi eccesso di velocità / cambio limite
+- **SWI68**: Disabilita / ACC / TJA + avviso sonoro On / Off
+- **SWI69 / SWI131**: Anticollisione frontale (AEB) — On / Off + modalità Solo avviso / Avviso + Frenata
+- **SWI165**: Disabilita / ACC / TJA + Anticollisione frontale (AEB) On/Off + modalità Avviso / Avviso+Frenata + avviso sonoro
+
+### Scorciatoie volante
+- Configurazione dei **4 pulsanti del volante** (pulsanti laterali sinistro/destro)
+- Azioni disponibili: Modalità di guida / Rigenerazione / ADAS / **Apri l'applicazione**
+- Attivazione / disattivazione delle scorciatoie con **dialog di avviso**
+
+### Gestione dei profili
+- Salvataggio fino a **5 profili** personalizzati
+- Applicazione istantanea di un profilo con un clic
+- Applicazione automatica del profilo predefinito **all'avvio del veicolo**
+
+### Impostazioni
+- Scelta della lingua (Italiano / Français / English)
+- Attivazione/disattivazione dell'applicazione automatica del profilo
+- **Aggiornamento automatico**: verifica GitHub + download APK nella cartella Download
+- **Pulizia APK**: rimozione dei vecchi file `MGControl*.apk` dalla cartella Download
+- Dialog "Informazioni" con versione dell'app, versione firmware e QR code GitHub
+- Pulsante "Chiudi" per tornare direttamente alla dashboard
+
+### Profili
+- Pulsante "Chiudi" per tornare direttamente alla dashboard
+
+### Compatibilità firmware sconosciuto (UNKNOWN)
+- Dialog di avviso all'avvio se il firmware non è né SWI133 né SWI68
+- L'utente può chiudere l'applicazione o continuare
+- In modalità "Continua", i chip SWI133 / SWI68 / SWI69 / SWI131 diventano cliccabili per forzare una modalità di compatibilità
+- La scelta forzata è salvata in SharedPreferences e sopravvive ai riavvii dell'app
+
+---
+
+## Compatibilità
+
+| Elemento | Valore |
+|---------|--------|
+| Veicolo target | MG4 Electric (SAIC) |
+| OS | Android Automotive 9+ (API 28+) |
+| SoC | SAIC MT2712 |
+| Risoluzione schermo | 1280 × 480 (orientamento orizzontale forzato) |
+| Firmware SWI133 | Compatibile ✅ |
+| Firmware SWI131 | Compatibile ✅ |
+| Firmware SWI132 | Compatibile ✅ |
+| Firmware SWI68 | Compatibile ✅ |
+| Firmware SWI69 | Compatibile ✅ |
+| Firmware SWI165 | Compatibile ✅ |
+| Firmware UNKNOWN | Modalità forzata SWI133/SWI132/SWI68/SWI69/SWI131/SWI165 disponibile ⚠️ |
+
+---
+
+## Architettura
+
+### Panoramica
+
+```
+┌──────────────────────────────────────────────────────┐
+│                    INTERFACCIA                        │
+│  MainActivity ─── NavController ─── Fragment Host   │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────┐ │
+│  │  Dashboard  │  │   Profili    │  │ Impostazioni│ │
+│  └─────────────┘  └──────────────┘  └─────────────┘ │
+└──────────────────────────────────────────────────────┘
+                         │
+┌──────────────────────────────────────────────────────┐
+│                 LOGICA DI BUSINESS                    │
+│  ProfileManager  ─  ProfileApplier  ─  FirmwareInfo  │
+└──────────────────────────────────────────────────────┘
+                         │
+┌──────────────────────────────────────────────────────┐
+│        ASTRAZIONE HARDWARE (MG4Hardware)             │
+│  Katman1 (Car API) → Katman2 (Binder) → Katman4      │
+│                      (ADAS / SWI133 / SWI68)          │
+└──────────────────────────────────────────────────────┘
+                         │
+┌──────────────────────────────────────────────────────┐
+│              SERVIZI DI SISTEMA & BOOT               │
+│      MG4ControlService  ─────  BootReceiver          │
+└──────────────────────────────────────────────────────┘
+```
+
+### Avvio dell'applicazione
+
+```
+Avvio veicolo
+       │
+       ▼
+BootReceiver.onReceive()
+       │
+       ▼
+MG4ControlService.onCreate()
+  └─ MG4Hardware.init()
+  └─ Scoperta dei servizi Katman1 / Katman4
+  └─ Applicazione del profilo predefinito (se attivato)
+       │
+       ▼
+MainActivity (UI)
+  └─ FirmwareInfo.initWithContext()     ← carica la modalità forzata (SharedPreferences)
+  └─ Rilevamento del firmware (SWI133 / SWI68 / UNKNOWN)
+  └─ Configurazione della top bar (chip firmware)
+  └─ checkUnknownFirmware()             ← dialog se UNKNOWN e non forzato
+  └─ Navigazione verso DashboardFragment
+```
+
+---
+
+## Struttura del progetto
+
+```
+MG4Control/
+├── app/src/main/
+│   ├── java/com/mg4/control/
+│   │   ├── MG4App.kt                  # Application — modalità notte, locale
+│   │   ├── MainActivity.kt            # Activity principale, top bar, navigazione
+│   │   │
+│   │   ├── model/
+│   │   │   ├── DrivingProfile.kt      # Modello dati di un profilo
+│   │   │   ├── DriveMode.kt           # Enum modalità di guida (ECO/NORMAL/SPORT/SNOW/CUSTOM)
+│   │   │   └── RegenLevel.kt          # Enum livelli di rigenerazione
+│   │   │
+│   │   ├── profile/
+│   │   │   ├── ProfileManager.kt      # CRUD profili (SharedPreferences + Gson)
+│   │   │   └── ProfileApplier.kt      # Applicazione delle impostazioni al veicolo (async)
+│   │   │
+│   │   ├── hardware/
+│   │   │   └── MG4Hardware.kt         # Astrazione hardware (4 livelli)
+│   │   │
+│   │   ├── ui/
+│   │   │   ├── DashboardFragment.kt   # Schermata principale unificata
+│   │   │   ├── ProfileFragment.kt     # Gestione dei profili
+│   │   │   ├── SettingsFragment.kt    # Impostazioni & Informazioni
+│   │   │   ├── ProfileAdapter.kt      # Adapter RecyclerView profili
+│   │   │   ├── ConsoleFragment.kt     # Log di debug in tempo reale
+│   │   │   ├── DriveRegenFragment.kt  # Legacy (non usato in v2)
+│   │   │   ├── ClimateFragment.kt     # Legacy (non usato in v2)
+│   │   │   └── AdasFragment.kt        # Legacy (non usato in v2)
+│   │   │
+│   │   ├── service/
+│   │   │   └── MG4ControlService.kt   # Servizio in primo piano (boot + auto-apply)
+│   │   │
+│   │   ├── receiver/
+│   │   │   └── BootReceiver.kt        # Receiver di avvio sistema
+│   │   │
+│   │   ├── util/
+│   │   │   ├── FirmwareInfo.kt        # Rilevamento firmware (SWI133/SWI68/UNKNOWN) + modalità forzata
+│   │   │   ├── FirmwareHelper.kt      # Lettura versione firmware completa (async)
+│   │   │   └── LocaleHelper.kt        # Gestione della lingua (IT / FR / EN)
+│   │   │
+│   │   └── update/
+│   │       ├── UpdateChecker.kt       # Verifica ultima release GitHub (API)
+│   │       ├── UpdateDialogManager.kt # Dialog aggiornamento + DownloadManager + apertura cartella
+│   │   │
+│   │   └── debug/
+│   │       └── AppLogger.kt           # Buffer di log in memoria (400 voci)
+│   │
+│   ├── res/
+│   │   ├── layout/
+│   │   │   ├── activity_main.xml      # Top bar + NavHostFragment
+│   │   │   ├── fragment_dashboard.xml # Schermata principale (guida + clima + avvisi)
+│   │   │   ├── fragment_profile.xml   # Lista dei profili
+│   │   │   ├── fragment_settings.xml  # Impostazioni
+│   │   │   ├── item_profile.xml       # Item lista profili
+│   │   │   ├── dialog_profile_edit.xml       # Dialog creazione / modifica profilo
+│   │   │   ├── dialog_app_info.xml           # Dialog "Informazioni"
+│   │   │   └── dialog_unknown_firmware.xml   # Dialog firmware sconosciuto (UNKNOWN)
+│   │   ├── navigation/nav_graph.xml   # Dashboard → Profili / Impostazioni
+│   │   ├── values/strings.xml         # Stringhe FR
+│   │   ├── values-en/strings.xml      # Stringhe EN
+│   │   └── values/colors.xml          # Palette dash_* (dark theme)
+│   │
+│   └── AndroidManifest.xml
+│
+└── mockup/
+    └── index.html                     # Mockup interattivo HTML 1280×480
+```
+
+---
+
+## Livelli hardware
+
+`MG4Hardware` è organizzato in **4 livelli di accesso**, dal più alto al più basso, con fallback automatico in caso di errore.
+
+### Katman1 — Android Automotive Car API
+Livello principale. Utilizza le API ufficiali Android Automotive:
+- `CarPropertyManager` → modalità di guida, rigenerazione, pedale singolo
+- `CarHvacManager` → sedile riscaldato, volante riscaldato
+
+La connessione è inizializzata tramite riflessione su `Car.createCar()` con diversi overload tentati in sequenza. Le azioni in attesa sono messe in coda ed eseguite non appena il servizio è pronto.
+
+### Katman2 — Raw Binder (fallback)
+Fallback su `ServiceManager.getService("vehiclesetting")` con chiamate `binderTransact()` dirette. Spesso bloccato da SELinux in produzione.
+
+### Katman4 — Servizi ADAS (firmware-specific)
+Livello dedicato alle funzioni ADAS, caricato dinamicamente in base alla generazione del firmware:
+
+| Firmware | Servizio | Meccanismo |
+|----------|---------|-----------|
+| **SWI133** | `VehiclePropertyManager` | Caricato dall'APK launcher tramite `ClassLoader` + riflessione su `mIVehiclePropertyService`. Usa `getMixProperty()` / `setMixProperty()` |
+| **SWI68** | `VehicleSettingManager` | Singleton statico caricato tramite riflessione. Usa `setAccTjaMode()` / `setLaneKeepingWarningSound()` |
+| **SWI69 / SWI131** | `VehicleSettingManager` | Stesso singleton di SWI68. Usa `setFcwState()` / `getFcwState()` / `setFcwAutoBrakeMode()` / `setFcwSensitivity()` per l'AEB. Valori confermati empiricamente su veicolo reale: `setFcwState(1)` = DISABILITA, `setFcwState(2)` = ABILITA. |
+| **SWI165** | `VehicleSettingManager` | Stesso SDK di SWI68 (`com.saicmotor.sdk.vehiclesettings`). ADAS tramite `setAccTjaMode()`. AEB tramite `setAutoEmergencyBraking(1/2)` come toggle principale + `setFcwAlarmMode(1/2)` + `setFcwAutoBrakeMode(1/2)`. Modalità: 1=OFF, 2=ON. |
+
+### Rilevamento del firmware
+
+```kotlin
+// util/FirmwareInfo.kt
+FirmwareInfo.initWithContext(context)   // Carica la modalità forzata da SharedPreferences
+val gen = FirmwareInfo.getGeneration()  // Legge ro.build.mt2712.version
+// → Gen.SWI133 | Gen.SWI68 | Gen.UNKNOWN
+
+// Se il firmware è sconosciuto, l'utente può forzare una modalità:
+FirmwareInfo.forceGeneration(context, FirmwareInfo.Gen.SWI133)
+FirmwareInfo.isForced(context)          // true se modalità forzata attiva
+FirmwareInfo.getDetectedString()        // Es: "SWI69-12345" (grezzo)
+```
+
+Il risultato è messo in cache. Se il firmware è `UNKNOWN` e nessuna modalità è forzata, un dialog di avviso viene mostrato all'avvio. L'utente può scegliere di continuare e forzare SWI133 o SWI68 tramite i chip della top bar.
+
+---
+
+## Sistema di profili
+
+### Modello `DrivingProfile`
+
+```kotlin
+data class DrivingProfile(
+    val id: String,             // UUID univoco
+    val name: String,           // Nome visualizzato
+    val driveMode: DriveMode,   // ECO / NORMAL / SPORT / SNOW / CUSTOM
+    val regenLevel: RegenLevel, // OFF / LOW / MEDIUM / HIGH / ADAPTIVE / ONE_PEDAL
+    val steeringHeat: Boolean,
+    val seatHeatLeft: Int,      // 0–3
+    val seatHeatRight: Int,     // 0–3
+    // Solo SWI133:
+    val overspeedAlarm: Boolean,
+    val speedLimitTone: Boolean,
+    val adasMode: Int,          // 0=Off 1=Lim 2=Auto 3=ACC 4=ICA
+    // Solo SWI68:
+    val soundWarning: Boolean,
+    val swi68AdasMode: Int      // Swi68Mode.OFF / ACC / TJA
+)
+```
+
+### Persistenza
+
+I profili sono serializzati in JSON tramite **Gson** e memorizzati in `SharedPreferences`. Massimo **5 profili** per dispositivo.
+
+### Applicazione di un profilo
+
+`ProfileApplier.apply()` esegue le chiamate hardware nel seguente ordine su `Dispatchers.IO`:
+1. Modalità di guida (rapido — binder)
+2. Livello di rigenerazione (rapido — binder)
+3. Volante riscaldato (~2 s — polling di conferma stato)
+4. Sedile sinistro (~7 s — polling tramite toggle)
+5. Sedile destro (~7 s — polling tramite toggle)
+6. Attesa Katman4 → ADAS (in base al firmware)
+
+---
+
+## Interfaccia utente
+
+### Navigazione
+L'applicazione utilizza un **NavController** con **3 destinazioni**:
+
+```
+DashboardFragment (partenza)
+    ├──► ProfileFragment  (pulsante PROFILI — toggle)
+    └──► SettingsFragment (pulsante IMPOSTAZIONI — toggle)
+```
+
+Una seconda pressione su PROFILI o IMPOSTAZIONI chiude la vista e ritorna alla dashboard.
+
+### Dashboard (schermata principale)
+Disposizione su **2 righe** (rapporto 2:1) ottimizzata per 1280×480:
+- **Riga superiore (2/3)**: Modalità di guida | Rigenerazione | ADAS
+- **Riga inferiore (1/3)**: Climatizzazione (volante + sedili) | Avvisi
+
+### Dark theme — palette di colori
+
+| Token | Hex | Uso |
+|-------|-----|-------|
+| `dash_bg` | `#0C0C0E` | Sfondo generale |
+| `dash_card` | `#141416` | Carte |
+| `dash_section` | `#1C1C1F` | Sezioni interne |
+| `dash_border` | `#2A2A2E` | Bordi |
+| `dash_accent` | `#38BDF8` | Selezione attiva (blu) |
+| `dash_eco` | `#22C55E` | Modalità ECO (verde) |
+| `dash_warn` | `#F59E0B` | Modalità SPORT (arancione) |
+| `dash_danger` | `#F43F5E` | Eliminazione / pericolo |
+
+---
+
+## Compilazione e installazione
+
+Puoi scaricare direttamente l'ultima versione di MG4Control tramite le release: https://github.com/SliDeeN/MG4Control/releases
+Ti serve solo una chiavetta USB e l'accesso alle impostazioni AAOS per installare l'APK.
+
+
+Puoi anche compilare tu stesso il progetto:
+
+### Prerequisiti
+- Android Studio Hedgehog (2023.1) o superiore
+- JDK 17+
+- Android SDK API 34
+
+### Build debug
+
+```bash
+# Con il JDK di Android Studio
+JAVA_HOME="/path/to/Android Studio/jbr" ./gradlew assembleDebug
+```
+
+L'APK si trova in:
+```
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Installazione sul veicolo
+
+L'applicazione deve essere firmata con la chiave di sistema della ROM. Su un sistema di sviluppo:
+
+```bash
+adb push app-debug.apk /sdcard/
+adb shell pm install -r --system /sdcard/app-debug.apk
+```
+
+> Su una ROM di produzione, l'APK deve essere inclusa nel build di sistema o installata tramite un meccanismo OEM specifico.
+
+---
+
+## Permessi richiesti
+
+| Permesso | Motivazione |
+|-----------|---------------|
+| `FOREGROUND_SERVICE` | Servizio in primo piano per l'auto-apply |
+| `WAKE_LOCK` | Impedisce lo sleep durante l'applicazione delle impostazioni |
+| `RECEIVE_BOOT_COMPLETED` | Avvio automatico al boot |
+| `CAR_POWERTRAIN` | Controllo della modalità di guida e della rigenerazione |
+| `CONTROL_CAR_CLIMATE` | Controllo dei sedili e del volante riscaldati |
+| `CAR_VENDOR_EXTENSION` | Estensioni proprietarie SAIC |
+| `CAR_ENERGY` | Informazioni batteria / motorizzazione |
+| `INTERNET` | Verifica degli aggiornamenti (GitHub API) |
+| `DOWNLOAD_WITHOUT_NOTIFICATION` | Download silenzioso dell'APK di aggiornamento |
+| `WRITE_EXTERNAL_STORAGE` | Salvataggio APK nella cartella Download |
+
+</details>
+
+---
+
+<details>
 <summary><strong>🇫🇷 Français</strong></summary>
 
 ## Table des matières
@@ -401,7 +795,7 @@ adb shell pm install -r --system /sdcard/app-debug.apk
 
 ---
 
-<details open>
+<details>
 <summary><strong>🇬🇧 English</strong></summary>
 
 ## Table of Contents
